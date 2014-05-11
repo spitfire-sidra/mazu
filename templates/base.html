@@ -3,9 +3,61 @@
   <head>
     <meta charset="utf-8">
     <title></title>
+    {% include 'base_head.html' %}
   </head>
   <body>
-    {% block content %}
-    {% endblock content %}
+    <div class="ui celled grid">
+      <div class="row">
+      {% block menu %}
+        {% include 'base_menu.html' %}
+      {% endblock menu %}
+      </div>
+
+      <div class="row">
+        {% block header %}
+        {% endblock header %}
+      </div>
+
+      <div class="row">
+        <div class="two wide column">
+          {% block nav %}
+          {% endblock nav %}
+        </div>
+        
+        <div class="fourteen wide column">
+          <div class="row">
+            {% block breadcrumb %}
+            {% endblock breadcrumb %}
+          </div>
+            
+          <div class="row">    
+            {% block message %}
+              {% if messages %}
+                <ul class="messages">
+                {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %} 
+            {% endblock message %}
+          </div>
+
+          <div class="row">
+            {% block content %}
+            {% endblock content %}
+          </div>
+
+          <div class="row">
+            {% block pagination %}
+            {% endblock pagination %}
+          </div>
+        </div> <!-- fourteen wide column end -->
+      </div> <!-- row end -->
+
+      <div class="row">
+        {% block footer %}
+        {% endblock footer %}
+      </div>
+    </div>
   </body>
 </html>
