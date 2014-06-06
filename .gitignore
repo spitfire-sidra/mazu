@@ -1,4 +1,5 @@
 db.sqlite3
+storage/*
 settings/local.py
 settings/production.py
 settings/staging.py

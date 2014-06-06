@@ -1,8 +1,9 @@
+{% load coretags %}
 <div class="ui menu">
-  <a class="active item">
+  <a class="item {% active request "^/$" %}">
     <i class="home icon"></i> Home
   </a>
-  <a class="item" href="{% url 'malware_list' %}">
+  <a class="item {% active request "^/malware/list/$" %}" href="{% url 'malware_list' %}">
     <i class="mail icon"></i> Malware
   </a>
   <div class="right menu">
