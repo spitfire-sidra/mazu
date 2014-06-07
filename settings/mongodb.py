@@ -1,0 +1,3 @@
+MONGOHOST = '127.0.0.1'
+MONGOPORT = 27017
+STORAGE = 'malware_cage'
