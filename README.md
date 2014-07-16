@@ -34,10 +34,16 @@ SECRET_KEY = '^v_m6li36$7*px46xw$)a(^&8_)sdfakfjkagu12-8=239r823ls**'
 
 ## USAGE
 
-### start web server
+### Initialize database
 
 ```
 $ cd mazu
+$ ./manage.py syncdb
+```
+
+### start web server
+
+```
 $ ./manage.py runserver 127.0.0.1:8000
 ```
 
