@@ -34,22 +34,22 @@ SECRET_KEY = '^v_m6li36$7*px46xw$)a(^&8_)sdfakfjkagu12-8=239r823ls**'
 
 ## USAGE
 
-- start web server
+### start web server
 
 ```
 $ cd mazu
 $ ./manage.py runserver 127.0.0.1:8000
 ```
 
-- start celery worker
+### start celery worker
 
 1. start mongodb server first
 
-2. 
+2. start celery worker 
 
-    ```
-    $ ./manage.py celery worker --app mazu --beat
-    ```
+```
+$ ./manage.py celery worker --app mazu --beat
+```
 
 ## CONTRIBUTE
 
