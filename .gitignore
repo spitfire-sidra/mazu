@@ -1,4 +1,5 @@
 db.sqlite3
+celerybeat-schedule.db
 storage/*
 settings/local.py
 settings/production.py
