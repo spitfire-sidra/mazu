@@ -81,7 +81,7 @@ python broker/broker.py
 
 #### install hpfeeds on your system:
 
-``
+```
 git clone https://github.com/rep/hpfeeds
 pip install gevent
 cd hpfeeds/cli/
