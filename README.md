@@ -1,5 +1,7 @@
 # MAZU - MALWARE REPOSITORY WITH SOCIAL SHARING FEATURE
 
+[![Build Status](https://travis-ci.org/PwnDoRa/mazu.svg?branch=master)](https://travis-ci.org/PwnDoRa/mazu)
+
 ## PREREQUISITE
 
 - python 2.7
