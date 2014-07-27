@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html>
   <head>
@@ -6,78 +7,79 @@
     {% include 'base_head.html' %}
   </head>
   <body>
-    <div class="ui celled grid">
-      <div class="row">
-      {% block menu %}
-        {% include 'base_menu.html' %}
-      {% endblock menu %}
+  <div class="row">
+  {% block menu %}
+    {% include 'base_menu.html' %}
+  {% endblock menu %}
+  </div>
+
+  <div class="row">
+    <div class="ui grid">
+      <div class="eight wide column">
+      {% block header1 %}
+      {% endblock header1 %}
       </div>
-
-      <div class="row">
-        <div class="ui grid">
-          <div class="eight wide column">
-          {% block header1 %}
-          {% endblock header1 %}
-          </div>
-          <div class="four wide column">
-          {% block header2 %}
-          {% endblock header2 %}
-          </div>
-          <div class="four wide column">
-          {% block header3 %}
-          {% endblock header3 %}
-          </div>
-        </div>
+      <div class="four wide column">
+      {% block header2 %}
+      {% endblock header2 %}
       </div>
-
-      <div class="row">
-        <div class="two wide column">
-        {% block leftcolumn %}
-        {% endblock leftcolumn %}
-        </div>
-        
-        <div class="fourteen wide column">
-          <div class="row">
-            <div class="ui breadcrumb">
-              <a class="section">Home</a>
-            </div> 
-            {% block breadcrumb %}
-            {% endblock breadcrumb %}
-          </div>
-
-          <div class="row">
-          {% block secondarymenu %}
-          {% endblock secondarymenu %}
-          </div>           
-
-          <div class="row">    
-          {% block message %}
-            {% if messages %}
-              <ul class="messages">
-              {% for message in messages %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-              {% endfor %}
-              </ul>
-            {% endif %} 
-          {% endblock message %}
-          </div>
-
-          <div class="row">
-          {% block content %}
-          {% endblock content %}
-          </div>
-
-          <div class="row">
-          {% block pagination %}
-          {% endblock pagination %}
-          </div>
-        </div> <!-- fourteen wide column end -->
-      </div> <!-- row end -->
-
-      <div class="row">
-      {% block footer %}
-      {% endblock footer %}
+      <div class="four wide column">
+      {% block header3 %}
+      {% endblock header3 %}
       </div>
     </div>
+  </div>
+
+  <div class="row">
+    <div class="two wide column">
+    {% block leftcolumn %}
+    {% endblock leftcolumn %}
+    </div>
+
+    <div class="fourteen wide column">
+      <div class="row">
+        <div class="ui breadcrumb">
+          <a class="section">Home</a>
+        </div> 
+        {% block breadcrumb %}
+        {% endblock breadcrumb %}
+      </div>
+
+      <div class="row">
+      {% block secondarymenu %}
+      {% endblock secondarymenu %}
+      </div> 
+
+      <div class="row">
+      {% block message %}
+        {% if messages %}
+          <ul class="messages">
+          {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endblock message %}
+      </div>
+
+      <div class="row">
+      {% block content %}
+      {% endblock content %}
+      </div>
+
+      <div class="row">
+      {% block pagination %}
+      {% endblock pagination %}
+      </div>
+    </div> <!-- fourteen wide column end -->
+  </div> <!-- row end -->
+
+  <div class="row">
+  {% block footer %}
+  {% endblock footer %}
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  {% block javascript %}
+  {% endblock javascript %}
   </body>
 </html>
