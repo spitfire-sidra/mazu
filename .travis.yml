@@ -1,0 +1,23 @@
+# .travis.yml
+services:
+  - mongodb
+
+language: python
+
+python:
+    - "2.7"
+
+env:
+    - DJANGO_VERSION=1.6.2
+
+# command to install dependencies
+install: 
+    - pip install -q Django==$DJANGO_VERSION --use-mirrors
+    - pip install -r requirements.txt
+
+before_script:
+    - cp settings/production.example.py settings/production.py 
+
+# command to run tests
+script:
+    - python manage.py test
