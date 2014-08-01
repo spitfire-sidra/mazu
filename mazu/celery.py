@@ -7,6 +7,8 @@ from celery import Celery
 from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 
+
+# Execute modules under the widget app periodically.
 app = Celery('mazu')
 app.conf.update(
     BROKER_URL = 'mongodb://localhost:27017/widget',
