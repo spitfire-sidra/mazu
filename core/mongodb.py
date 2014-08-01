@@ -16,8 +16,18 @@ from settings.mongodb import STORAGE
 
 logger = logging.getLogger(__name__)
 
+
 def connect_gridfs():
     """ Connect to GridFS
+
+    Args:
+        None
+ 
+    Returns:
+        an instance of GridFS
+ 
+    Raises:
+        ConnectionFailure, PyMongoError, Exception
 
     >>> connect_gridfs()
     """
@@ -38,7 +48,18 @@ def connect_gridfs():
 def get_compressed_file(attr, value):
     """ Get a compressed file cursor that attribute equals specific value from GridFS
 
-    >>> 
+    Args:
+        attr (str): The attribute to retrieve.
+        vale (str): Value of the attribute.
+ 
+    Returns:
+        success - an instance of StringIO
+        not found - None
+ 
+    Raises:
+        Exception
+
+    >>> get_compressed_file('name', 'test')
     """
     try:
         gridfs = connect_gridfs()
@@ -61,7 +82,18 @@ def get_compressed_file(attr, value):
 def delete_file(attr, value):
     """ Delete files in GridFS
 
-    >>>
+    Args:
+        attr (str): The attribute to retrieve.
+        vale (str): Value of the attribute.
+
+    Returns:
+        success - True
+        not found - False
+
+    Raises:
+        Exception
+
+    >>> delete_file('name', 'test')
     """
     try:
         gridfs = connect_gridfs()
