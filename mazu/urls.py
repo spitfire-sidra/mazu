@@ -12,4 +12,5 @@ urlpatterns = patterns(
     '',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^malware/', include('malware.urls')),
+    url(r'^authkey/', include('authkey.urls')),
 )

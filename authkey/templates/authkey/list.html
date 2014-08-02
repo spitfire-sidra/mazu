@@ -1,0 +1,45 @@
+{% extends 'authkey_base.html' %}
+
+{% block content %}
+
+<table class="ui sortable table segment">
+<thead>
+<tr>
+<th>Identity</th>
+<th>Secret</th>
+<th>Subscribe channels</th>
+<th>Publish channels</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+{% for authkey in authkeys %}
+<tr>
+<td>{{ authkey.ident }}</td>
+<td>
+{{ authkey.secret }}
+</td>
+<td>{{ authkey.subchans }}</td>
+<td>{{ authkey.pubchans }}</td>
+<td>
+<a href='{% url 'authkey_update' authkey.id %}'>Update</a>
+<a href='{% url 'authkey_delete' authkey.id %}'>Delete</a>
+</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan='5'>No authkey yet.</td>
+</tr>
+{% endfor %}
+</tbody>
+<tfoot>
+<tr>
+<th>Total: {{ authkeys.count }}</th
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</tfoot>
+</table>
+{% endblock content %}

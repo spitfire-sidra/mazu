@@ -1,3 +1,4 @@
 {% load coretags %}
 <a class="item {% active request "^/$" %}">Home</a>
 <a class="item {% active request "^/malware/list/$" %}" href="{% url 'malware_list' %}">Malware</a>
+<a class="item {% active request "^/authkey/list/$" %}" href="{% url 'authkey_list' %}">Authkey</a>
