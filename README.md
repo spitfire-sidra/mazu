@@ -20,7 +20,7 @@ $ export ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future
 ## INSTALLATION (Ubuntu, MAC OS X)
 
 ```
-$ sudo apt-get install python-dev libxml2-dev libxslt-d
+$ sudo apt-get install python-dev libxml2-dev libxslt-dev
 $ git clone https://github.com/PwnDoRa/mazu
 $ cd mazu
 $ pip install -r requirements.txt
