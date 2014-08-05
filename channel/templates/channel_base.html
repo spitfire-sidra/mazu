@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block leftcolumn %}
+<ul>
+  <li><a href="{% url 'channel_list' %}">CHANNEL LIST</a></li>
+  <li><a href="{% url 'channel_create' %}">CREATE CHANNEL</a></li>
+</ul>
+{% endblock leftcolumn %}

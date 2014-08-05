@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'authkey',
 	'malware',
     'widget',
+    'channel',
 )
 
 MIDDLEWARE_CLASSES = (
