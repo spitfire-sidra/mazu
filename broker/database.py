@@ -67,6 +67,7 @@ class Database(object):
 
         if not res: return None
 
+        # should be fix later, change ["chan1","chan2"] to chan1,chan2
         pubchans = json.loads(res.pubchans)
         subchans = json.loads(res.subchans)
 
