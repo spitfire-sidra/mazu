@@ -5,3 +5,4 @@ settings/local.py
 settings/production.py
 settings/staging.py
 settings/test.py
+malware/tests/*
