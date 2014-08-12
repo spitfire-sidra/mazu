@@ -12,7 +12,8 @@ import time
 import threading
 import ssl
 
-logger = logging.getLogger('pyhpfeeds')
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 OP_ERROR    = 0
 OP_INFO        = 1
@@ -34,10 +35,11 @@ def msgpublish(ident, chan, data):
     return msghdr(OP_PUBLISH, data)
 
 def msgsubscribe(ident, chan):
-    return msghdr(OP_SUBSCRIBE, struct.pack('!B', len(ident)) + ident + chan)
+    return msghdr(OP_SUBSCRIBE, '{}{}{}'.format(struct.pack('!B', len(ident)), ident, chan))
+
 def msgauth(rand, ident, secret):
-    hash = hashlib.sha1(rand+secret).digest()
-    return msghdr(OP_AUTH, struct.pack('!B', len(ident)) + ident + hash)
+    hash = hashlib.sha1('{}{}'.format(rand, secret)).digest()
+    return msghdr(OP_AUTH, '{}{}{}'.format(struct.pack('!B', len(ident)), ident, hash))
 
 class FeedUnpack(object):
     def __init__(self):
@@ -62,6 +64,7 @@ class FeedUnpack(object):
 
 class FeedException(Exception):
     pass
+
 class Disconnect(Exception):
     pass
 
@@ -141,8 +144,8 @@ class HPC(object):
                 self.s.settimeout(self.timeout)
                 self.s.connect((addr, self.port))
             except:
-                import traceback
-                traceback.print_exc()
+                #import traceback
+                #traceback.print_exc()
                 #print 'Could not connect to broker. %s[%s]' % (self.host, addr)
                 continue
             else:
