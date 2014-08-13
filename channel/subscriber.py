@@ -5,43 +5,32 @@ import time
 import datetime
 import hashlib
 import logging
+
 from multiprocessing import Process
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(PROJECT_ROOT)
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 
 from lib import hpfeeds
 from lib.dictdiffer import DictDiffer
 
-OUTDIR = './malware'
+from channel.utils import get_channels
+from malware.utils import save_malware
+from django.db import connection
+
+
 INIT = None
 CURRENT = None
 PIDS = dict()
 
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(PROJECT_ROOT)
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.local")
-
-from channel.models import Channel
-from malware.utils import save_malware
-
-def get_channels():
-    mapping = dict()
-    for c in Channel.objects.all():
-        mapping.update({
-            c.name: {
-                'host': c.host,
-                'port': c.port,
-                'ident': c.ident,
-                'secret': c.secret,
-                'subchans': [c.subchans]
-            }
-        })
-    return mapping
-
-
 def create_hpc(host, port, ident, secret, subchans):
     
     def on_message(identifier, channel, payload):
+        from django.db import connection
+        connection.close()
         save_malware(payload)
 
     def on_error(payload):
@@ -104,7 +93,7 @@ if __name__ == '__main__':
     try:
         sys.exit(main())
     except KeyboardInterrupt:
-        # terminate all processes
-        for k, v in PIDS.items():
-            v.terminate()
-        sys.exit(0)
+         #terminate all processes
+         for k, v in PIDS.items():
+             v.terminate()
+         sys.exit(0)
