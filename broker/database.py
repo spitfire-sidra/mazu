@@ -19,7 +19,7 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(PROJECT_ROOT)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 from django.contrib.auth.models import User
 from authkey.models import Log
 from authkey.models import ConnStats
