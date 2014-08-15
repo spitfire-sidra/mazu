@@ -20,6 +20,7 @@ sys.path.append(PROJECT_ROOT)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 
 from django.contrib.auth.models import User
+from utils import custom_split
 from authkey.models import Log
 from authkey.models import ConnStats
 from authkey.models import AuthKey
@@ -66,9 +67,8 @@ class Database(object):
 
         if not res: return None
 
-        # should be fix later, change ["chan1","chan2"] to chan1,chan2
-        pubchans = json.loads(res.pubchans)
-        subchans = json.loads(res.subchans)
+        pubchans = custom_split(res.pubchans)
+        subchans = custom_split(res.subchans)
 
         return dict(secret=res.secret, ident=res.ident, pubchans=pubchans,
             subchans=subchans, owner=res.owner
