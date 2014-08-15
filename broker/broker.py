@@ -1,6 +1,4 @@
-#!/usr/bin/python
 # -*- coding: utf8 -*-
-
 import gevent, gevent.server, gevent.monkey
 gevent.monkey.patch_all()
 
@@ -14,9 +12,13 @@ import config
 import database
 import proto
 import utils
-from utils import Disconnect, BadClient
 
-log = logging.getLogger("broker")
+from utils import Disconnect
+from utils import BadClient
+from utils import custom_split
+
+
+log = logging.getLogger(__name__)
 
 
 class Connection(object):
@@ -174,7 +176,7 @@ class Server(object):
         log.debug('Connection from {0}.'.format(addr))
         fc = self.connclass(sock, addr, self)
         self.connections.add(fc)
-        
+
         try: fc.handle()
         except Disconnect:
             log.debug("Connection closed by {0}".format(addr))
@@ -201,14 +203,14 @@ class Server(object):
                 c2.forward(c.ak, chan, data)
         except Exception as e:
             traceback.print_exc()
-        
+
     def do_subscribe(self, c, ident, chan):
         log.debug('broker subscribe to {0} by {1}@{2}'.format(chan, ident, c.addr))
         self.subscribermap[chan].append(c)
         self.conn2chans[c].append(chan)
         if not chan.endswith('..broker'):
             self._brokerchan(c, chan, ident, 'join')
-    
+
     def do_unsubscribe(self, c, ident, chan):
         log.debug('broker unsubscribe to {0} by {1}@{2}'.format(chan, ident, c.addr))
         self.subscribermap[chan].remove(c)

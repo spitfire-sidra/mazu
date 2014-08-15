@@ -1,10 +1,11 @@
-#!/usr/bin/python
 # -*- coding: utf8 -*-
 import socket
 import struct
 import logging
 
-from utils import Disconnect, BadClient
+from utils import Disconnect
+from utils import BadClient
+
 
 OP_ERROR    = 0
 OP_INFO     = 1
@@ -13,20 +14,26 @@ OP_PUBLISH  = 3
 OP_SUBSCRIBE    = 4
 OP_UNSUBSCRIBE  = 5
 
+
 BUFSIZ = 16 * 1024
 MAXBUF = 10 * (1024**2)
+
 
 def msghdr(op, data):
     return struct.pack('!iB', 5+len(data), op) + data
 
+
 def msginfo(name, rand):
     return msghdr(OP_INFO, '{0}{1}{2}'.format(chr(len(name)), name, rand))
+
 
 def msgerror(emsg):
     return msghdr(OP_ERROR, emsg)
 
+
 def msgpublish(ident, chan, data):
     return msghdr(OP_PUBLISH, chr(len(ident)) + ident + chr(len(chan)) + chan + data)
+
 
 def recv(sock, minlength):
     buf = ""
@@ -44,6 +51,7 @@ def recv(sock, minlength):
 
     return buf
 
+
 def read_message(sock):
     buf = recv(sock, 5)
     ml, opcode = struct.unpack('!iB', buf)
@@ -57,6 +65,7 @@ def read_message(sock):
     ident, buf = buf[:nextlen], buf[nextlen:]
 
     return opcode, ident, buf
+
 
 def split(data, howmany):
     out = []

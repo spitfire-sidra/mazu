@@ -1,25 +1,24 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
+""" Inserting an user and an authkey
+
+    ./manage.py shell
+    >>> from django.contrib.auth.models import User
+    >>> from authkey.models import AuthKey
+    >>> User.objects.create_user('username', 'username@example.com', 'password').save()
+    >>> usr = User.objects.get(username='username')
+    >>> AuthKey(owner=usr, ident='ident', secret='secret', pubchans='["chan1"]', subchans='["chan1"]').save()
+"""
 
 import json
-import sqlite3
-
 import config
-
-# inserting an user and an authkey(example):
-# ./manage.py shell
-# >>> from django.contrib.auth.models import User
-# >>> from authkey.models import AuthKey
-# >>> User.objects.create_user('username', 'username@example.com', 'password').save()
-# >>> usr = User.objects.get(username='username')
-# >>> AuthKey(owner=usr, ident='ident', secret='secret', pubchans='["chan1"]', subchans='["chan1"]').save()
-
 import sys
 import os
+
+# Django configurations
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(PROJECT_ROOT)
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
+
 from django.contrib.auth.models import User
 from authkey.models import Log
 from authkey.models import ConnStats
