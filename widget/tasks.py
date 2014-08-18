@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import pkgutil
 
-from core.modules import Widget
 from celery import shared_task
+
+from core.modules import Widget
 
 
 @shared_task
