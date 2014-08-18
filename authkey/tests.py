@@ -3,12 +3,10 @@ import random
 
 from django.test import Client
 from django.test import TestCase
-
 from django.core.urlresolvers import reverse_lazy
 
+from models import AuthKey
 from core.tests import random_string
-
-from .models import AuthKey
 
 
 class AuthKeyTestCase(TestCase):
@@ -30,14 +28,14 @@ class AuthKeyTestCase(TestCase):
 
     def test_list_view(self):
         self._create()
-        response = self.client.get(reverse_lazy('authkey_list'))
+        response = self.client.get(reverse_lazy('authkey.list'))
         authkeys = AuthKey.objects.all()
         for c in response.context['authkeys']:
             self.assertIn(c, authkeys)
 
     def test_can_create(self):
         expected_count = AuthKey.objects.all().count() + 1
-        self.client.post(reverse_lazy('authkey_create'), self.authkey)
+        self.client.post(reverse_lazy('authkey.create'), self.authkey)
         count = AuthKey.objects.all().count()
         self.assertEqual(count, expected_count)
 
@@ -45,7 +43,7 @@ class AuthKeyTestCase(TestCase):
         self._create()
         pk = AuthKey.objects.get(ident=self.authkey['ident']).id
         self._random_data()
-        self.client.post(reverse_lazy('authkey_update', args=[pk]), self.authkey)
+        self.client.post(reverse_lazy('authkey.update', args=[pk]), self.authkey)
         updated_authkey = AuthKey.objects.get(id=pk)
         self.assertEqual(updated_authkey.ident, self.authkey['ident'])
 
@@ -53,6 +51,6 @@ class AuthKeyTestCase(TestCase):
         self._create()
         expected_count = AuthKey.objects.all().count() - 1
         pk = AuthKey.objects.get(ident=self.authkey['ident']).id
-        self.client.post(reverse_lazy('authkey_delete', args=[pk]))
+        self.client.post(reverse_lazy('authkey.delete', args=[pk]))
         count = AuthKey.objects.all().count()
         self.assertEqual(count, expected_count)

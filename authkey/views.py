@@ -19,7 +19,7 @@ from .models import AuthKey
 class AuthKeyCreateView(CreateView):
     model = AuthKey
     template_name = 'authkey/create.html'
-    success_url = reverse_lazy('authkey_list')
+    success_url = reverse_lazy('authkey.list')
     fields = ['ident', 'secret', 'pubchans', 'subchans']
 
 
@@ -32,11 +32,11 @@ class AuthKeyListView(ListView):
 class AuthKeyUpdateView(UpdateView):
     model = AuthKey
     template_name = 'authkey/update.html'
-    success_url = reverse_lazy('authkey_list')
+    success_url = reverse_lazy('authkey.list')
     fields = ['ident', 'secret', 'pubchans', 'subchans']
 
 
 class AuthKeyDeleteView(DeleteView):
     model = AuthKey
     template_name = 'authkey/delete.html'
-    success_url = reverse_lazy('authkey_list')
+    success_url = reverse_lazy('authkey.list')
