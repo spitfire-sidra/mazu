@@ -4,6 +4,8 @@ import base64
 import binascii
 import logging
 
+from bson.json_util import dumps
+
 from django.http import Http404
 from django.http import HttpResponse
 from django.contrib import messages
@@ -16,14 +18,10 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.core.urlresolvers import reverse_lazy
 
-from core.mongodb import connect_gridfs
-
-from bson.json_util import dumps
-
-from malware.models import Malware
-
 from lib import hpfeeds
-from .models import Channel
+from models import Channel
+from core.mongodb import connect_gridfs
+from malware.models import Malware
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ChannelCreateView(CreateView):
     model = Channel
     template_name = 'channel/create.html'
-    success_url = reverse_lazy('channel_list')
+    success_url = reverse_lazy('channel.list')
     fields = ['name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
 
 
@@ -45,14 +43,14 @@ class ChannelListView(ListView):
 class ChannelUpdateView(UpdateView):
     model = Channel
     template_name = 'channel/update.html'
-    success_url = reverse_lazy('channel_list')
+    success_url = reverse_lazy('channel.list')
     fields = ['name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
 
 
 class ChannelDeleteView(DeleteView):
     model = Channel
     template_name = 'channel/delete.html'
-    success_url = reverse_lazy('channel_list')
+    success_url = reverse_lazy('channel.list')
 
 
 def publish(request):

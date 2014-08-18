@@ -28,8 +28,8 @@
 <td>{{ channel.subchans }}</td>
 <td>{{ channel.pubchans }}</td>
 <td>
-<a href='{% url 'channel_update' channel.id %}'>Update</a>
-<a href='{% url 'channel_delete' channel.id %}'>Delete</a>
+<a href='{% url 'channel.update' channel.id %}'>Update</a>
+<a href='{% url 'channel.delete' channel.id %}'>Delete</a>
 </td>
 </tr>
 {% empty %}

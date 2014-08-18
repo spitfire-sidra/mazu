@@ -5,20 +5,19 @@ import time
 import datetime
 import hashlib
 import logging
-
 from multiprocessing import Process
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(PROJECT_ROOT)
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
+
+from django.db import connection
 
 from lib import hpfeeds
 from lib.dictdiffer import DictDiffer
 
 from channel.utils import get_channels
 from malware.utils import save_malware
-from django.db import connection
 
 
 INIT = None
