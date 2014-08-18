@@ -1,0 +1,18 @@
+{% extends 'empty.html' %}
+
+{% block content %}
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+<form class="form-signin" method="post" action="{% url 'auth.views.auth' %}">
+    {% csrf_token %}
+    <h2>Please Sign In</h2>
+    <input type="text" placeholder="Username" name="username" required="" autofocus="">
+    <input type="password" placeholder="Password" name="password" required="">
+    <input type="submit">
+</form>
+{% endblock content %}

@@ -24,7 +24,7 @@ DEBUG = False
 
 TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = (
 	'south',
     'djcelery',
     'core',
+    'auth',
     'authkey',
 	'malware',
     'widget',
@@ -66,6 +67,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 ROOT_URLCONF = 'mazu.urls'
+
+LOGIN_URL = '/'
 
 WSGI_APPLICATION = 'mazu.wsgi.application'
 

@@ -10,6 +10,12 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
+    url(r'^$', 'auth.views.index'),
+    url(r'^auth$', 'auth.views.auth'),
+)
+
+
+urlpatterns += patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^malware/', include('malware.urls')),
     url(r'^authkey/', include('authkey.urls')),
