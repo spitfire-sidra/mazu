@@ -1,18 +1,19 @@
 # -*- cofing: utf-8 -*-
 import random
 import string
-
 from StringIO import StringIO
+
 from gridfs import GridFS
 
 from django.test import TestCase
+
 from mongodb import connect_gridfs
 from mongodb import get_compressed_file
 from mongodb import delete_file
 
 
 def random_string(k=5):
-    """ Return a random string. Maximum value of k is 52.
+    """ Return a random string
 
         args:
             k - length of random string
@@ -20,10 +21,8 @@ def random_string(k=5):
     >>> random_sting()
     'YMluq'
     """
-    if k >= 0 and k <= 52:
-        return ''.join(random.sample(string.ascii_letters, k))
-    else:
-        return ''.join(random.sample(string.ascii_letters, 5))
+    choices = string.ascii_letters
+    return ''.join([random.choice(choices) for i in range(k)])
 
 
 class MongodbTestCase(TestCase):

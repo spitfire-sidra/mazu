@@ -2,7 +2,6 @@
 import gridfs
 import zipfile
 import logging
-
 from StringIO import StringIO
 
 from pymongo import MongoClient
