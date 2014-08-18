@@ -27,7 +27,7 @@ def auth(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return redirect(reverse_lazy('malware_list'))
+                return redirect(reverse_lazy('malware.list'))
         else:
             messages.error(request, 'invalid login')
     return redirect(reverse_lazy('auth.views.index'))
