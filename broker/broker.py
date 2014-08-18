@@ -1,6 +1,11 @@
 # -*- coding: utf8 -*-
 import gevent, gevent.server, gevent.monkey
-gevent.monkey.patch_all()
+
+""" Here is an issue about django database threading issue
+    (https://code.djangoproject.com/ticket/17998)
+    we got change gevent.monkey.patch_all() to the following line
+"""
+gevent.monkey.patch_all(thread=False)
 
 import sys
 import os
