@@ -5,7 +5,9 @@ from StringIO import StringIO
 
 from gridfs import GridFS
 
+from django.test import Client
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 from mongodb import connect_gridfs
 from mongodb import get_compressed_file
@@ -23,6 +25,23 @@ def random_string(k=5):
     """
     choices = string.ascii_letters
     return ''.join([random.choice(choices) for i in range(k)])
+
+
+class CoreTestCase(TestCase):
+
+    def setUp(self):
+        self.username = random_string()
+        self.password = random_string()
+        self.user = User.objects.create_user(
+                        username=self.username,
+                        email='mazu@example.com',
+                        password=self.password
+                    )
+        self.client = Client()
+        self.client.login(
+            username=self.username,
+            password=self.password
+        )
 
 
 class MongodbTestCase(TestCase):
