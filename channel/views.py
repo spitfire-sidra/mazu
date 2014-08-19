@@ -8,7 +8,6 @@ from bson.json_util import dumps
 
 from django.http import Http404
 from django.http import HttpResponse
-from django.contrib import messages
 from django.shortcuts import render
 from django.views.generic.edit import FormView
 from django.views.generic.edit import CreateView
@@ -17,6 +16,9 @@ from django.views.generic.edit import DeleteView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.core.urlresolvers import reverse_lazy
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from lib import hpfeeds
 from models import Channel
@@ -32,6 +34,15 @@ class ChannelCreateView(CreateView):
     template_name = 'channel/create.html'
     success_url = reverse_lazy('channel.list')
     fields = ['name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ChannelCreateView, self).dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        # Save the owner of channel
+        form.instance.owner = self.request.user
+        return super(ChannelCreateView, self).form_valid(form)
 
 
 class ChannelListView(ListView):

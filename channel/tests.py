@@ -1,18 +1,17 @@
 # -*- cofing: utf-8 -*-
 import random
 
-from django.test import Client
-from django.test import TestCase
 from django.core.urlresolvers import reverse_lazy
 
 from models import Channel
+from core.tests import CoreTestCase
 from core.tests import random_string
 
 
-class ChannelTestCase(TestCase):
+class ChannelTestCase(CoreTestCase):
 
     def setUp(self):
-        self.client = Client()
+        super(ChannelTestCase, self).setUp()
         self._random_data()
 
     def _random_data(self):
