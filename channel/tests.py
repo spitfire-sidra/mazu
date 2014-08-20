@@ -35,6 +35,12 @@ class ChannelTestCase(CoreTestCase):
         for c in response.context['channels']:
             self.assertIn(c, channels)
 
+    def test_display_own_channels(self):
+        self._create()
+        response = self.client.get(reverse_lazy('channel.list'))
+        count = Channel.objects.filter(owner=self.user).count()
+        self.assertEqual(count, len(response.context['channels']))
+
     def test_can_create(self):
         expected_count = Channel.objects.all().count() + 1
         self.client.post(reverse_lazy('channel.create'), self.channel)

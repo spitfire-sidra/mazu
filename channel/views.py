@@ -50,6 +50,13 @@ class ChannelListView(ListView):
     template_name = 'channel/list.html'
     context_object_name = 'channels'
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ChannelListView, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return self.model.objects.filter(owner=self.request.user)
+
 
 class ChannelUpdateView(UpdateView):
     model = Channel

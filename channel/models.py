@@ -27,3 +27,4 @@ class Channel(TimeStampedModel):
 
     class Meta:
         ordering = ['host', 'port']
+        unique_together = ('owner', 'name')
