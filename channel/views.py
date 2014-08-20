@@ -33,7 +33,7 @@ class ChannelCreateView(CreateView):
     model = Channel
     template_name = 'channel/create.html'
     success_url = reverse_lazy('channel.list')
-    fields = ['name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
+    fields = ['default', 'name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -62,7 +62,7 @@ class ChannelUpdateView(UpdateView):
     model = Channel
     template_name = 'channel/update.html'
     success_url = reverse_lazy('channel.list')
-    fields = ['name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
+    fields = ['default', 'name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
 
 
 class ChannelDeleteView(DeleteView):

@@ -15,6 +15,7 @@ class Channel(TimeStampedModel):
     subchans = models.TextField(null=True, blank=True)
     ident = models.TextField()
     secret = models.TextField(null=True, blank=True)
+    default = models.BooleanField(default=False)
     slug = models.SlugField()
 
     def __unicode__(self):
