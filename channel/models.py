@@ -29,3 +29,12 @@ class Channel(TimeStampedModel):
     class Meta:
         ordering = ['host', 'port']
         unique_together = ('owner', 'name')
+
+
+class Queue(TimeStampedModel):
+    malware = models.ForeignKey('malware.Malware')
+    channel = models.ForeignKey(Channel)
+    published = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return 'QUEUE-{}'.format(self.id)
