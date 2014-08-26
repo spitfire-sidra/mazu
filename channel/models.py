@@ -19,7 +19,7 @@ class Channel(TimeStampedModel):
     slug = models.SlugField()
 
     def __unicode__(self):
-        return self.pubchans
+        return self.name
 
     def save(self, *args, **kwargs):
         if not self.id:
