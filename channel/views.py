@@ -21,6 +21,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from lib import hpfeeds
+from forms import ChannelForm
 from models import Channel
 from core.mongodb import connect_gridfs
 from malware.models import Malware
@@ -31,13 +32,20 @@ logger = logging.getLogger(__name__)
 
 class ChannelCreateView(CreateView):
     model = Channel
+    form_class = ChannelForm
     template_name = 'channel/create.html'
     success_url = reverse_lazy('channel.list')
-    fields = ['default', 'name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(ChannelCreateView, self).dispatch(*args, **kwargs)
+
+    def get_form(self, form_class):
+        kwargs = self.get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return form_class(
+            **kwargs
+        )
 
     def form_valid(self, form):
         # Save the owner of channel
@@ -61,8 +69,25 @@ class ChannelListView(ListView):
 class ChannelUpdateView(UpdateView):
     model = Channel
     template_name = 'channel/update.html'
+    form_class = ChannelForm
     success_url = reverse_lazy('channel.list')
-    fields = ['default', 'name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans']
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ChannelUpdateView, self).dispatch(*args, **kwargs)
+
+    def get_form(self, form_class):
+        kwargs = self.get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return form_class(
+            **kwargs
+        )
+
+    def form_valid(self, form):
+        # Save the owner of channel
+        form.instance.owner = self.request.user
+        return super(ChannelUpdateView, self).form_valid(form)
+
 
 
 class ChannelDeleteView(DeleteView):
