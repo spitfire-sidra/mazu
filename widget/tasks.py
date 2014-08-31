@@ -3,7 +3,7 @@ import pkgutil
 
 from celery import shared_task
 
-from core.modules import Widget
+from core.modules.widget import Widget
 
 
 @shared_task
