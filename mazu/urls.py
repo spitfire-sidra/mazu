@@ -2,7 +2,7 @@
 from django.conf.urls import patterns
 from django.conf.urls import include
 from django.conf.urls import url
-
+from django.contrib.auth.views import logout_then_login
 from django.contrib import admin
 
 
@@ -12,6 +12,8 @@ urlpatterns = patterns(
     '',
     url(r'^$', 'auth.views.index'),
     url(r'^auth$', 'auth.views.auth'),
+    url(r'^signup$', 'auth.views.signup'),
+    url(r'^logout',  logout_then_login, name='user.logout'),
 )
 
 
