@@ -1,5 +1,15 @@
 {% load coretags %}
-<a class="item {% active request "^/$" %}">Home</a>
-<a class="item {% active request "^/malware/list/$" %}" href="{% url 'malware.list' %}">Malware</a>
-<a class="item {% active request "^/authkey/list/$" %}" href="{% url 'authkey.list' %}">Authkey</a>
-<a class="item {% active request "^/channel/list/$" %}" href="{% url 'channel.list' %}">Channel</a>
+<div class="ui selection list">
+    <div class="item {% active request "^/$" %}">
+        <a>Home</a>
+    </div>
+    <div class="item {% active request "^/malware/list/$" %}">
+        <a href="{% url 'malware.list' %}">Malware</a>
+    </div>
+    <div class="item {% active request "^/authkey/list/$" %}">
+        <a href="{% url 'authkey.list' %}">Authkey</a>
+    </div>
+    <div class="item {% active request "^/channel/list/$" %}">
+        <a href="{% url 'channel.list' %}">Channel</a>
+    </div>
+</div>
