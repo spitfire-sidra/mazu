@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 
-{% block leftcolumn %}
-<ul>
-  <li><a href="{% url 'channel.list' %}">CHANNEL LIST</a></li>
-  <li><a href="{% url 'channel.create' %}">CREATE CHANNEL</a></li>
-</ul>
-{% endblock leftcolumn %}
+{% block secondarymenu %}
+<div class="ui secondary menu">
+    <div class="item">
+        <a href="{% url 'channel.list' %}">CHANNEL LIST</a>
+    </div>
+    <div class="item">
+        <a href="{% url 'channel.create' %}">CREATE CHANNEL</a>
+    </div>
+</div>
+{% endblock secondarymenu %}

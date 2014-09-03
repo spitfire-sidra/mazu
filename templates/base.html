@@ -1,85 +1,75 @@
 {% load staticfiles %}
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-    {% include 'base_head.html' %}
-  </head>
-  <body>
-  <div class="row">
-  {% block menu %}
-    {% include 'base_menu.html' %}
-  {% endblock menu %}
-  </div>
+    <head>
+        <meta charset="utf-8">
+        <title>MAZU - Malware Repository</title>
+        {% include 'base_head.html' %}
+    </head>
+    <body>
+        <div class="ui two column page grid">
+            <div class="three wide column">
+                <div class="row">
+                    {% block menu %}
+                        {% include 'base_menu.html' %}
+                    {% endblock menu %}
+                </div>
+            </div>
+            <div class="thirteen wide column">
+                <div class="row">
+                {% block header %}
+                {% endblock header %}
+                </div>
+                <div class="row">
+                    <div class="ui breadcrumb">
+                        <a class="section">MAZU</a>
+                        {% block breadcrumb %}
+                        {% endblock breadcrumb %}
+                    </div> 
+                    <br />
+                </div>
+                <div class="row">
+                    <div class="ui fluid action input">
+                        <input type="text" placeholder="Search...">
+                        <div class="ui button">Search</div>
+                    </div>
+                </div>
+                <div class="ui section divider"></div>
+                <div class="row">
+                {% block secondarymenu %}
+                {% endblock secondarymenu %}
+                </div>
 
-  <div class="row">
-    <div class="ui grid">
-      <div class="eight wide column">
-      {% block header1 %}
-      {% endblock header1 %}
-      </div>
-      <div class="four wide column">
-      {% block header2 %}
-      {% endblock header2 %}
-      </div>
-      <div class="four wide column">
-      {% block header3 %}
-      {% endblock header3 %}
-      </div>
-    </div>
-  </div>
+                {% block message %}
+                {% if messages %}
+                <div class="row">
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% endblock message %}
 
-  <div class="row">
-    <div class="two wide column">
-    {% block leftcolumn %}
-    {% endblock leftcolumn %}
-    </div>
 
-    <div class="fourteen wide column">
-      <div class="row">
-        <div class="ui breadcrumb">
-          <a class="section">Home</a>
-        </div> 
-        {% block breadcrumb %}
-        {% endblock breadcrumb %}
-      </div>
-
-      <div class="row">
-      {% block secondarymenu %}
-      {% endblock secondarymenu %}
-      </div> 
-
-      <div class="row">
-      {% block message %}
-        {% if messages %}
-          <ul class="messages">
-          {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-          {% endfor %}
-          </ul>
-        {% endif %}
-      {% endblock message %}
-      </div>
-
-      <div class="row">
-      {% block content %}
-      {% endblock content %}
-      </div>
-
-      <div class="row">
-      {% block pagination %}
-      {% endblock pagination %}
-      </div>
-    </div> <!-- fourteen wide column end -->
-  </div> <!-- row end -->
-
-  <div class="row">
-  {% block footer %}
-  {% endblock footer %}
-  </div>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-  {% block javascript %}
-  {% endblock javascript %}
-  </body>
+                <div class="row">
+                {% block content %}
+                {% endblock content %}
+                </div>
+                <div class="row">
+                {% block pagination %}
+                {% endblock pagination %}
+                </div>
+                <div class="row">
+                {% block footer %}
+                    {% include 'base_foot.html' %}
+                {% endblock footer %}
+                </div>
+            </div>
+        </div>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        {% block javascript %}
+        {% endblock javascript %}
+    </body>
 </html>

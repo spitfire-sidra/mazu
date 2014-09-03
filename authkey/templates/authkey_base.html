@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 
-{% block leftcolumn %}
-<ul>
-  <li><a href="{% url 'authkey.list' %}">AUTHKEY LIST</a></li>
-  <li><a href="{% url 'authkey.create' %}">CREATE AUTHKEY</a></li>
-</ul>
-{% endblock leftcolumn %}
+{% block secondarymenu %}
+<div class="ui secondary menu">
+    <div class="item">
+        <a href="{% url 'authkey.list' %}">AUTHKEY LIST</a>
+    </div>
+    <div class="item">
+        <a href="{% url 'authkey.create' %}">CREATE AUTHKEY</a>
+    </div>
+</div>
+{% endblock secondarymenu %}

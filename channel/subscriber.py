@@ -25,12 +25,11 @@ CURRENT = None
 PIDS = dict()
 
 
-def create_hpc(host, port, ident, secret, subchans):
-    
+def create_hpc(host, port, ident, secret, subchans, user, source):
     def on_message(identifier, channel, payload):
         from django.db import connection
         connection.close()
-        save_malware(payload)
+        save_malware(payload, user=user, source=source)
 
     def on_error(payload):
         print >>sys.stderr, ' -> errormessage from server: {0}'.format(payload)
@@ -41,8 +40,8 @@ def create_hpc(host, port, ident, secret, subchans):
     hpc.run(on_message, on_error)
 
 
-def create_subscriber(host, port, ident, secret, subchans):
-    p = Process(target=create_hpc, args=(host, port, ident, secret, subchans))
+def create_subscriber(host, port, ident, secret, subchans, user, source):
+    p = Process(target=create_hpc, args=(host, port, ident, secret, subchans, user, source))
     p.start()
     return p
 
@@ -52,7 +51,7 @@ def handle_channels(added, removed, changed):
     global PIDS
     for key in added:
         c = CURRENT[key]
-        p = create_subscriber(c['host'], c['port'], c['ident'], c['secret'], c['subchans'])
+        p = create_subscriber(c['host'], c['port'], c['ident'], c['secret'], c['subchans'], c['user'], c['source'])
         PIDS.update({key: p})
 
     for key in removed:
@@ -76,7 +75,7 @@ def main():
 
     INIT = get_channels()
     for k, v in INIT.items():
-        p = create_subscriber(v['host'], v['port'], v['ident'], v['secret'], v['subchans'])
+        p = create_subscriber(v['host'], v['port'], v['ident'], v['secret'], v['subchans'], v['user'], v['source'])
         PIDS.update({k: p})
 
     while True:

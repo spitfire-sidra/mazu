@@ -14,6 +14,7 @@ class Channel(TimeStampedModel):
     pubchans = models.TextField(null=True, blank=True)
     subchans = models.TextField(null=True, blank=True)
     ident = models.TextField()
+    source = models.ForeignKey('malware.Source', null=True, blank=True)
     secret = models.TextField(null=True, blank=True)
     default = models.BooleanField(default=False)
     slug = models.SlugField()
