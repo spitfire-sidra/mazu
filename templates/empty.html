@@ -1,2 +1,14 @@
-{% block content %}
-{% endblock content %}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>MAZU - Malware Repository</title>
+        {% include 'base_head.html' %}
+    </head>
+    <body>
+    {% block content %}
+    {% endblock content %}
+    {% include 'base_foot.html' %}
+    </body>
+</html>

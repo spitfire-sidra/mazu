@@ -1,56 +1,50 @@
 {% extends 'channel_base.html' %}
 
 {% block content %}
-
-<table class="ui sortable table segment">
-<thead>
-<tr>
-<th>Default</th>
-<th>Name</th>
-<th>Host</th>
-<th>Port</th>
-<th>Identity</th>
-<th>Secret</th>
-<th>Subscribe channels</th>
-<th>Publish channels</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-{% for channel in channels %}
-<tr>
-<td>{{ channel.default }}</td>
-<td>{{ channel.name }}</td>
-<td>{{ channel.host }}</td>
-<td>{{ channel.port }}</td>
-<td>{{ channel.ident }}</td>
-<td>
-{{ channel.secret }}
-</td>
-<td>{{ channel.subchans }}</td>
-<td>{{ channel.pubchans }}</td>
-<td>
-<a href='{% url 'channel.update' channel.id %}'>Update</a>
-<a href='{% url 'channel.delete' channel.id %}'>Delete</a>
-</td>
-</tr>
-{% empty %}
-<tr>
-<td colspan='9'>No channel yet.</td>
-</tr>
-{% endfor %}
-</tbody>
-<tfoot>
-<tr>
-<th>Total: {{ channels.count }}</th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</tfoot>
+<table class="ui basic table">
+    <thead>
+        <tr>
+            <th>Default</th>
+            <th>Name</th>
+            <th>Host</th>
+            <th>Port</th>
+            <th>Identity</th>
+            <th>Secret</th>
+            <th>Subscribe channels</th>
+            <th>Publish channels</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for channel in channels %}
+        <tr>
+            <td>{{ channel.default }}</td>
+            <td>{{ channel.name }}</td>
+            <td>{{ channel.host }}</td>
+            <td>{{ channel.port }}</td>
+            <td>{{ channel.ident }}</td>
+            <td>
+                {{ channel.secret }}
+            </td>
+            <td>{{ channel.subchans }}</td>
+            <td>{{ channel.pubchans }}</td>
+            <td>
+                <div class="ui tiny buttons">
+                    <a class="ui button" href='{% url 'channel.update' channel.id %}'><i class="ui edit icon"></i></a>
+                    <a class="ui button" href='{% url 'channel.delete' channel.id %}'><i class="ui trash icon"></i></a>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='9'>No channel yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan='9'>Total: {{ channels.count }}</th>
+        </tr>
+    </tfoot>
 </table>
 {% endblock content %}

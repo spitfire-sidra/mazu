@@ -1,45 +1,36 @@
 {% extends 'authkey_base.html' %}
 
 {% block content %}
-
-<table class="ui sortable table segment">
-<thead>
-<tr>
-<th>Identity</th>
-<th>Secret</th>
-<th>Subscribe channels</th>
-<th>Publish channels</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-{% for authkey in authkeys %}
-<tr>
-<td>{{ authkey.ident }}</td>
-<td>
-{{ authkey.secret }}
-</td>
-<td>{{ authkey.subchans }}</td>
-<td>{{ authkey.pubchans }}</td>
-<td>
-<a href='{% url 'authkey.update' authkey.id %}'>Update</a>
-<a href='{% url 'authkey.delete' authkey.id %}'>Delete</a>
-</td>
-</tr>
-{% empty %}
-<tr>
-<td colspan='5'>No authkey yet.</td>
-</tr>
-{% endfor %}
-</tbody>
-<tfoot>
-<tr>
-<th>Total: {{ authkeys.count }}</th
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</tfoot>
-</table>
+<div class="ui two column grid">
+    <div class="three wide column">
+        <div class="ui vertical text menu">
+            <div class="header item">All Identities</div>
+            {% for authkey in authkeys %}
+            <a class="item">{{authkey.ident}}</a>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="thirteen wide column">
+        <table class="ui basic table">
+            <thead>
+                <tr><td>IDIENTITY</td><td>SECRET</td><td>SUBSCRIBE</td><td>PUBLISH</td></tr>
+            </thead>
+            {% for authkey in authkeys %}
+            <tr>
+                <td>{{ authkey.ident }}</td>
+                <td>{{ authkey.secret }}</td>
+                <td>{{ authkey.subchans }}</td>
+                <td>{{ authkey.pubchans }}</td>
+                <td>
+                    <div class="ui tiny buttons">
+                        <a class="ui button" href='{% url 'authkey.update' authkey.id %}'><i class="ui edit icon"></i></a>
+                        <a class="ui button" href='{% url 'authkey.delete' authkey.id %}'><i class="ui trash icon"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            {% endfor %}
+        </table>
+    </div>
+</div>
 {% endblock content %}

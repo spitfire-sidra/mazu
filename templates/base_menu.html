@@ -12,4 +12,7 @@
     <div class="item {% active request "^/channel/list/$" %}">
         <a href="{% url 'channel.list' %}">Channel</a>
     </div>
+    <div class="item">
+        <a href="{% url 'user.logout' %}">Logout</a>
+    </div>
 </div>
