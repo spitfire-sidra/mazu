@@ -74,14 +74,10 @@ class ChannelUpdateView(UpdateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(ChannelUpdateView, self).dispatch(*args, **kwargs)
-
-    def get_object(self, *args, **kwargs):
-        # user can not update others' channel
-        obj = super(ChannelUpdateView, self).get_object(*args, **kwargs)
+        obj = self.get_object()
         if obj.owner != self.request.user:
             raise Http404
-        return obj
+        return super(ChannelUpdateView, self).dispatch(*args, **kwargs)
 
     def get_form(self, form_class):
         kwargs = self.get_form_kwargs()
@@ -89,11 +85,6 @@ class ChannelUpdateView(UpdateView):
         return form_class(
             **kwargs
         )
-
-    def form_valid(self, form):
-        # Save the owner of channel
-        form.instance.owner = self.request.user
-        return super(ChannelUpdateView, self).form_valid(form)
 
 
 class ChannelDeleteView(DeleteView):
@@ -103,11 +94,7 @@ class ChannelDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(ChannelDeleteView, self).dispatch(*args, **kwargs)
-
-    def get_object(self, *args, **kwargs):
-        # user can not delete others' channel
-        obj = super(ChannelDeleteView, self).get_object(*args, **kwargs)
+        obj = self.get_object()
         if obj.owner != self.request.user:
             raise Http404
-        return obj
+        return super(ChannelDeleteView, self).dispatch(*args, **kwargs)
