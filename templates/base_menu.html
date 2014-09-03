@@ -6,9 +6,11 @@
     <div class="item {% active request "^/malware/list/$" %}">
         <a href="{% url 'malware.list' %}">Malware</a>
     </div>
+    {% if perms.authkey.add_authkey and perms.authkey.change_authkey and perms.authkey.delete_authkey%}
     <div class="item {% active request "^/authkey/list/$" %}">
         <a href="{% url 'authkey.list' %}">Authkey</a>
     </div>
+    {% endif %}
     <div class="item {% active request "^/channel/list/$" %}">
         <a href="{% url 'channel.list' %}">Channel</a>
     </div>
