@@ -16,13 +16,15 @@ class ChannelTestCase(CoreTestCase):
 
     def _random_data(self):
         self.channel = {
+            'default': True,
             'name': random_string(),
             'host': random_string(),
             'port': random.randint(1024, 65535),
             'ident': random_string(),
             'secret': random_string(),
             'pubchans': random_string(),
-            'subchans': random_string()
+            'subchans': random_string(),
+            'owner': self.user
         }
 
     def _create(self):
@@ -49,7 +51,7 @@ class ChannelTestCase(CoreTestCase):
 
     def test_can_update(self):
         self._create()
-        pk = Channel.objects.get(name=self.channel['name']).id
+        pk = Channel.objects.get(name=self.channel['name'], owner=self.user).id
         self._random_data()
         self.client.post(reverse_lazy('channel.update', args=[pk]), self.channel)
         updated_channel = Channel.objects.get(id=pk)
@@ -58,7 +60,7 @@ class ChannelTestCase(CoreTestCase):
     def test_can_delete(self):
         self._create()
         expected_count = Channel.objects.all().count() - 1
-        pk = Channel.objects.get(name=self.channel['name']).id
+        pk = Channel.objects.get(name=self.channel['name'], owner=self.user).id
         self.client.post(reverse_lazy('channel.delete', args=[pk]))
         count = Channel.objects.all().count()
         self.assertEqual(count, expected_count)
