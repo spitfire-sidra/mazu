@@ -76,6 +76,13 @@ class ChannelUpdateView(UpdateView):
     def dispatch(self, *args, **kwargs):
         return super(ChannelUpdateView, self).dispatch(*args, **kwargs)
 
+    def get_object(self, *args, **kwargs):
+        # user can not update others' channel
+        obj = super(ChannelUpdateView, self).get_object(*args, **kwargs)
+        if obj.owner != self.request.user:
+            raise Http404
+        return obj
+
     def get_form(self, form_class):
         kwargs = self.get_form_kwargs()
         kwargs['user'] = self.request.user
@@ -89,51 +96,18 @@ class ChannelUpdateView(UpdateView):
         return super(ChannelUpdateView, self).form_valid(form)
 
 
-
 class ChannelDeleteView(DeleteView):
     model = Channel
     template_name = 'channel/delete.html'
     success_url = reverse_lazy('channel.list')
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ChannelDeleteView, self).dispatch(*args, **kwargs)
 
-def publish(request):
-    response = {}
-    if request.method == 'POST':
-        try:
-            gridfs = connect_gridfs()
-        except Exception as e:
-            logger.debug(e)
-            response.update({'error': ''})
-            return HttpResponse(json.dumps(response), content_type='application/json')
-
-        try:
-            channel_name = request.POST['channel_name']
-            malware_sha256 = request.POST['malware_sha256']
-            channel = Channel.objects.get(name=channel_name)
-            malware = None
-            for r in gridfs.find({'sha256': malware_sha256}, limit=1):
-                malware = r 
-        except Exception as e:
-            logger.debug(e)
-            response.update({'error': '0'})
-            return HttpResponse(json.dumps(response), content_type='application/json')
-
-        try:
-            hpc = hpfeeds.new(channel.host, int(channel.port), channel.ident.encode(), channel.secret.encode())
-        except Exception as e:
-            logger.debug(e)
-            response.update({'error': '1'})
-            return HttpResponse(json.dumps(response), content_type='application/json')
-        else:
-            data = malware.read()
-            hpc.publish([channel.pubchans], data)
-            error_msg = hpc.wait()
-            if error_msg:
-                logger.debug('got error from server: {}'.format(error_msg))
-                response.update({'error': '2'})
-                return HttpResponse(json.dumps(response), content_type='application/json')
-            else:
-                response.update({'success': '200'})
-                return HttpResponse(json.dumps(response), content_type='application/json')
-    
-    return HttpResponse(json.dumps(response), content_type='application/json')
+    def get_object(self, *args, **kwargs):
+        # user can not delete others' channel
+        obj = super(ChannelDeleteView, self).get_object(*args, **kwargs)
+        if obj.owner != self.request.user:
+            raise Http404
+        return obj
