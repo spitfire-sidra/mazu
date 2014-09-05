@@ -13,6 +13,7 @@ urlpatterns = patterns(
     url(r'^$', 'auth.views.index'),
     url(r'^auth$', 'auth.views.auth'),
     url(r'^signup$', 'auth.views.signup'),
+    url(r'^passwd$', 'auth.views.passwd', name='user.passwd'),
     url(r'^logout',  logout_then_login, name='user.logout'),
 )
 
