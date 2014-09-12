@@ -29,10 +29,14 @@
                     <br />
                 </div>
                 <div class="row">
+                    <form method="get" action="/search/">
+                    {% csrf_token %}
                     <div class="ui fluid action input">
-                        <input type="text" placeholder="Search...">
+                        <input name="q" type="text" placeholder="Search...">
+                        <input name="models" type="hidden" value="malware.malware">
                         <div class="ui button">Search</div>
                     </div>
+                    </form>
                 </div>
                 <div class="ui section divider"></div>
                 <div class="row">
