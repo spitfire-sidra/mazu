@@ -1,26 +1,35 @@
 # -*- cofing: utf-8 -*-
-import random
-
-from django.test import Client
-from django.test import TestCase
 from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth.models import Permission
 
 from models import AuthKey
+from core.tests import CoreTestCase
 from core.tests import random_string
 
 
-class AuthKeyTestCase(TestCase):
+PERMISSIONS = ['add_authkey', 'change_authkey', 'delete_authkey']
+
+
+class AuthKeyTestCase(CoreTestCase):
 
     def setUp(self):
-        self.client = Client()
+        super(AuthKeyTestCase, self).setUp()
+        self._gain_perms()
         self._random_data()
+
+    def _gain_perms(self):
+        perms = Permission.objects.filter(codename__in=PERMISSIONS)
+        for perm in perms:
+            self.user.user_permissions.add(perm)
+        self.user.save()
 
     def _random_data(self):
         self.authkey = {
             'ident': random_string(),
             'secret': random_string(),
             'pubchans': random_string(),
-            'subchans': random_string()
+            'subchans': random_string(),
+            'owner': self.user
         }
 
     def _create(self):

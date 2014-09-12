@@ -6,7 +6,8 @@ from views import ChannelCreateView
 from views import ChannelUpdateView
 from views import ChannelDeleteView
 from views import ChannelListView
-from views import publish
+from views import QueueListView
+
 
 urlpatterns = patterns(
     '',
@@ -14,5 +15,5 @@ urlpatterns = patterns(
     url(r'^create/$', ChannelCreateView.as_view(), name='channel.create'),
     url(r'^delete/(?P<pk>[\d]+)/$', ChannelDeleteView.as_view(), name='channel.delete'),
     url(r'^update/(?P<pk>[\d]+)/$', ChannelUpdateView.as_view(), name='channel.update'),
-    url(r'^publish/$', publish, name='publish'),
+    url(r'^queue/$', QueueListView.as_view(), name='queue.list'),
 )

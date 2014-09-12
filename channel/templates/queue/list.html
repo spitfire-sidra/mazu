@@ -1,0 +1,31 @@
+{% extends 'channel_base.html' %}
+
+{% block content %}
+<table class="ui basic table">
+    <thead>
+        <tr>
+            <th>Malware</th>
+            <th>Channel</th>
+            <th>Published</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for q in queues %}
+        <tr>
+            <td>{{ q.malware.sha256 }}</td>
+            <td>{{ q.channel.name }}</td>
+            <td>{{ q.published }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='3'>No queue yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan='3'>Total: {{ queues.count }}</th>
+        </tr>
+    </tfoot>
+</table>
+{% endblock content %}
