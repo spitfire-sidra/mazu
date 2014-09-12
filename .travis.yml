@@ -20,6 +20,8 @@ install:
     - pip install -r requirements.txt
 
 before_script:
+    - mkdir -p storage/whoosh_index/
+    - mkdir -p storage/samples/
     - cp settings/production.example.py settings/production.py 
 
 # command to run tests
