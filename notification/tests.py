@@ -12,8 +12,8 @@ class NotificationTestCase(CoreTestCase):
         self._create()
 
     def _create(self):
-        self.subject = rand_str(25)
-        self.message = rand_str(35)
+        self.subject = random_string(25)
+        self.message = random_string(35)
         self.notification = Notification(
             user=self.user,
             subject=self.subject,
