@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 	'south',
+    'haystack',
     'djcelery',
     'core',
     'auth',
@@ -44,6 +45,7 @@ INSTALLED_APPS = (
 	'malware',
     'widget',
     'channel',
+    'notification',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -109,3 +111,12 @@ STATIC_URL = '/static/'
 TEMPLATE_DIRS = (
 	os.path.join(BASE_DIR, 'templates'),
 )
+
+# Haystack
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'storage', 'whoosh_index'),
+    },
+}
