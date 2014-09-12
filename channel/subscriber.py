@@ -12,12 +12,18 @@ sys.path.append(PROJECT_ROOT)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 
 from django.db import connection
+from django.core.urlresolvers import reverse_lazy
 
 from lib import hpfeeds
 from lib.dictdiffer import DictDiffer
 
 from channel.utils import get_channels
 from malware.utils import save_malware
+from notification.models import Notification
+
+
+SUBJECT='YOU GOT A NEW MALWARE'
+MESSAGE='YOU CAN VIEW DETAIL ABOUT THE MALWARE AT <a href="{}">{}</a>.'
 
 
 INIT = None
@@ -29,7 +35,9 @@ def create_hpc(host, port, ident, secret, subchans, user, source):
     def on_message(identifier, channel, payload):
         from django.db import connection
         connection.close()
-        save_malware(payload, user=user, source=source)
+        sha256 = save_malware(payload, user=user, source=source)
+        link = reverse_lazy('malware.profile', args=[sha256])
+        Notification(user=user, subject=SUBJECT, message=MESSAGE.format(link, sha256)).save()
 
     def on_error(payload):
         print >>sys.stderr, ' -> errormessage from server: {0}'.format(payload)

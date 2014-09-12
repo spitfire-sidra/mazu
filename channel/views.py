@@ -23,6 +23,7 @@ from django.utils.decorators import method_decorator
 from lib import hpfeeds
 from forms import ChannelForm
 from models import Channel
+from models import Queue
 from core.mongodb import connect_gridfs
 from malware.models import Malware
 
@@ -98,3 +99,17 @@ class ChannelDeleteView(DeleteView):
         if obj.owner != self.request.user:
             raise Http404
         return super(ChannelDeleteView, self).dispatch(*args, **kwargs)
+
+
+class QueueListView(ListView):
+    model = Queue
+    template_name = 'queue/list.html'
+    context_object_name = 'queues'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(QueueListView, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return self.model.objects.filter(malware__user=self.request.user)
+
