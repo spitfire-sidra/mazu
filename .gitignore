@@ -6,3 +6,6 @@ settings/production.py
 settings/staging.py
 settings/test.py
 malware/tests/*
+
+# Python
+*.pyc
