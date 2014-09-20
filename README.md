@@ -19,6 +19,8 @@ $ export ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future
 
 ## INSTALLATION (Ubuntu, MAC OS X)
 
+### Ubuntu
+
 ```
 $ sudo apt-get install python-dev libxml2-dev libxslt-dev
 $ git clone https://github.com/PwnDoRa/mazu
@@ -26,6 +28,17 @@ $ cd mazu
 $ pip install -r requirements.txt
 $ cp settings/production.example.py settings/production.py
 ```
+
+### MAC OS X
+
+```
+$ sudo brew install libxml2 libxslt libmagic
+$ git clone https://github.com/PwnDoRa/mazu
+$ cd mazu
+$ pip install -r requirements.txt
+$ cp settings/production.example.py settings/production.py
+```
+
 
 Add a secret key in `settings/production.py`, like this:
 

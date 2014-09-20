@@ -15,5 +15,4 @@ pytz==2014.4
 ssdeep==2.9-0.3
 wsgiref==0.1.2
 django-haystack==2.2.1
-haystack==0.15
 Whoosh==2.6.0
