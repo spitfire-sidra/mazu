@@ -73,6 +73,7 @@ class PasswordChangeView(FormView):
 
     def form_valid(self, form):
         messages.success(self.request, 'Password Changed!')
+        form.save()
         return super(PasswordChangeView, self).form_valid(form)
 
 
