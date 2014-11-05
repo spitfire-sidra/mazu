@@ -1,4 +1,4 @@
-#! -*- utf-8 -*-
+# -*- utf-8 -*-
 import re
 
 from django import template

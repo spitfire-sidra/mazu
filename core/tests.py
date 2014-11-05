@@ -15,10 +15,10 @@ from mongodb import delete_file
 
 
 def random_string(k=5):
-    """ Return a random string
-
-        args:
-            k - length of random string
+    """
+    Return a random string.
+    Args:
+        k - length of random string
 
     >>> random_sting()
     'YMluq'
@@ -29,14 +29,18 @@ def random_string(k=5):
 
 class CoreTestCase(TestCase):
 
+    """
+    Core class of test case.
+    """
+
     def setUp(self):
         self.username = random_string()
         self.password = random_string()
         self.user = User.objects.create_user(
-                        username=self.username,
-                        email='mazu@example.com',
-                        password=self.password
-                    )
+            username=self.username,
+            email='mazu@example.com',
+            password=self.password
+        )
         self.client = Client()
         self.client.login(
             username=self.username,
@@ -54,8 +58,8 @@ class MongodbTestCase(TestCase):
 
     def test_create_file(self):
         excepted_count = self.fs.find().count() + 1
-        
-        # create a new file
+
+        # creating a new file
         data = random_string()
         self.fs.put(data)
 
