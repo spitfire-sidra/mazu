@@ -23,7 +23,7 @@ from models import Sample
 from models import SampleSource
 from models import DownloadLog
 from forms import SampleUploadForm
-from forms import MalwarePublishForm
+from forms import SamplePublishForm
 from forms import SampleUpdateForm
 from forms import SampleFilterForm
 from forms import SampleSourceForm
@@ -56,7 +56,7 @@ def download(request, slug):
 
 class MalwarePublishView(FormView):
     template_name = 'malware/publish.html'
-    form_class = MalwarePublishForm
+    form_class = SamplePublishForm
     success_url = reverse_lazy('malware.list')
 
     @method_decorator(login_required)

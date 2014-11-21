@@ -173,36 +173,52 @@ class SampleUploadForm(forms.Form):
         pass
 
 
-class MalwarePublishForm(forms.Form):
-    malware = forms.CharField(
-        widget=forms.HiddenInput,
+class SamplePublishForm(forms.Form):
+
+    """
+    User can choice channels that a sample will be published.
+    """
+
+    sample = forms.CharField(
+        required=False,
         label='',
-        required=False
+        widget=forms.HiddenInput,
     )
 
     def __init__(self, *args, **kwargs):
+        # get current user instance
         self.user = kwargs.pop('user')
-        super(MalwarePublishForm, self).__init__(*args, **kwargs)
-        self.fields['channels'] = forms.ModelMultipleChoiceField(
-            queryset=self.get_channels_choices(self.user),
-            widget=forms.CheckboxSelectMultiple,
+        super(SamplePublishForm, self).__init__(*args, **kwargs)
+        # add a field 'channels'
+        self.fields['channels'] = self.channels_field()
+
+    def channels_field(self):
+        # user are allowed to publish samples on their own channels
+        queryset = Channel.objects.filter(owner=self.user)
+        initial = (chann for chann in queryset if chann.default)
+        field = forms.ModelMultipleChoiceField(
+            required=False,
+            queryset=queryset,
+            initial=initial,
             label='Publish to',
-            initial=self.get_channels_initial(self.user),
-            required=False
+            widget=forms.CheckboxSelectMultiple
         )
 
-    def get_channels_choices(self, user):
-        # can only publish to user's channel
-        return Channel.objects.filter(owner=user)
-
-    def get_channels_initial(self, user):
-        channels = self.get_channels_choices(user)
-        return (c for c in channels if c.default)
+    def clean_channels(self):
+        channels = self.cleaned_data['channels']
+        if len(channels) == 0:
+            ValidationError('Please choice at least one channel.')
+        return channels
 
     def save(self):
-        malware = Sample.objects.get(sha256=self.cleaned_data['malware'])
-        for c in self.cleaned_data['channels']:
-            Queue(malware=malware, channel=c).save()
+        try:
+            sample = Sample.objects.get(sha256=self.cleaned_data['sample'])
+        except sample.DoesNotExist:
+            return False
+        else:
+            for chann in self.cleaned_data['channels']:
+                Queue(malware=sample, channel=chann).save()
+            return True
 
 
 class SampleUpdateForm(forms.ModelForm):
