@@ -62,7 +62,7 @@ def save_sample(buf, **kwargs):
     """
     ignored_attrs = ('md5')
     hashes = compute_hashes(buf)
-    
+
     if sample_exists(hashes.sha256):
         return False
 

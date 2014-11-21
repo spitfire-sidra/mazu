@@ -37,17 +37,21 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def download(request, slug):
+    """
+    A function-based view for downloading sample
+    """
     try:
-        malware = get_compressed_file('sha256', slug)
+        sample = get_compressed_file('sha256', slug)
     except Exception as e:
         logger.debug(e)
         messages.error(request, 'Oops! We got an error!')
         return render(request, 'error.html')
     else:
-        if malware:
-            response = HttpResponse(malware.read())
-            response['Content-Disposition'] = 'attachment; filename={}.zip'.format(slug)
+        if sample:
+            response_body = 'attachment; filename={}.zip'.format(slug)
+            response = HttpResponse(sample.read())
             response['Content-Type'] = 'application/x-zip'
+            response['Content-Disposition'] = response_body
             DownloadLog(user=request.user, malware=slug).save()
             return response
         else:
