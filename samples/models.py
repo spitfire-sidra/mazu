@@ -31,6 +31,7 @@ class SampleSource(TimeStampedModel):
 
     class Meta:
         ordering = ['name']
+        # every user can create own sources
         unique_together = ('user', 'name')
 
 
