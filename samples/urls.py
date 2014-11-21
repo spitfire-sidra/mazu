@@ -11,13 +11,13 @@ from views import SampleListView
 from views import SourceUpdateView
 from views import SourceDeleteView
 from views import SourceListView
-from views import SourceCreateView
+from views import SampleSourceCreateView
 from views import download
 
 
 urlpatterns = patterns(
     '',
-    url(r'^source/create/$', SourceCreateView.as_view(), name='source.create'),
+    url(r'^source/create/$', SampleSourceCreateView.as_view(), name='source.create'),
     url(r'^source/list/$', SourceListView.as_view(), name='source.list'),
     url(r'^source/update/(?P<slug>[\w]+)/$', SourceUpdateView.as_view(), name='source.update'),
     url(r'^source/delete/(?P<slug>[\w]+)/$', SourceDeleteView.as_view(), name='source.delete'),

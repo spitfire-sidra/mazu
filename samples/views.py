@@ -212,17 +212,22 @@ class SampleDetailView(DetailView, LoginRequiredMixin):
         return self.model.objects.get(slug=self.kwargs['slug'])
 
 
-class SourceCreateView(CreateView, LoginRequiredMixin):
+class SampleSourceCreateView(CreateView, LoginRequiredMixin):
+
+    """
+    A class-based view for creating sample source.
+    """
+
     model = SampleSource
-    template_name = 'source/create.html'
-    form_class = SampleSourceForm
     fields = ['name', 'link', 'descr']
+    form_class = SampleSourceForm
+    template_name = 'source/create.html'
     success_url = reverse_lazy('source.list')
 
     def form_valid(self, form):
-        # Save the user
+        # Saving the user who create the sample source
         form.instance.user = self.request.user
-        return super(SourceCreateView, self).form_valid(form)
+        return super(SampleSourceCreateView, self).form_valid(form)
 
 
 class SourceUpdateView(UpdateView):
