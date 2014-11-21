@@ -2,7 +2,7 @@
 from datetime import date
 from django import forms
 from django.contrib.auth.models import User
-from models import Source
+from models import SampleSource
 from models import Malware
 from utils import compute_hashes
 from channel.models import Channel
@@ -96,7 +96,7 @@ class MalwareUploadForm(forms.Form):
 
     def get_source_choices(self, user):
         # can only mark to user's source
-        return Source.objects.filter(user=user)
+        return SampleSource.objects.filter(user=user)
 
     def clean_malware(self):
         data = self.cleaned_data['malware']
@@ -174,13 +174,13 @@ class MalwareUpdateForm(forms.ModelForm):
 
 class SourceForm(forms.ModelForm):
     class Meta:
-        model = Source
-        fields = ['label', 'desc']
+        model = SampleSource
+        fields = ['name', 'link', 'descr']
         labels = {
-            'label': 'Label',
-            'desc': 'Description'
+            'name': 'Label',
+            'descr': 'Description'
         }
         widgets = {
-            'label': forms.TextInput(),
-            'desc': forms.Textarea()
+            'name': forms.TextInput(),
+            'descr': forms.Textarea()
         }

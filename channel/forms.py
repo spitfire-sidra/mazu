@@ -2,7 +2,7 @@
 from django import forms
 
 from models import Channel
-from samples.models import Source
+from samples.models import SampleSource
 
 
 class ChannelForm(forms.ModelForm):
@@ -21,4 +21,4 @@ class ChannelForm(forms.ModelForm):
         )
 
     def get_source_choices(self, user):
-        return Source.objects.filter(user=user)
+        return SampleSource.objects.filter(user=user)

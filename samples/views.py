@@ -20,7 +20,7 @@ from django.template import RequestContext
 from django.views.generic.edit import FormMixin
 
 from models import Malware
-from models import Source
+from models import SampleSource
 from models import DownloadLog
 from forms import MalwareUploadForm
 from forms import MalwarePublishForm
@@ -231,10 +231,10 @@ class MalwareProfileView(DetailView):
 
 
 class SourceCreateView(CreateView):
-    model = Source
+    model = SampleSource
     template_name = 'source/create.html'
     form_class = SourceForm
-    fields = ['label', 'desc']
+    fields = ['name', 'link', 'descr']
     success_url = reverse_lazy('source.list')
 
     @method_decorator(login_required)
@@ -250,7 +250,7 @@ class SourceCreateView(CreateView):
 class SourceUpdateView(UpdateView):
     template_name = 'source/update.html'
     form_class = SourceForm
-    fields = ['label', 'desc']
+    fields = ['name', 'link', 'descr']
     success_url = reverse_lazy('source.list')
 
     @method_decorator(login_required)
@@ -266,7 +266,7 @@ class SourceUpdateView(UpdateView):
 
 
 class SourceListView(ListView):
-    model = Source
+    model = SampleSource
     template_name = 'source/list.html'
     context_object_name = 'malware_sources'
 
@@ -280,7 +280,7 @@ class SourceListView(ListView):
 
 
 class SourceDeleteView(DeleteView):
-    model = Source
+    model = SampleSource
     template_name = 'source/delete.html'
     success_url = reverse_lazy('source.list')
 
@@ -297,7 +297,7 @@ class SourceDeleteView(DeleteView):
 
 
 class SourceProfileView(DetailView):
-    model = Source
+    model = SampleSource
     template_name = 'source/profile.html'
     context_object_name = 'malware_source'
 

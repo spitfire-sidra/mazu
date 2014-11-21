@@ -6,11 +6,17 @@ from django.template.defaultfilters import slugify
 from core.models import TimeStampedModel
 
 
-class Source(TimeStampedModel):
-    label = models.CharField(max_length=255)
-    desc = models.TextField(null=True, blank=True)
-    user = models.ForeignKey('auth.User', null=True, blank=True)
+class SampleSource(TimeStampedModel):
+
+    """
+    SampleSource model stores information of sample sources.
+    """
+
+    name = models.CharField(max_length=255)
     slug = models.SlugField()
+    link = models.URLField(null=True, blank=True)
+    descr = models.TextField(null=True, blank=True)
+    user = models.ForeignKey('auth.User')
 
     def __unicode__(self):
         return self.label
@@ -20,12 +26,12 @@ class Source(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            self.slug = slugify(self.label)
-        super(Source, self).save(*args, **kwargs) 
+            self.slug = slugify(self.name)
+        super(SampleSource, self).save(*args, **kwargs) 
 
     class Meta:
-        ordering = ['label']
-        unique_together = ('user', 'label')
+        ordering = ['name']
+        unique_together = ('user', 'name')
 
 
 class Malware(TimeStampedModel):
@@ -40,7 +46,7 @@ class Malware(TimeStampedModel):
     crc32 = models.IntegerField(max_length=255, null=True)
     ssdeep = models.CharField(max_length=255, null=True)
     desc = models.TextField(default='', null=True, blank=True)
-    source = models.ForeignKey(Source, null=True, blank=True)
+    source = models.ForeignKey(SampleSource, null=True, blank=True)
     slug = models.SlugField(max_length=128)
     user = models.ForeignKey('auth.User', null=True, blank=True)
 
