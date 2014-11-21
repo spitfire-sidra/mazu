@@ -7,7 +7,7 @@ import ssdeep
 from core.objects import Hashes
 
 
-def compute_hashes(buf):
+def compute_hashes(buff):
     """
     To compute hashes of buff.
     Available attributes as following:
@@ -24,25 +24,3 @@ def compute_hashes(buf):
         hashes.append(cls(buff).hexdigest())
     hashes.append(ssdeep.hash(buff))
     return Hashes(*hashes)
-
-
-def get_file_info(fp):
-    """
-    Get information of Django InMemoryUploadedFile.
-    """
-    info = dict()
-    try:
-        buf = fp.read()
-    except Exception as e:
-        logger.debug(e)
-    else:
-        hashes = compute_hashes(buf)
-        info['md5'] = hashes.md5
-        info['sha1'] = hashes.sha1
-        info['sha256'] = hashes.sha256
-        info['sha512'] = hashes.sha512
-        info['ssdeep'] = hashes.ssdeep
-        info['size'] = getattr(fp, 'size', 0)
-        info['type'] = magic.from_buffer(buf)
-        info['crc32'] = binascii.crc32(buf)
-    return info

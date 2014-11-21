@@ -9,8 +9,11 @@ from channel.models import Channel
 from channel.models import Queue
 
 from core.utils import compute_hashes
-from sample.models import Sample
-from sample.models import SampleSource
+from samples.models import Sample
+from samples.models import SampleSource
+from samples.utils import save_sample
+from samples.utils import delete_sample
+from samples.utils import get_file_attrs
 
 
 class MalwareFilterForm(forms.Form):
@@ -62,7 +65,7 @@ class SampleUploadForm(forms.Form):
     This class contains some dirty hacks in __init__(*args, **kwargs).
     """
 
-    file = forms.FileField()
+    sample = forms.FileField()
     name = forms.CharField(required=False)
     descr = forms.CharField(
         required=False,
@@ -110,18 +113,17 @@ class SampleUploadForm(forms.Form):
 
     def clean_sample(self):
         """
-        Cleaning the sample field.
-        If a sample already exists in database, then ValidationError will be
-        raised.
+        Cleaning the sample field. If a sample already exists in database,
+        then ValidationError will be raised.
         """
-        data = self.cleaned_data['sample']
-        hashes = compute_hashes(data.read())
+        sample = self.cleaned_data['sample']
+        hashes = compute_hashes(sample.read())
         try:
             Sample.objects.get(sha256=hashes.sha256)
         except Sample.DoesNotExist:
             # sets the file's current position at the beginning
-            data.seek(0)
-            return data
+            sample.seek(0)
+            return sample
         else:
             raise ValidationError('Duplicated sample.')
 
@@ -137,6 +139,33 @@ class SampleUploadForm(forms.Form):
         else:
             cleaned_data['channels'] = []
         return cleaned_data
+
+    def save_sample(self):
+        """
+        Saving a sample and its attributes.
+        """
+        sample = self.cleaned_data['sample']
+        attrs = get_file_attrs(sample)
+        # saving who uploaded this sample
+        attrs['user'] = self.user
+        if save_sample(sample.read()):
+            if self.save_sample_attrs(attrs):
+                return True
+            # if didn't save attributes into database,
+            # delete the sample that saved in GridFS.
+            delete_sample(attrs['sha256'])
+        return False
+
+    def save_sample_attrs(self, attrs):
+        try:
+            Sample(**attrs).save()
+        except Exception:
+            return False
+        else:
+            return True
+
+    def save_publish_queue(self):
+        pass
 
 
 class MalwarePublishForm(forms.Form):

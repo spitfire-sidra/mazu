@@ -7,7 +7,7 @@ from models import Sample
 from core.tests import CoreTestCase
 from core.tests import random_string
 from core.mongodb import connect_gridfs
-
+from core.utils import compute_hashes
 
 def random_file():
     app_path = os.path.dirname(__file__)
@@ -35,26 +35,27 @@ class MalwareTestCase(CoreTestCase):
                 reverse_lazy('malware.upload'),
                 {
                     #'name': file_name,
-                    'malware': fp,
+                    'sample': fp,
                     #'description': random_string(),
                 },
                 follow=True
             )
+            fp.seek(0)
+            self.hashes = compute_hashes(fp.read())
             return response
 
     def test_can_upload(self):
         # test can upload
-        condition = {'filename': self.file_name}
         gridfs = connect_gridfs()
-        excepted_count = gridfs.find(condition).count() + 1
         self._upload(self.file_path, self.file_name)
+        condition = {'md5': self.hashes.md5}
         count = gridfs.find(condition).count()
-        self.assertEqual(count, excepted_count)
+        self.assertGreater(count, 0)
 
         # test can not upload repeatedly
-        excepted_error = 'Duplicated Malware Sample.'
+        excepted_error = 'Duplicated sample.'
         response = self._upload(self.file_path, self.file_name)
-        errors = response.context['form'].errors['malware']
+        errors = response.context['form'].errors['sample']
         self.assertIn(excepted_error, errors)
 
     def test_list_view(self):
@@ -67,7 +68,7 @@ class MalwareTestCase(CoreTestCase):
 
     def test_profile_view(self):
         self._upload(self.file_path, self.file_name)
-        malware = Sample.objects.get(name=self.file_name)
+        malware = Sample.objects.get(sha256=self.hashes.sha256)
         response = self.client.get(
             reverse_lazy('malware.profile', args=[malware.sha256])
         )
@@ -75,7 +76,7 @@ class MalwareTestCase(CoreTestCase):
 
     def test_can_update(self):
         self._upload(self.file_path, self.file_name)
-        malware = Sample.objects.get(name=self.file_name)
+        malware = Sample.objects.get(sha256=self.hashes.sha256)
         new_file_name = random_string(8)
         response = self.client.post(
             reverse_lazy('malware.update', args=[malware.sha256]),
@@ -92,7 +93,7 @@ class MalwareTestCase(CoreTestCase):
             }
         )
         try:
-            Sample.objects.get(name=new_file_name)
+            Sample.objects.get(sha256=self.hashes.sha256)
         except Sample.DoesNotExist:
             updated = False
         else:
@@ -101,7 +102,7 @@ class MalwareTestCase(CoreTestCase):
 
     def test_can_delete(self):
         self._upload(self.file_path, self.file_name)
-        malware = Sample.objects.get(name=self.file_name)
+        malware = Sample.objects.get(sha256=self.hashes.sha256)
         self.client.post(
             reverse_lazy('malware.delete', args=[malware.sha256]),
             {
@@ -109,7 +110,7 @@ class MalwareTestCase(CoreTestCase):
             }
         )
         try:
-            Sample.objects.get(name=self.file_name)
+            Sample.objects.get(sha256=self.hashes.sha256)
         except Sample.DoesNotExist:
             does_exist = False
         else:

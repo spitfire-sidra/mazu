@@ -8,9 +8,9 @@ from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from pymongo.errors import ConnectionFailure
 
-from settings.mongodb import MONGOHOST
-from settings.mongodb import MONGOPORT
-from settings.mongodb import STORAGE
+from settings.mongodb import MONGODB_HOST
+from settings.mongodb import MONGODB_PORT
+from settings.mongodb import MONGODB_STORAGE
 
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,9 @@ def connect_gridfs():
     >>> connect_gridfs()
     """
     try:
-        mongodb = MongoClient(MONGOHOST, int(MONGOPORT))[STORAGE]
-    except ConnectionFailure:
+        mongodb = MongoClient(MONGODB_HOST, int(MONGODB_PORT))[MONGODB_STORAGE]
+    except ConnectionFailure as e:
+        logger.debug(e)
         raise ConnectionFailure
     except PyMongoError as e:
         logger.debug(e)

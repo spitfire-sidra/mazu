@@ -8,85 +8,77 @@ import ssdeep
 
 from models import Sample
 from core.mongodb import connect_gridfs
+from core.mongodb import delete_file
+from core.utils import compute_hashes
 
 
 logger = logging.getLogger(__name__)
 
 
-def compute_hashes(buf):
-    """ Compute hashes
-
-    >>> compute_hashes('HelloWorld')
+def get_file_attrs(fp):
     """
-    algorithms = ('md5', 'sha1', 'sha256', 'sha512')
-    hashes = dict()
-    for a in algorithms:
-        hashes[a] = getattr(hashlib, a)(buf).hexdigest()
-    return hashes
-
-
-def compute_ssdeep(buf):
-    """ Compute ssdeep
-
-    >>> compute_ssdeep('HelloWorld')
+    Get attributes of Django InMemoryUploadedFile.
     """
-    return ssdeep.hash(buf)
-
-
-def get_uploaded_file_info(fp):
-    """ Get information of Django InMemoryUploadedFile
-    """
-    info = dict()
+    attrs = dict()
     try:
         buf = fp.read()
     except Exception as e:
         logger.debug(e)
-        raise
     else:
-        info.update(compute_hashes(buf))
-        info.update({
-            'size': getattr(fp, 'size', None),
-            'type': magic.from_buffer(buf),
-            'crc32': binascii.crc32(buf),
-            'ssdeep': compute_ssdeep(buf),
-        })
-        return info
+        hashes = compute_hashes(buf)
+        attrs['md5'] = hashes.md5
+        attrs['sha1'] = hashes.sha1
+        attrs['sha256'] = hashes.sha256
+        attrs['sha512'] = hashes.sha512
+        attrs['ssdeep'] = hashes.ssdeep
+        attrs['size'] = getattr(fp, 'size', 0)
+        attrs['type'] = magic.from_buffer(buf)
+        attrs['crc32'] = binascii.crc32(buf)
+        fp.seek(0)
+    return attrs
 
 
-def is_malware_exists(sha256):
-    if Sample.objects.filter(sha256=sha256).count() > 0:
+def sample_exists(sha256):
+    """
+    To check a sample is existing or not.
+    """
+    try:
+        Sample.objects.get(sha256=sha256)
+    except Sample.DoesNotExist:
+        return False
+    else:
         return True
-    else:
+
+
+def save_sample(buf, **kwargs):
+    """
+    Saving a sample into mongodb.
+    You can pass any keyword arguments to this function. This function will
+    try to save these arguments as attributes of the sample. Keyword argument
+    'md5' would be ignored, because mongodb also saves md5 in GridFS.
+
+    >>> save_sample_gridfs('HelloWorld!', user='spitfire', age='18 forever')
+    True
+    """
+    ignored_attrs = ('md5')
+    hashes = compute_hashes(buf)
+    
+    if sample_exists(hashes.sha256):
         return False
 
+    try:
+        gridfs = connect_gridfs()
+    except Exception:
+        return False
+    else:
+        with gridfs.new_file() as fp:
+            fp.write(str(buf))
+            # save all attributes
+            for attr, value in kwargs.items():
+                if attr not in ignored_attrs:
+                    setattr(fp, attr, value)
+        return True
 
-def save_malware(buf, user=None, source=None):
-    hashes = compute_hashes(buf)
 
-    if not is_malware_exists(hashes['sha256']):
-        columns = dict()
-        columns.update(hashes)
-        columns.update({
-            'size': str(len(buf)), # bytes
-            'type': magic.from_buffer(str(buf)),
-            'crc32': binascii.crc32(buf),
-            'ssdeep': compute_ssdeep(str(buf))
-        })
-        # save malware into gridfs
-        try:
-            gridfs = connect_gridfs()
-        except:
-            return False
-        else:
-            with gridfs.new_file() as fp:
-                fp.write(str(buf))
-
-                for attr, value in columns.items():
-                    if attr != 'md5':
-                        setattr(fp, attr, value)
-                fp.close()
-                columns['user'] = user
-                columns['source'] = source
-                instance = Sample(**columns)
-                instance.save()
-            return hashes['sha256']
+def delete_sample(sha256):
+    return delete_file('sha256', sha256)
