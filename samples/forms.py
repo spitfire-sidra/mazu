@@ -92,9 +92,9 @@ class SampleUploadForm(forms.Form):
         # !dirty hack!
         # Adding a form field that only list samples sources owned by an user
         self.fields['sample_source'] = self.sample_source_field(self.user)
-        self.fields['channels'] = self.channels_filed(self.user)
+        self.fields['channels'] = self.channels_field(self.user)
 
-    def channels_filed(self, user):
+    def channels_field(self, user):
         queryset = Channel.objects.filter(owner=user)
         # get all default channels
         initial = (r for r in queryset if r.default)

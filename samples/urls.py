@@ -6,7 +6,7 @@ from views import SampleUploadView
 from views import SampleUpdateView
 from views import MalwareDeleteView
 from views import MalwareProfileView
-from views import MalwarePublishView
+from views import SamplePublishView
 from views import SampleListView
 from views import SourceUpdateView
 from views import SourceDeleteView
@@ -28,5 +28,5 @@ urlpatterns = patterns(
     url(r'^profile/(?P<slug>[\w]+)/$', MalwareProfileView.as_view(), name='malware.profile'),
     url(r'^delete/(?P<slug>[\w]+)/$', MalwareDeleteView.as_view(), name='malware.delete'),
     url(r'^update/(?P<slug>[\w]+)/$', SampleUpdateView.as_view(), name='malware.update'),
-    url(r'^publish/(?P<slug>[\w]*)/$', MalwarePublishView.as_view(), name='malware.publish'),
+    url(r'^publish/(?P<slug>[\w]*)/$', SamplePublishView.as_view(), name='malware.publish'),
 )

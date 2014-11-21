@@ -54,33 +54,35 @@ def download(request, slug):
             raise Http404
 
 
-class MalwarePublishView(FormView):
+class SamplePublishView(FormView, LoginRequiredMixin):
+
+    """
+    A class-based view for publishing sample.
+    """
+
     template_name = 'malware/publish.html'
     form_class = SamplePublishForm
     success_url = reverse_lazy('malware.list')
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(MalwarePublishView, self).dispatch(*args, **kwargs)
-
     def get_initial(self):
+        """
+        Initial value of self.form_class
+        """
         try:
             sha256 = self.kwargs['slug']
-        except:
-            return {}
+        except KeyError:
+            raise Http404
         else:
-            return {'malware': sha256}
+            return {'sample': sha256}
 
     def get_form(self, form_class):
         kwargs = self.get_form_kwargs()
         kwargs['user'] = self.request.user
-        return form_class(
-            **kwargs
-        )
+        return form_class(**kwargs)
 
     def form_valid(self, form):
         form.save()
-        return super(MalwarePublishView, self).form_valid(form)
+        return super(SamplePublishView, self).form_valid(form)
 
 
 class SampleUploadView(FormView, LoginRequiredMixin):
