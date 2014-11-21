@@ -25,7 +25,7 @@ from models import DownloadLog
 from forms import SampleUploadForm
 from forms import MalwarePublishForm
 from forms import SampleUpdateForm
-from forms import MalwareFilterForm
+from forms import SampleFilterForm
 from forms import SampleSourceForm
 from core.mixins import LoginRequiredMixin
 from core.mongodb import get_compressed_file
@@ -142,7 +142,7 @@ class MalwareListView(ListView, FormMixin):
     model = Sample
     template_name = 'malware/list.html'
     context_object_name = 'malwares'
-    form_class = MalwareFilterForm
+    form_class = SampleFilterForm
     success_url = reverse_lazy('malware.list')
     qs = None
 
@@ -152,7 +152,7 @@ class MalwareListView(ListView, FormMixin):
 
     def get_context_data(self, **kwargs):
         context = super(MalwareListView, self).get_context_data(**kwargs)
-        context['filter'] = MalwareFilterForm()
+        context['filter'] = SampleFilterForm()
         return context
 
     def get_queryset(self):

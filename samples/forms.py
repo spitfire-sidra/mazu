@@ -16,46 +16,51 @@ from samples.utils import delete_sample
 from samples.utils import get_file_attrs
 
 
-class MalwareFilterForm(forms.Form):
+class SampleFilterForm(forms.Form):
+
+    """
+    SampleFilterForm can filter samples. User can apply multiple filters
+    in the same time.
+    """
+
     user = forms.ModelChoiceField(
-        queryset=User.objects.filter(is_active=True),
-        label='User',
-        required=False
+        required=False,
+        label='Username',
+        queryset=User.objects.filter(is_active=True)
     )
-    type = forms.CharField(
-        label='File Type',
-        required=False
-    )
+    type = forms.CharField(required=False, label='File Type')
     start = forms.DateField(
-        widget=forms.DateInput(attrs={'placeholder': date.today().strftime("%Y-%m-%d")}),
-        required=False
+        required=False,
+        widget=forms.DateInput(
+            attrs={'placeholder': date.today().strftime("%Y-%m-%d")}
+        )
     )
     end = forms.DateField(
-        widget=forms.DateInput(attrs={'placeholder': date.today().strftime("%Y-%m-%d")}),
-        required=False
+        required=False,
+        widget=forms.DateInput(
+            attrs={'placeholder': date.today().strftime("%Y-%m-%d")}
+        )
     )
 
     def clean(self):
-        cleaned_data = super(MalwareFilterForm, self).clean()
+        cleaned_data = super(SampleFilterForm, self).clean()
         return cleaned_data
 
     def get_queryset(self):
-        qs = Sample.objects.all()
+        samples = Sample.objects.all()
         if self.cleaned_data['start']:
-            s = self.cleaned_data['start']
-            qs = qs.filter(created__gte=s)
+            samples = samples.filter(created__gte=self.cleaned_data['start'])
 
         if self.cleaned_data['end']:
-            e = self.cleaned_data['end']
-            qs = qs.filter(created__lte=e)
+            samples = samples.filter(created__lte=self.cleaned_data['end'])
 
         if self.cleaned_data['user']:
-            qs = qs.filter(user=self.cleaned_data['user'])
+            samples = samples.filter(user=self.cleaned_data['user'])
 
         if self.cleaned_data['type']:
-            qs = qs.filter(type__icontains=self.cleaned_data['type'])
+            samples = samples.filter(type__icontains=self.cleaned_data['type'])
 
-        return qs
+        return samples
 
 
 class SampleUploadForm(forms.Form):
