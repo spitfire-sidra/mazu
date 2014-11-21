@@ -124,6 +124,7 @@ class SampleUpdateView(UpdateView):
     A class-based view for updating sample attributes.
     """
 
+    model = Sample
     template_name = 'malware/update.html'
     form_class = SampleUpdateForm
     success_url = reverse_lazy('malware.list')
@@ -137,7 +138,7 @@ class SampleUpdateView(UpdateView):
         return super(SampleUpdateView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
-        return Sample.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(slug=self.kwargs['slug'])
 
 
 class SampleListView(ListView, FormMixin, LoginRequiredMixin):
@@ -230,22 +231,31 @@ class SampleSourceCreateView(CreateView, LoginRequiredMixin):
         return super(SampleSourceCreateView, self).form_valid(form)
 
 
-class SourceUpdateView(UpdateView):
-    template_name = 'source/update.html'
-    form_class = SampleSourceForm
+class SampleSourceUpdateView(UpdateView):
+
+    """
+    UpdateView for SampleSource
+    """
+
+    model = SampleSource
     fields = ['name', 'link', 'descr']
+    form_class = SampleSourceForm
+    template_name = 'source/update.html'
     success_url = reverse_lazy('source.list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        # user can only update their source
-        obj = self.get_object()
-        if obj.user != self.request.user:
-            raise Http404
-        return super(SourceUpdateView, self).dispatch(*args, **kwargs)
+        # users can a source which owned by them
+        source = self.get_object()
+        if source.user != self.request.user:
+            raise HttpResponseForbidden
+        return super(SampleSourceUpdateView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
-        return self.model.objects.get(slug=self.kwargs['slug'], user=self.request.user)
+        return self.model.objects.get(
+            slug=self.kwargs['slug'],
+            user=self.request.user
+        )
 
 
 class SourceListView(ListView, LoginRequiredMixin):
