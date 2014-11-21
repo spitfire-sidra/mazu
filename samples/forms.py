@@ -200,11 +200,18 @@ class MalwarePublishForm(forms.Form):
             Queue(malware=malware, channel=c).save()
 
 
-class MalwareUpdateForm(forms.ModelForm):
+class SampleUpdateForm(forms.ModelForm):
+
+    """
+    Form class for updating sample
+    """
+
     class Meta:
         model = Sample
-        fields = ['type', 'size', 'crc32', 'md5',
-                  'sha1', 'sha256', 'sha512', 'ssdeep']
+        fields = [
+            'type', 'size', 'crc32', 'md5',
+            'sha1', 'sha256', 'sha512', 'ssdeep'
+        ]
         labels = {
             'type': 'File Type',
             'size': 'File Size',
@@ -213,7 +220,7 @@ class MalwareUpdateForm(forms.ModelForm):
             'sha1': 'SHA1',
             'sha256': 'SHA256',
             'sha512': 'SHA512',
-            'ssdeep': 'SSDEEP',
+            'ssdeep': 'ssdeep',
         }
 
 

@@ -3,7 +3,7 @@ from django.conf.urls import patterns
 from django.conf.urls import url
 
 from views import SampleUploadView
-from views import MalwareUpdateView
+from views import SampleUpdateView
 from views import MalwareDeleteView
 from views import MalwareProfileView
 from views import MalwarePublishView
@@ -27,6 +27,6 @@ urlpatterns = patterns(
     url(r'^list/(?P<slug>[\w]+)/$', MalwareListView.as_view(), name='malware.source.filter'),
     url(r'^profile/(?P<slug>[\w]+)/$', MalwareProfileView.as_view(), name='malware.profile'),
     url(r'^delete/(?P<slug>[\w]+)/$', MalwareDeleteView.as_view(), name='malware.delete'),
-    url(r'^update/(?P<slug>[\w]+)/$', MalwareUpdateView.as_view(), name='malware.update'),
+    url(r'^update/(?P<slug>[\w]+)/$', SampleUpdateView.as_view(), name='malware.update'),
     url(r'^publish/(?P<slug>[\w]*)/$', MalwarePublishView.as_view(), name='malware.publish'),
 )

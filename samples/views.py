@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.http import Http404
 from django.http import HttpResponse
+from django.http import HttpResponseForbidden
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormMixin
@@ -23,7 +24,7 @@ from models import SampleSource
 from models import DownloadLog
 from forms import SampleUploadForm
 from forms import MalwarePublishForm
-from forms import MalwareUpdateForm
+from forms import SampleUpdateForm
 from forms import MalwareFilterForm
 from forms import SourceForm
 from core.mixins import LoginRequiredMixin
@@ -115,18 +116,23 @@ class SampleUploadView(FormView, LoginRequiredMixin):
         return super(SampleUploadView, self).form_valid(form)
 
 
-class MalwareUpdateView(UpdateView):
+class SampleUpdateView(UpdateView):
+
+    """
+    A class-based view for updating sample attributes.
+    """
+
     template_name = 'malware/update.html'
-    form_class = MalwareUpdateForm
+    form_class = SampleUpdateForm
     success_url = reverse_lazy('malware.list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        # only owner of malware can update information
-        obj = self.get_object()
-        if obj.user != self.request.user:
-            raise Http404
-        return super(MalwareUpdateView, self).dispatch(*args, **kwargs)
+        # only the owner of sample can update sample attributes
+        sample = self.get_object()
+        if sample.user != self.request.user:
+            raise HttpResponseForbidden
+        return super(SampleUpdateView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
         return Sample.objects.get(slug=self.kwargs['slug'])
