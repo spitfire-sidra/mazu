@@ -258,13 +258,18 @@ class SampleSourceUpdateView(UpdateView):
         )
 
 
-class SourceListView(ListView, LoginRequiredMixin):
+class SampleSourceListView(ListView, LoginRequiredMixin):
+
+    """
+    ListView for SampleSource
+    """
+
     model = SampleSource
     template_name = 'source/list.html'
     context_object_name = 'malware_sources'
 
     def get_queryset(self):
-        # user can only see their source
+        # users can see sample sources that owned by them
         return self.model.objects.filter(user=self.request.user)
 
 
