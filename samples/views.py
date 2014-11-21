@@ -138,7 +138,7 @@ class SampleUpdateView(UpdateView):
         return Sample.objects.get(slug=self.kwargs['slug'])
 
 
-class MalwareListView(ListView, FormMixin):
+class SampleListView(ListView, FormMixin):
     model = Sample
     template_name = 'malware/list.html'
     context_object_name = 'malwares'
@@ -148,17 +148,17 @@ class MalwareListView(ListView, FormMixin):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(MalwareListView, self).dispatch(*args, **kwargs)
+        return super(SampleListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(MalwareListView, self).get_context_data(**kwargs)
+        context = super(SampleListView, self).get_context_data(**kwargs)
         context['filter'] = SampleFilterForm()
         return context
 
     def get_queryset(self):
         if self.qs is not None:
             return self.qs
-        return super(MalwareListView, self).get_queryset()
+        return super(SampleListView, self).get_queryset()
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
