@@ -297,18 +297,25 @@ class SampleSourceDeleteView(DeleteView):
     )
 
 
-class SourceProfileView(DetailView):
+class SampleSourceDetailView(DetailView):
+
+    """
+    DetailView for SampleSource
+    """
+
     model = SampleSource
     template_name = 'source/profile.html'
     context_object_name = 'malware_source'
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        # user can only see their source
-        obj = self.get_object()
-        if obj.user != self.request.user:
-            raise Http404
-        return super(SourceProfileView, self).dispatch(*args, **kwargs)
+        source = self.get_object()
+        if source.user != self.request.user:
+            raise HttpResponseForbidden
+        return super(SampleSourceDetailView, self).dispatch(*args, **kwargs)
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(slug=self.kwargs['slug'], user=self.request.user)
+        return self.model.objects.get(
+            slug=self.kwargs['slug'],
+            user=self.request.user
+        )
