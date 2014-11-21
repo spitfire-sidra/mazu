@@ -2,7 +2,7 @@
 from django import forms
 
 from models import Channel
-from malware.models import Source
+from samples.models import Source
 
 
 class ChannelForm(forms.ModelForm):

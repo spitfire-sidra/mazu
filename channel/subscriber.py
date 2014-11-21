@@ -18,7 +18,7 @@ from lib import hpfeeds
 from lib.dictdiffer import DictDiffer
 
 from channel.utils import get_channels
-from malware.utils import save_malware
+from samples.utils import save_malware
 from notification.models import Notification
 
 

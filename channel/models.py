@@ -14,7 +14,7 @@ class Channel(TimeStampedModel):
     pubchans = models.TextField(null=True, blank=True)
     subchans = models.TextField(null=True, blank=True)
     ident = models.TextField()
-    source = models.ForeignKey('malware.Source', null=True, blank=True)
+    source = models.ForeignKey('samples.Source', null=True, blank=True)
     secret = models.TextField(null=True, blank=True)
     default = models.BooleanField(default=False)
     slug = models.SlugField()
@@ -33,7 +33,7 @@ class Channel(TimeStampedModel):
 
 
 class Queue(TimeStampedModel):
-    malware = models.ForeignKey('malware.Malware')
+    malware = models.ForeignKey('samples.Malware')
     channel = models.ForeignKey(Channel)
     published = models.BooleanField(default=False)
 

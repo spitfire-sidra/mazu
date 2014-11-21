@@ -24,7 +24,7 @@ urlpatterns = patterns(
 urlpatterns += patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', login_required(basic_search)),
-    url(r'^malware/', include('malware.urls')),
+    url(r'^samples/', include('samples.urls')),
     url(r'^authkey/', include('authkey.urls')),
     url(r'^channel/', include('channel.urls')),
     url(r'^notification/', include('notification.urls')),

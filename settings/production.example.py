@@ -42,7 +42,7 @@ INSTALLED_APPS = (
     'core',
     'auth',
     'authkey',
-	'malware',
+	'samples',
     'widget',
     'channel',
     'notification',
