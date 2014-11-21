@@ -140,17 +140,19 @@ class SampleUpdateView(UpdateView):
         return Sample.objects.get(slug=self.kwargs['slug'])
 
 
-class SampleListView(ListView, FormMixin):
+class SampleListView(ListView, FormMixin, LoginRequiredMixin):
+
+    """
+    A ListView that displays samples and a filter form. This class also
+    handles the POST request of filter form.
+    """
+
     model = Sample
     template_name = 'malware/list.html'
     context_object_name = 'malwares'
     form_class = SampleFilterForm
     success_url = reverse_lazy('malware.list')
-    qs = None
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(SampleListView, self).dispatch(*args, **kwargs)
+    filtered_queryset = None
 
     def get_context_data(self, **kwargs):
         context = super(SampleListView, self).get_context_data(**kwargs)
@@ -158,14 +160,14 @@ class SampleListView(ListView, FormMixin):
         return context
 
     def get_queryset(self):
-        if self.qs is not None:
-            return self.qs
+        if self.filtered_queryset is not None:
+            return self.filtered_queryset
         return super(SampleListView, self).get_queryset()
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
-            self.qs = form.get_queryset()
+            self.filtered_queryset = form.get_queryset()
         return self.get(request, *args, **kwargs)
 
 
