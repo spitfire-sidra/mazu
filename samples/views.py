@@ -19,19 +19,21 @@ from django.utils.decorators import method_decorator
 from django.template import RequestContext
 from django.views.generic.edit import FormMixin
 
-from models import Malware
+from models import Sample
 from models import SampleSource
 from models import DownloadLog
-from forms import MalwareUploadForm
+from forms import SampleUploadForm
 from forms import MalwarePublishForm
 from forms import MalwareUpdateForm
 from forms import MalwareFilterForm
 from forms import SourceForm
-from utils import compute_hashes
+from core.utils import compute_hashes
+from core.utils import get_file_info
 from utils import compute_ssdeep
 from utils import get_uploaded_file_info
 from channel.models import Channel
 from channel.models import Queue
+from core.mixins import LoginRequiredMixin
 from core.mongodb import connect_gridfs
 from core.mongodb import get_compressed_file
 from core.mongodb import delete_file
@@ -88,39 +90,41 @@ class MalwarePublishView(FormView):
         return super(MalwarePublishView, self).form_valid(form)
 
 
-class MalwareUploadView(FormView):
+class SampleUploadView(FormView, LoginRequiredMixin):
+
+    """
+    Sample upload view.
+    """
+
     template_name = 'malware/upload.html'
-    form_class = MalwareUploadForm
+    form_class = SampleUploadForm
     success_url = reverse_lazy('malware.upload')
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(MalwareUploadView, self).dispatch(*args, **kwargs)
-
     def get_form(self, form_class):
+        """
+        Get current user instance, and initialize the form class.
+        """
         kwargs = self.get_form_kwargs()
         kwargs['user'] = self.request.user
-        return form_class(
-            **kwargs
-        )
+        return form_class(**kwargs)
 
     def form_invalid(self, form):
         messages.info(
             self.request,
             "Your submission has not been saved. Try again."
         )
-        return super(MalwareUploadView, self).form_invalid(form)
+        return super(SampleUploadView, self).form_invalid(form)
 
     def form_valid(self, form):
-        malware = form.cleaned_data['malware']
-        channels = form.cleaned_data['channels'] #list
-        file_info = get_uploaded_file_info(malware)
+        sample = form.cleaned_data['sample']
+        channels = form.cleaned_data['channels']
+        file_info = get_file_info(sample)
 
         columns = file_info.copy()
-        columns.update({
-            'desc': form.cleaned_data['desc'],
-            'name': form.cleaned_data['name']
-        })
+        #columns.update({
+        #    'desc': form.cleaned_data['desc'],
+        #    'name': form.cleaned_data['name']
+        #})
         # save malware into gridfs
         try:
             gridfs = connect_gridfs()
@@ -141,13 +145,13 @@ class MalwareUploadView(FormView):
                     'source': form.cleaned_data['source'],
                     'user': form.user
                 })
-                sample = Malware(**columns)
+                sample = Sample(**columns)
                 sample.save()
-                # Save into pulishing queue 
+                # Save into pulishing queue
                 for c in channels:
                     Queue(malware=sample, channel=c).save()
             messages.success(self.request, 'New malware created.')
-        return super(MalwareUploadView, self).form_valid(form)
+        return super(SampleUploadView, self).form_valid(form)
 
 
 class MalwareUpdateView(UpdateView):
@@ -164,11 +168,11 @@ class MalwareUpdateView(UpdateView):
         return super(MalwareUpdateView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
-        return Malware.objects.get(slug=self.kwargs['slug'])
+        return Sample.objects.get(slug=self.kwargs['slug'])
 
 
 class MalwareListView(ListView, FormMixin):
-    model = Malware
+    model = Sample
     template_name = 'malware/list.html'
     context_object_name = 'malwares'
     form_class = MalwareFilterForm
@@ -193,11 +197,11 @@ class MalwareListView(ListView, FormMixin):
         form = self.form_class(request.POST)
         if form.is_valid():
             self.qs = form.get_queryset()
-        return self.get(request, *args, **kwargs) 
+        return self.get(request, *args, **kwargs)
 
 
 class MalwareDeleteView(DeleteView):
-    model = Malware
+    model = Sample
     template_name = 'malware/delete.html'
     success_url = reverse_lazy('malware.list')
 
@@ -210,7 +214,7 @@ class MalwareDeleteView(DeleteView):
         return super(MalwareDeleteView, self).dispatch(*args, **kwargs)
 
     def get_object(self, **kwargs):
-        return Malware.objects.get(slug=self.kwargs['slug'])
+        return Sample.objects.get(slug=self.kwargs['slug'])
 
     def delete(self, request, *args, **kwargs):
         delete_file('sha256', self.kwargs['slug'])
@@ -218,7 +222,7 @@ class MalwareDeleteView(DeleteView):
 
 
 class MalwareProfileView(DetailView):
-    model = Malware
+    model = Sample
     template_name = 'malware/profile.html'
     context_object_name = 'malware'
 
@@ -227,7 +231,7 @@ class MalwareProfileView(DetailView):
         return super(MalwareProfileView, self).dispatch(*args, **kwargs)
 
     def get_object(self, **kwargs):
-        return Malware.objects.get(slug=self.kwargs['slug'])
+        return Sample.objects.get(slug=self.kwargs['slug'])
 
 
 class SourceCreateView(CreateView):

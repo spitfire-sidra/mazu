@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from haystack import indexes
-from models import Malware
+from models import Sample
 
 
 class MalwareIndex(indexes.SearchIndex, indexes.Indexable):
@@ -14,8 +14,7 @@ class MalwareIndex(indexes.SearchIndex, indexes.Indexable):
     created = indexes.DateTimeField(model_attr='created')
 
     def get_model(self):
-        return Malware
+        return Sample
 
     def index_queryset(self, using=None):
-        """Used when the entire index for model is updated."""
         return self.get_model().objects.filter(created__lte=datetime.datetime.now())

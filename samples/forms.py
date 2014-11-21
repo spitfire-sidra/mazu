@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 from datetime import date
+
 from django import forms
+from django.forms import ValidationError
 from django.contrib.auth.models import User
-from models import SampleSource
-from models import Malware
-from utils import compute_hashes
+
 from channel.models import Channel
 from channel.models import Queue
+
+from core.utils import compute_hashes
+from sample.models import Sample
+from sample.models import SampleSource
 
 
 class MalwareFilterForm(forms.Form):
@@ -33,7 +37,7 @@ class MalwareFilterForm(forms.Form):
         return cleaned_data
 
     def get_queryset(self):
-        qs = Malware.objects.all()
+        qs = Sample.objects.all()
         if self.cleaned_data['start']:
             s = self.cleaned_data['start']
             qs = qs.filter(created__gte=s)
@@ -51,69 +55,85 @@ class MalwareFilterForm(forms.Form):
         return qs
 
 
-class MalwareUploadForm(forms.Form):
-    malware = forms.FileField(
-        label='Malware'
-    )
-    name = forms.CharField(
-        label='Name',
-        required=False
-    )
-    desc = forms.CharField(
-        widget=forms.Textarea,
+class SampleUploadForm(forms.Form):
+
+    """
+    A form for uploading sample.
+    This class contains some dirty hacks in __init__(*args, **kwargs).
+    """
+
+    file = forms.FileField()
+    name = forms.CharField(required=False)
+    descr = forms.CharField(
+        required=False,
         label='Description',
-        required=False
+        widget=forms.Textarea
     )
     publish = forms.BooleanField(
-        label='Do you want publish?',
         required=False,
-        help_text='Yes',
+        label='Publish?',
+        help_text='Yes'
     )
 
     def __init__(self, *args, **kwargs):
+        # get user instance
         self.user = kwargs.pop('user')
-        super(MalwareUploadForm, self).__init__(*args, **kwargs)
-        self.fields['source'] = forms.ModelChoiceField(
-            queryset=self.get_source_choices(self.user),
-            label='Source',
-            required=False
-        )
-        self.fields['channels'] = forms.ModelMultipleChoiceField(
-            queryset=self.get_channels_choices(self.user),
-            widget=forms.CheckboxSelectMultiple,
-            label='Publish to',
-            initial=self.get_channels_initial(self.user),
-            required=False
-        )
 
-    def get_channels_choices(self, user):
-        # can only publish to user's channel
-        return Channel.objects.filter(owner=user)
+        super(SampleUploadForm, self).__init__(*args, **kwargs)
 
-    def get_channels_initial(self, user):
-        channels = self.get_channels_choices(user)
-        return (c for c in channels if c.default)
+        # !dirty hack!
+        # Adding a form field that only list samples sources owned by an user
+        self.fields['sample_source'] = self.sample_source_field(self.user)
+        self.fields['channels'] = self.channels_filed(self.user)
 
-    def get_source_choices(self, user):
-        # can only mark to user's source
-        return SampleSource.objects.filter(user=user)
+    def channels_filed(self, user):
+        queryset = Channel.objects.filter(owner=user)
+        # get all default channels
+        initial = (r for r in queryset if r.default)
+        params = {
+            'required': False,
+            'queryset': queryset,
+            'label': 'Select channels to publish',
+            'widget': forms.CheckboxSelectMultiple,
+            'initial': initial
+        }
+        return forms.ModelMultipleChoiceField(**params)
 
-    def clean_malware(self):
-        data = self.cleaned_data['malware']
+    def sample_source_field(self, user):
+        queryset = SampleSource.objects.filter(user=user)
+        params = {
+            'required': False,
+            'queryset': queryset,
+            'label': 'Sample source'
+        }
+        return forms.ModelChoiceField(**params)
+
+    def clean_sample(self):
+        """
+        Cleaning the sample field.
+        If a sample already exists in database, then ValidationError will be
+        raised.
+        """
+        data = self.cleaned_data['sample']
         hashes = compute_hashes(data.read())
-        if Malware.objects.filter(sha256=hashes['sha256']).count() > 0:
-            raise forms.ValidationError('Duplicated Malware Sample.')
-        data.seek(0)
-        return data
+        try:
+            Sample.objects.get(sha256=hashes.sha256)
+        except Sample.DoesNotExist:
+            # sets the file's current position at the beginning
+            data.seek(0)
+            return data
+        else:
+            raise ValidationError('Duplicated sample.')
 
     def clean(self):
-        cleaned_data = super(MalwareUploadForm, self).clean()
-        publish = cleaned_data['publish']
-        channels = cleaned_data['channels']
+        """
+        Cleaning all fields in this form class. If a user choose to publish a
+        sample but did not choice any channls, ValidationError would be raised.
+        """
+        cleaned_data = super(SampleUploadForm, self).clean()
 
-        if publish:
-            if len(channels) == 0:
-                raise forms.ValidationError('Please select a channel at least.')
+        if cleaned_data['publish'] and len(cleaned_data['channels']) == 0:
+            raise ValidationError('Please select a channel at least.')
         else:
             cleaned_data['channels'] = []
         return cleaned_data
@@ -146,20 +166,17 @@ class MalwarePublishForm(forms.Form):
         return (c for c in channels if c.default)
 
     def save(self):
-        malware = Malware.objects.get(sha256=self.cleaned_data['malware'])
+        malware = Sample.objects.get(sha256=self.cleaned_data['malware'])
         for c in self.cleaned_data['channels']:
             Queue(malware=malware, channel=c).save()
 
 
 class MalwareUpdateForm(forms.ModelForm):
     class Meta:
-        model = Malware
-        fields = ['name', 'source', 'link', 'type', 'size', 'crc32', 'md5',
-                  'sha1', 'sha256', 'sha512', 'ssdeep', 'desc']
+        model = Sample
+        fields = ['type', 'size', 'crc32', 'md5',
+                  'sha1', 'sha256', 'sha512', 'ssdeep']
         labels = {
-            'name': 'Name',
-            'source': 'Source',
-            'link': 'Link',
             'type': 'File Type',
             'size': 'File Size',
             'crc32': 'CRC32',
@@ -168,7 +185,6 @@ class MalwareUpdateForm(forms.ModelForm):
             'sha256': 'SHA256',
             'sha512': 'SHA512',
             'ssdeep': 'SSDEEP',
-            'desc': 'Description'
         }
 
 

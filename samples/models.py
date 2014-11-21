@@ -27,7 +27,7 @@ class SampleSource(TimeStampedModel):
     def save(self, *args, **kwargs):
         if not self.id:
             self.slug = slugify(self.name)
-        super(SampleSource, self).save(*args, **kwargs) 
+        super(SampleSource, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ['name']
@@ -35,21 +35,23 @@ class SampleSource(TimeStampedModel):
         unique_together = ('user', 'name')
 
 
-class Malware(TimeStampedModel):
-    link = models.TextField(null=True, blank=True)
-    name = models.CharField(max_length=255, null=True, blank=True)
-    type = models.CharField(max_length=255, null=True)
-    size = models.IntegerField(null=True)
-    md5 = models.CharField(max_length=32, null=True)
-    sha1 = models.CharField(max_length=40, null=True)
-    sha256 = models.CharField(max_length=64, null=True)
-    sha512 = models.CharField(max_length=128, null=True)
-    crc32 = models.IntegerField(max_length=255, null=True)
-    ssdeep = models.CharField(max_length=255, null=True)
-    desc = models.TextField(default='', null=True, blank=True)
-    source = models.ForeignKey(SampleSource, null=True, blank=True)
+class Sample(TimeStampedModel):
+
+    """
+    Sample model stores attributes of a sample
+    """
+
+    md5 = models.CharField(max_length=32)
+    sha1 = models.CharField(max_length=40)
+    sha256 = models.CharField(max_length=64)
+    sha512 = models.CharField(max_length=128)
+    ssdeep = models.CharField(max_length=255)
+    type = models.CharField(max_length=255, default='Unknown')
+    size = models.IntegerField(default=0)
+    crc32 = models.IntegerField(max_length=255)
+    source = models.ForeignKey(SampleSource, blank=True, null=True)
     slug = models.SlugField(max_length=128)
-    user = models.ForeignKey('auth.User', null=True, blank=True)
+    user = models.ForeignKey('auth.User')
 
     def __unicode__(self):
         return self.sha256
@@ -60,10 +62,22 @@ class Malware(TimeStampedModel):
     def save(self, *args, **kwargs):
         if not self.id:
             self.slug = slugify(self.sha256)
-        super(Malware, self).save(*args, **kwargs)
+        super(Sample, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ['-created', '-updated']
+
+
+class SampleExtraInfo(TimeStampedModel):
+
+    """
+    SampleExtraInfo model stores extra information about a sample.
+    """
+
+    sample = models.ForeignKey(Sample)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    link = models.TextField(null=True, blank=True)
+    descr = models.TextField(default='', null=True, blank=True)
 
 
 class DownloadLog(TimeStampedModel):

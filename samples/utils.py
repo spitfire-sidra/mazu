@@ -6,7 +6,7 @@ import binascii
 import magic
 import ssdeep
 
-from models import Malware
+from models import Sample
 from core.mongodb import connect_gridfs
 
 
@@ -54,7 +54,7 @@ def get_uploaded_file_info(fp):
 
 
 def is_malware_exists(sha256):
-    if Malware.objects.filter(sha256=sha256).count() > 0:
+    if Sample.objects.filter(sha256=sha256).count() > 0:
         return True
     else:
         return False
@@ -87,6 +87,6 @@ def save_malware(buf, user=None, source=None):
                 fp.close()
                 columns['user'] = user
                 columns['source'] = source
-                instance = Malware(**columns)
+                instance = Sample(**columns)
                 instance.save()
             return hashes['sha256']

@@ -25,7 +25,6 @@ from forms import ChannelForm
 from models import Channel
 from models import Queue
 from core.mongodb import connect_gridfs
-from samples.models import Malware
 
 
 logger = logging.getLogger(__name__)

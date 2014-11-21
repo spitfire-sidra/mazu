@@ -3,7 +3,7 @@ import os
 
 from django.core.urlresolvers import reverse_lazy
 
-from models import Malware
+from models import Sample
 from core.tests import CoreTestCase
 from core.tests import random_string
 from core.mongodb import connect_gridfs
@@ -34,9 +34,9 @@ class MalwareTestCase(CoreTestCase):
             response = self.client.post(
                 reverse_lazy('malware.upload'),
                 {
-                    'name': file_name,
+                    #'name': file_name,
                     'malware': fp,
-                    'description': random_string(),
+                    #'description': random_string(),
                 },
                 follow=True
             )
@@ -59,7 +59,7 @@ class MalwareTestCase(CoreTestCase):
 
     def test_list_view(self):
         self._upload(self.file_path, self.file_name)
-        malwares = Malware.objects.all()
+        malwares = Sample.objects.all()
         response = self.client.get(reverse_lazy('malware.list'))
         self.assertEqual(response.status_code, 200)
         for mal in response.context['malwares']:
@@ -67,7 +67,7 @@ class MalwareTestCase(CoreTestCase):
 
     def test_profile_view(self):
         self._upload(self.file_path, self.file_name)
-        malware = Malware.objects.get(name=self.file_name)
+        malware = Sample.objects.get(name=self.file_name)
         response = self.client.get(
             reverse_lazy('malware.profile', args=[malware.sha256])
         )
@@ -75,12 +75,12 @@ class MalwareTestCase(CoreTestCase):
 
     def test_can_update(self):
         self._upload(self.file_path, self.file_name)
-        malware = Malware.objects.get(name=self.file_name)
+        malware = Sample.objects.get(name=self.file_name)
         new_file_name = random_string(8)
         response = self.client.post(
             reverse_lazy('malware.update', args=[malware.sha256]),
             {
-                'name': new_file_name,
+                #'name': new_file_name,
                 'type': malware.type,
                 'size': malware.size,
                 'crc32': malware.crc32,
@@ -92,8 +92,8 @@ class MalwareTestCase(CoreTestCase):
             }
         )
         try:
-            Malware.objects.get(name=new_file_name)
-        except Malware.DoesNotExist:
+            Sample.objects.get(name=new_file_name)
+        except Sample.DoesNotExist:
             updated = False
         else:
             updated = True
@@ -101,7 +101,7 @@ class MalwareTestCase(CoreTestCase):
 
     def test_can_delete(self):
         self._upload(self.file_path, self.file_name)
-        malware = Malware.objects.get(name=self.file_name)
+        malware = Sample.objects.get(name=self.file_name)
         self.client.post(
             reverse_lazy('malware.delete', args=[malware.sha256]),
             {
@@ -109,8 +109,8 @@ class MalwareTestCase(CoreTestCase):
             }
         )
         try:
-            Malware.objects.get(name=self.file_name)
-        except Malware.DoesNotExist:
+            Sample.objects.get(name=self.file_name)
+        except Sample.DoesNotExist:
             does_exist = False
         else:
             does_exist = True

@@ -33,7 +33,7 @@ class Channel(TimeStampedModel):
 
 
 class Queue(TimeStampedModel):
-    malware = models.ForeignKey('samples.Malware')
+    malware = models.ForeignKey('samples.Sample')
     channel = models.ForeignKey(Channel)
     published = models.BooleanField(default=False)
 
