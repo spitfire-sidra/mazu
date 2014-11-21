@@ -169,25 +169,31 @@ class SampleListView(ListView, FormMixin):
         return self.get(request, *args, **kwargs)
 
 
-class MalwareDeleteView(DeleteView):
+class SampleDeleteView(DeleteView):
+
+    """
+    A class-based view for deleting a sample.
+    """
+
     model = Sample
     template_name = 'malware/delete.html'
     success_url = reverse_lazy('malware.list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        # only owner of malware can delete malware
-        obj = self.get_object()
-        if obj.user != self.request.user:
-            raise Http404
-        return super(MalwareDeleteView, self).dispatch(*args, **kwargs)
+        # only the owner of scan can delete
+        sample = self.get_object()
+        if sample.user != self.request.user:
+            raise HttpResponseForbidden
+        return super(SampleDeleteView, self).dispatch(*args, **kwargs)
 
     def get_object(self, **kwargs):
-        return Sample.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(slug=self.kwargs['slug'])
 
     def delete(self, request, *args, **kwargs):
+        # delete the sample which existing in GridFS
         delete_sample(self.kwargs['slug'])
-        return super(MalwareDeleteView, self).delete(request, *args, **kwargs)
+        return super(SampleDeleteView, self).delete(request, *args, **kwargs)
 
 
 class MalwareProfileView(DetailView, LoginRequiredMixin):
@@ -196,7 +202,7 @@ class MalwareProfileView(DetailView, LoginRequiredMixin):
     context_object_name = 'malware'
 
     def get_object(self, **kwargs):
-        return Sample.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(slug=self.kwargs['slug'])
 
 
 class SourceCreateView(CreateView, LoginRequiredMixin):
