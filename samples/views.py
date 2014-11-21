@@ -273,21 +273,28 @@ class SampleSourceListView(ListView, LoginRequiredMixin):
         return self.model.objects.filter(user=self.request.user)
 
 
-class SourceDeleteView(DeleteView):
+class SampleSourceDeleteView(DeleteView):
+
+    """
+    DeleteView for SampleSource
+    """
+
     model = SampleSource
     template_name = 'source/delete.html'
     success_url = reverse_lazy('source.list')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        # user can only delete their source
-        obj = self.get_object()
-        if obj.user != self.request.user:
-            raise Http404
-        return super(SourceDeleteView, self).dispatch(*args, **kwargs)
+        source = self.get_object()
+        if source.user != self.request.user:
+            raise HttpResponseForbidden
+        return super(SampleSourceDeleteView, self).dispatch(*args, **kwargs)
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(slug=self.kwargs['slug'], user=self.request.user)
+        return self.model.objects.get(
+            slug=self.kwargs['slug'],
+            user=self.request.user
+    )
 
 
 class SourceProfileView(DetailView):

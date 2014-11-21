@@ -9,7 +9,7 @@ from views import SampleDetailView
 from views import SamplePublishView
 from views import SampleListView
 from views import SampleSourceUpdateView
-from views import SourceDeleteView
+from views import SampleSourceDeleteView
 from views import SampleSourceListView
 from views import SampleSourceCreateView
 from views import download
@@ -20,7 +20,7 @@ urlpatterns = patterns(
     url(r'^source/create/$', SampleSourceCreateView.as_view(), name='source.create'),
     url(r'^source/list/$', SampleSourceListView.as_view(), name='source.list'),
     url(r'^source/update/(?P<slug>[\w]+)/$', SampleSourceUpdateView.as_view(), name='source.update'),
-    url(r'^source/delete/(?P<slug>[\w]+)/$', SourceDeleteView.as_view(), name='source.delete'),
+    url(r'^source/delete/(?P<slug>[\w]+)/$', SampleSourceDeleteView.as_view(), name='source.delete'),
     url(r'^upload/$', SampleUploadView.as_view(), name='malware.upload'),
     url(r'^download/(?P<slug>[\w]+)/$', download, name='malware.download'),
     url(r'^list/$', SampleListView.as_view(), name='malware.list'),
