@@ -26,7 +26,7 @@ from forms import SampleUploadForm
 from forms import MalwarePublishForm
 from forms import SampleUpdateForm
 from forms import MalwareFilterForm
-from forms import SourceForm
+from forms import SampleSourceForm
 from core.mixins import LoginRequiredMixin
 from core.mongodb import get_compressed_file
 from samples.utils import delete_sample
@@ -200,7 +200,7 @@ class MalwareProfileView(DetailView, LoginRequiredMixin):
 class SourceCreateView(CreateView, LoginRequiredMixin):
     model = SampleSource
     template_name = 'source/create.html'
-    form_class = SourceForm
+    form_class = SampleSourceForm
     fields = ['name', 'link', 'descr']
     success_url = reverse_lazy('source.list')
 
@@ -212,7 +212,7 @@ class SourceCreateView(CreateView, LoginRequiredMixin):
 
 class SourceUpdateView(UpdateView):
     template_name = 'source/update.html'
-    form_class = SourceForm
+    form_class = SampleSourceForm
     fields = ['name', 'link', 'descr']
     success_url = reverse_lazy('source.list')
 

@@ -224,7 +224,12 @@ class SampleUpdateForm(forms.ModelForm):
         }
 
 
-class SourceForm(forms.ModelForm):
+class SampleSourceForm(forms.ModelForm):
+
+    """
+    SampleSourceForm is a form class for updating and creating SampleSource.
+    """
+
     class Meta:
         model = SampleSource
         fields = ['name', 'link', 'descr']
