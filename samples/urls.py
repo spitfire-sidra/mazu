@@ -5,7 +5,7 @@ from django.conf.urls import url
 from views import SampleUploadView
 from views import SampleUpdateView
 from views import SampleDeleteView
-from views import MalwareProfileView
+from views import SampleDetailView
 from views import SamplePublishView
 from views import SampleListView
 from views import SourceUpdateView
@@ -25,7 +25,7 @@ urlpatterns = patterns(
     url(r'^download/(?P<slug>[\w]+)/$', download, name='malware.download'),
     url(r'^list/$', SampleListView.as_view(), name='malware.list'),
     url(r'^list/(?P<slug>[\w]+)/$', SampleListView.as_view(), name='malware.source.filter'),
-    url(r'^profile/(?P<slug>[\w]+)/$', MalwareProfileView.as_view(), name='malware.profile'),
+    url(r'^profile/(?P<slug>[\w]+)/$', SampleDetailView.as_view(), name='malware.profile'),
     url(r'^delete/(?P<slug>[\w]+)/$', SampleDeleteView.as_view(), name='malware.delete'),
     url(r'^update/(?P<slug>[\w]+)/$', SampleUpdateView.as_view(), name='malware.update'),
     url(r'^publish/(?P<slug>[\w]*)/$', SamplePublishView.as_view(), name='malware.publish'),

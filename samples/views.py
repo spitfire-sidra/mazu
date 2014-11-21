@@ -196,7 +196,12 @@ class SampleDeleteView(DeleteView):
         return super(SampleDeleteView, self).delete(request, *args, **kwargs)
 
 
-class MalwareProfileView(DetailView, LoginRequiredMixin):
+class SampleDetailView(DetailView, LoginRequiredMixin):
+
+    """
+    Detail view of Sample
+    """
+
     model = Sample
     template_name = 'malware/profile.html'
     context_object_name = 'malware'
