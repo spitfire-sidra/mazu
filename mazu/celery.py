@@ -7,25 +7,26 @@ from celery import Celery
 from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 
+from settings.celery_settings import CELERY_APPNAME
+from settings.celery_settings import CELERY_BROKER
+from settings.celery_settings import CELERY_RESULT_BACKEND
 
-app = Celery('mazu')
-# Using a string here means the worker will not have to
-# pickle the object when using Windows.
-# app.config_from_object('django.conf:settings')
+
+mazu_tasks = {
+    'run-all-widgets': {
+        'task': 'samples.tasks.run_all_widgets',
+        'schedule': crontab(hour=21, minute=30),
+    },
+    'exec-publisher': {
+        'task': 'channel.tasks.publisher',
+        'schedule': crontab(minute='*/3'),
+    },
+}
+
+app = Celery(CELERY_APPNAME)
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-
-# Execute modules under the widget app periodically.
 app.conf.update(
-    BROKER_URL = 'mongodb://localhost:27017/widget',
-    CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',
-    CELERYBEAT_SCHEDULE = {
-        'exec-widget-modules': {
-            'task': 'widget.tasks.exec_widget_modules',
-            'schedule': crontab(minute='*/3'),
-        },
-        'exec-publisher': {
-            'task': 'channel.tasks.publisher',
-            'schedule': crontab(minute='*/3'),
-        },
-    }
+    BROKER_URL = CELERY_BROKER,
+    CELERY_RESULT_BACKEND=CELERY_RESULT_BACKEND,
+    CELERYBEAT_SCHEDULE=mazu_tasks
 )
