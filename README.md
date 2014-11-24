@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/PwnDoRa/mazu.svg?branch=master)](https://travis-ci.org/PwnDoRa/mazu)
 
-## PREREQUISITE
+## INSTALLATION PREREQUISITES
 
 - python 2.7
 - django
@@ -11,7 +11,7 @@
 
 ## MAC OS X 10.9
 
-If your OS is above MAC OS X 10.9, use the following command first:
+If your OS is above MAC OS X 10.9, pls unuse "cmd line argument hard error" first:
 
 ```
 $ export ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future
