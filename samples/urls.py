@@ -1,32 +1,82 @@
-#! -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from django.conf.urls import patterns
 from django.conf.urls import url
 
-from views import SampleUploadView
-from views import SampleUpdateView
-from views import SampleDeleteView
-from views import SampleDetailView
-from views import SamplePublishView
-from views import SampleListView
-from views import SampleSourceUpdateView
-from views import SampleSourceDeleteView
-from views import SampleSourceListView
-from views import SampleSourceCreateView
-from views import download
+from samples.views import download
+from samples.views import SampleList
+from samples.views import SampleUpload
+from samples.views import SampleUpdate
+from samples.views import SampleDelete
+from samples.views import SampleDetail
+from samples.views import SamplePublish
+from samples.views import SampleSourceList
+from samples.views import SampleSourceUpdate
+from samples.views import SampleSourceDelete
+from samples.views import SampleSourceCreate
 
 
-urlpatterns = patterns(
-    '',
-    url(r'^source/create/$', SampleSourceCreateView.as_view(), name='source.create'),
-    url(r'^source/list/$', SampleSourceListView.as_view(), name='source.list'),
-    url(r'^source/update/(?P<slug>[\w]+)/$', SampleSourceUpdateView.as_view(), name='source.update'),
-    url(r'^source/delete/(?P<slug>[\w]+)/$', SampleSourceDeleteView.as_view(), name='source.delete'),
-    url(r'^upload/$', SampleUploadView.as_view(), name='malware.upload'),
-    url(r'^download/(?P<slug>[\w]+)/$', download, name='malware.download'),
-    url(r'^list/$', SampleListView.as_view(), name='malware.list'),
-    url(r'^list/(?P<slug>[\w]+)/$', SampleListView.as_view(), name='malware.source.filter'),
-    url(r'^profile/(?P<slug>[\w]+)/$', SampleDetailView.as_view(), name='malware.profile'),
-    url(r'^delete/(?P<slug>[\w]+)/$', SampleDeleteView.as_view(), name='malware.delete'),
-    url(r'^update/(?P<slug>[\w]+)/$', SampleUpdateView.as_view(), name='malware.update'),
-    url(r'^publish/(?P<slug>[\w]*)/$', SamplePublishView.as_view(), name='malware.publish'),
+urlpatterns = patterns('',
+    url(
+        r'^source/list/$',
+        SampleSourceList,
+        name='source.list'
+    ),
+    url(
+        r'^source/create/$',
+        SampleSourceCreate,
+        name='source.create'
+    ),
+    url(
+        r'^source/update/(?P<slug>[\w]+)/$',
+        SampleSourceUpdate,
+        name='source.update'
+    ),
+    url(
+        r'^source/delete/(?P<slug>[\w]+)/$',
+        SampleSourceDelete,
+        name='source.delete'
+    ),
+)
+
+urlpatterns += patterns('',
+    url(
+        r'^list/$',
+        SampleList,
+        name='malware.list'
+    ),
+    url(
+        r'^upload/$',
+        SampleUpload,
+        name='malware.upload'
+    ),
+    url(
+        r'^download/(?P<slug>[\w]+)/$',
+        download,
+        name='malware.download'
+    ),
+    url(
+        r'^list/(?P<slug>[\w]+)/$',
+        SampleList,
+        name='malware.source.filter'
+    ),
+    url(
+        r'^profile/(?P<slug>[\w]+)/$',
+        SampleDetail,
+        name='malware.profile'
+    ),
+    url(
+        r'^delete/(?P<slug>[\w]+)/$',
+        SampleDelete,
+        name='malware.delete'
+    ),
+    url(
+        r'^update/(?P<slug>[\w]+)/$',
+        SampleUpdate,
+        name='malware.update'
+    ),
+    url(
+        r'^publish/(?P<slug>[\w]*)/$',
+        SamplePublish,
+        name='malware.publish'
+    ),
 )

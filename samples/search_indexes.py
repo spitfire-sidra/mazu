@@ -4,7 +4,12 @@ from haystack import indexes
 from models import Sample
 
 
-class MalwareIndex(indexes.SearchIndex, indexes.Indexable):
+class SampleIndex(indexes.SearchIndex, indexes.Indexable):
+
+    """
+    Index class for haystack
+    """
+
     text = indexes.CharField(document=True, use_template=True)
     user = indexes.CharField(model_attr='user')
     md5 = indexes.CharField(model_attr='md5')

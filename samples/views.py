@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import os
 import logging
 
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render
-from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.http import Http404
 from django.http import HttpResponse
@@ -19,17 +17,17 @@ from django.views.generic.edit import DeleteView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from models import Sample
-from models import SampleSource
-from models import DownloadLog
-from forms import SampleUploadForm
-from forms import SamplePublishForm
-from forms import SampleUpdateForm
-from forms import SampleFilterForm
-from forms import SampleSourceForm
 from core.mixins import LoginRequiredMixin
 from core.mongodb import get_compressed_file
 from samples.utils import delete_sample
+from samples.models import Sample
+from samples.models import SampleSource
+from samples.models import DownloadLog
+from samples.forms import SampleUploadForm
+from samples.forms import SamplePublishForm
+from samples.forms import SampleUpdateForm
+from samples.forms import SampleFilterForm
+from samples.forms import SampleSourceForm
 
 
 logger = logging.getLogger(__name__)
@@ -298,7 +296,7 @@ class SampleSourceDeleteView(DeleteView):
         return self.model.objects.get(
             slug=self.kwargs['slug'],
             user=self.request.user
-    )
+        )
 
 
 class SampleSourceDetailView(DetailView):
@@ -323,3 +321,15 @@ class SampleSourceDetailView(DetailView):
             slug=self.kwargs['slug'],
             user=self.request.user
         )
+
+
+SampleSourceList = SampleSourceListView.as_view()
+SampleSourceCreate = SampleSourceCreateView.as_view()
+SampleSourceUpdate = SampleSourceUpdateView.as_view()
+SampleSourceDelete = SampleSourceDeleteView.as_view()
+SampleList = SampleListView.as_view()
+SampleUpload = SampleUploadView.as_view()
+SampleDetail = SampleDetailView.as_view()
+SampleDelete = SampleDeleteView.as_view()
+SampleUpdate = SampleUpdateView.as_view()
+SamplePublish = SamplePublishView.as_view()

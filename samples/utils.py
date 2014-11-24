@@ -81,4 +81,7 @@ def save_sample(buf, **kwargs):
 
 
 def delete_sample(sha256):
+    """
+    Deleting a sample which sha256 equals variable 'sha256'
+    """
     return delete_file('sha256', sha256)
