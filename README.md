@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/PwnDoRa/mazu.svg?branch=master)](https://travis-ci.org/PwnDoRa/mazu)
 
-## INSTALLATION PREREQUISITE
+## INSTALLATION PREREQUISITES
 
 - python 2.7
 - django
