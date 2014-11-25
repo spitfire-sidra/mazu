@@ -1,0 +1,19 @@
+{% extends 'samples_app_base.html' %}
+{% load virustotal %}
+{% block content %}
+
+{{ object.name }}
+{{ object.source.name }}
+{{ object.reference }}
+{{ object.type }}
+{{ object.size }}
+{{ object.crc32 }}
+{{ object.md5 }}
+{{ object.sha1 }}
+{{ object.sha256 }}
+<a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a>
+{{ object.sha512 }}
+{{ object.ssdeep }}
+{{ object.desc }}
+
+{% endblock content %}

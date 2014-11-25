@@ -62,7 +62,7 @@ class SamplePublishView(FormView, LoginRequiredMixin):
     A class-based view for publishing sample.
     """
 
-    template_name = 'malware/publish.html'
+    template_name = 'sample/publish.html'
     form_class = SamplePublishForm
     success_url = reverse_lazy('malware.list')
 
@@ -93,7 +93,7 @@ class SampleUploadView(FormView, LoginRequiredMixin):
     Sample upload view.
     """
 
-    template_name = 'malware/upload.html'
+    template_name = 'sample/upload.html'
     form_class = SampleUploadForm
     success_url = reverse_lazy('malware.upload')
 
@@ -127,7 +127,7 @@ class SampleUpdateView(UpdateView):
     """
 
     model = Sample
-    template_name = 'malware/update.html'
+    template_name = 'sample/update.html'
     form_class = SampleUpdateForm
     success_url = reverse_lazy('malware.list')
 
@@ -151,8 +151,7 @@ class SampleListView(ListView, FormMixin, LoginRequiredMixin):
     """
 
     model = Sample
-    template_name = 'malware/list.html'
-    context_object_name = 'malwares'
+    template_name = 'sample/list.html'
     form_class = SampleFilterForm
     success_url = reverse_lazy('malware.list')
     filtered_queryset = None
@@ -181,7 +180,7 @@ class SampleDeleteView(DeleteView):
     """
 
     model = Sample
-    template_name = 'malware/delete.html'
+    template_name = 'sample/delete.html'
     success_url = reverse_lazy('malware.list')
 
     @method_decorator(login_required)
@@ -208,8 +207,7 @@ class SampleDetailView(DetailView, LoginRequiredMixin):
     """
 
     model = Sample
-    template_name = 'malware/profile.html'
-    context_object_name = 'malware'
+    template_name = 'sample/detail.html'
 
     def get_object(self, **kwargs):
         return self.model.objects.get(slug=self.kwargs['slug'])
@@ -224,7 +222,7 @@ class SampleSourceCreateView(CreateView, LoginRequiredMixin):
     model = SampleSource
     fields = ['name', 'link', 'descr']
     form_class = SampleSourceForm
-    template_name = 'source/create.html'
+    template_name = 'sample_source/create.html'
     success_url = reverse_lazy('source.list')
 
     def form_valid(self, form):
@@ -242,7 +240,7 @@ class SampleSourceUpdateView(UpdateView):
     model = SampleSource
     fields = ['name', 'link', 'descr']
     form_class = SampleSourceForm
-    template_name = 'source/update.html'
+    template_name = 'sample_source/update.html'
     success_url = reverse_lazy('source.list')
 
     @method_decorator(login_required)
@@ -267,8 +265,7 @@ class SampleSourceListView(ListView, LoginRequiredMixin):
     """
 
     model = SampleSource
-    template_name = 'source/list.html'
-    context_object_name = 'malware_sources'
+    template_name = 'sample_source/list.html'
 
     def get_queryset(self):
         # users can see sample sources that owned by them
@@ -282,7 +279,7 @@ class SampleSourceDeleteView(DeleteView):
     """
 
     model = SampleSource
-    template_name = 'source/delete.html'
+    template_name = 'sample_source/delete.html'
     success_url = reverse_lazy('source.list')
 
     @method_decorator(login_required)
@@ -306,8 +303,7 @@ class SampleSourceDetailView(DetailView):
     """
 
     model = SampleSource
-    template_name = 'source/profile.html'
-    context_object_name = 'malware_source'
+    template_name = 'sample_source/detail.html'
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):

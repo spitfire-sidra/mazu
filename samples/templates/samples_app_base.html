@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block secondarymenu %}
+<div class="ui secondary menu">
+    <div class="item">
+        <a href="{% url 'malware.list' %}">LIST</a>
+    </div>
+    <div class="item">
+        <a href="{% url 'malware.upload' %}">UPLOAD</a>
+    </div>
+    <div class="item">
+        <a href="{% url 'source.list' %}">SOURCE LIST</a>
+    </div>
+    <div class="item">
+        <a href="{% url 'source.create' %}">CREATE SOURCE</a>
+    </div>
+</div>
+{% endblock secondarymenu %}

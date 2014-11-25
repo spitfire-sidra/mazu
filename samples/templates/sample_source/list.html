@@ -1,0 +1,12 @@
+{% extends 'samples_app_base.html' %}
+
+{% block content %}
+
+{% for object in object_list %}
+{{ object.label }}
+{{ object.descr }}
+{% empty %}
+No malware source yet.
+{% endfor %}
+
+{% endblock content %}

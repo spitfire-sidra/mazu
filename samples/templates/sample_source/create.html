@@ -1,4 +1,4 @@
-{% extends 'malware_base.html' %}
+{% extends 'samples_app_base.html' %}
 
 {% block content %}
 <p></p>
@@ -6,7 +6,7 @@
     <form action="" method="POST">
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="Update">
+        <input type="submit" value="Create">
     </form>
 </div>
 {% endblock content %}
