@@ -1,112 +1,147 @@
 # -*- cofing: utf-8 -*-
 import os
+import shutil
 
 from django.core.urlresolvers import reverse_lazy
 
-from models import Sample
+from core.mongodb import connect_gridfs
 from core.tests import CoreTestCase
 from core.tests import random_string
-from core.mongodb import connect_gridfs
 from core.utils import compute_hashes
-
-def random_file():
-    app_path = os.path.dirname(__file__)
-    tests_folder = os.path.join(app_path, 'tests')
-    if not os.path.exists(tests_folder):
-        os.mkdir(tests_folder)
-
-    path = os.path.join(app_path, 'tests', random_string(10))
-    fp = open(path, 'wb')
-    fp.write(random_string(10))
-    fp.close()
-    return path
+from samples.models import Sample
 
 
-class MalwareTestCase(CoreTestCase):
+def get_temp_folder():
+    """
+    Making a folder for testing
+    """
+    app_folder = os.path.dirname(__file__)
+    temp_test_folder = os.path.join(app_folder, 'fake_samples')
+    if not os.path.exists(temp_test_folder):
+        os.mkdir(temp_test_folder)
+    return temp_test_folder
+
+
+def make_fake_sample_file():
+    """
+    Making a fake sample file for testing
+    """
+    temp_test_folder = get_temp_folder()
+    fake_sample_path = os.path.join(temp_test_folder, random_string(10))
+    with open(fake_sample_path, 'wb') as fp:
+        fp.write(random_string(10))
+    return fake_sample_path
+
+
+def remove_temp_folder():
+    """
+    Removing temp folder
+    """
+    temp_folder = get_temp_folder()
+    shutil.rmtree(temp_folder)
+
+
+class SampleTestCase(CoreTestCase):
+
+    """
+    Test cases for Sample
+    """
 
     def setUp(self):
-        super(MalwareTestCase, self).setUp()
-        self.file_path = random_file()
-        self.file_name = random_string(8)
+        super(SampleTestCase, self).setUp()
 
-    def _upload(self, file_path, file_name):
-        with open(file_path, 'rb') as fp:
-            response = self.client.post(
-                reverse_lazy('malware.upload'),
-                {
-                    #'name': file_name,
-                    'sample': fp,
-                    #'description': random_string(),
-                },
-                follow=True
-            )
-            fp.seek(0)
-            self.hashes = compute_hashes(fp.read())
-            return response
+    def tearDown(self):
+        super(SampleTestCase, self).tearDown()
+        remove_temp_folder()
+
+    def upload_fake_sample(self, filepath=None):
+        if not filepath:
+            self.filepath = make_fake_sample_file()
+            self.filename = random_string(8)
+        else:
+            self.filepath = filepath
+        fp = open(self.filepath, 'rb')
+        # compute hashes here
+        self.hashes = compute_hashes(fp.read())
+        # reset file pointer
+        fp.seek(0)
+        self.send_post_request(fp)
+        fp.close()
+
+    def send_post_request(self, fp):
+        self.response = self.client.post(
+            reverse_lazy('malware.upload'),
+            {
+                'sample': fp,
+                #'name': filename,
+                #'description': random_string(),
+            },
+            follow=True
+        )
 
     def test_can_upload(self):
-        # test can upload
+        # test can save sample in GridFS
         gridfs = connect_gridfs()
-        self._upload(self.file_path, self.file_name)
-        condition = {'md5': self.hashes.md5}
-        count = gridfs.find(condition).count()
+        self.upload_fake_sample()
+        count = gridfs.find({'md5': self.hashes.md5}).count()
         self.assertGreater(count, 0)
 
-        # test can not upload repeatedly
-        excepted_error = 'Duplicated sample.'
-        response = self._upload(self.file_path, self.file_name)
-        errors = response.context['form'].errors['sample']
-        self.assertIn(excepted_error, errors)
+        # test can not upload duplicated sample
+        # use the same file which just created
+        self.upload_fake_sample(self.filepath)
+        response = self.get_response()
+        expected_errors = 'Duplicated sample.'
+        form_all_errors = response.context['form'].errors['sample']
+        self.assertIn(expected_errors, form_all_errors)
 
     def test_list_view(self):
-        self._upload(self.file_path, self.file_name)
-        malwares = Sample.objects.all()
-        response = self.client.get(reverse_lazy('malware.list'))
-        self.assertEqual(response.status_code, 200)
-        for mal in response.context['malwares']:
-            self.assertIn(mal, malwares)
+        target = reverse_lazy('malware.list')
+        self.set_target(target)
+        self.set_target_model(Sample)
+
+        self.upload_fake_sample()
+        self.assert_response_status_code(200)
+        response = self.get_response()
+        self.assert_response_objects_count(response, 'malwares')
 
     def test_profile_view(self):
-        self._upload(self.file_path, self.file_name)
-        malware = Sample.objects.get(sha256=self.hashes.sha256)
+        self.upload_fake_sample()
+        sample = Sample.objects.get(sha256=self.hashes.sha256)
         response = self.client.get(
-            reverse_lazy('malware.profile', args=[malware.sha256])
+            reverse_lazy('malware.profile', args=[sample.sha256])
         )
-        self.assertEqual(response.context['malware'], malware)
+        self.assertEqual(response.context['malware'], sample)
 
     def test_can_update(self):
-        self._upload(self.file_path, self.file_name)
-        malware = Sample.objects.get(sha256=self.hashes.sha256)
-        new_file_name = random_string(8)
+        self.upload_fake_sample()
+        target = reverse_lazy('malware.update', args=[self.hashes.sha256])
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        random_type = random_string(8)
+        sample = Sample.objects.get(sha256=self.hashes.sha256)
         response = self.client.post(
-            reverse_lazy('malware.update', args=[malware.sha256]),
+            reverse_lazy('malware.update', args=[self.hashes.sha256]),
             {
-                #'name': new_file_name,
-                'type': malware.type,
-                'size': malware.size,
-                'crc32': malware.crc32,
-                'md5': malware.md5,
-                'sha1': malware.sha1,
-                'sha256': malware.sha256,
-                'sha512': malware.sha512,
-                'ssdeep': malware.ssdeep,
+                'type': random_type,
+                'size': sample.size,
+                'crc32': sample.crc32,
+                'md5': sample.md5,
+                'sha1': sample.sha1,
+                'sha256': sample.sha256,
+                'sha512': sample.sha512,
+                'ssdeep': sample.ssdeep,
             }
         )
-        try:
-            Sample.objects.get(sha256=self.hashes.sha256)
-        except Sample.DoesNotExist:
-            updated = False
-        else:
-            updated = True
-        self.assertTrue(updated)
+        sample = Sample.objects.get(sha256=self.hashes.sha256)
+        self.assertEqual(sample.type, random_type)
 
     def test_can_delete(self):
-        self._upload(self.file_path, self.file_name)
-        malware = Sample.objects.get(sha256=self.hashes.sha256)
+        self.upload_fake_sample()
+        sample = Sample.objects.get(sha256=self.hashes.sha256)
         self.client.post(
-            reverse_lazy('malware.delete', args=[malware.sha256]),
+            reverse_lazy('malware.delete', args=[sample.sha256]),
             {
-                'pk': malware.id
+                'pk': sample.id
             }
         )
         try:
