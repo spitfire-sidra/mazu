@@ -12,8 +12,13 @@ from django.utils.decorators import method_decorator
 from django.template import RequestContext
 from django.views.generic.edit import FormView
 
+from core.mixins import LoginRequiredMixin
+
 
 def index(request):
+    """
+    Function-based view for displaying index
+    """
     context = dict()
     if request.user.is_authenticated():
         return redirect(reverse_lazy('malware.list'))
@@ -25,6 +30,9 @@ def index(request):
 
 
 def auth(request):
+    """
+    Authentication
+    """
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -39,6 +47,12 @@ def auth(request):
 
 
 def signup(request):
+    """
+    If an user had login, then redirect to index.
+    """
+    if request.user.is_authenticated():
+        return redirect(reverse_lazy('malware.list'))
+
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -55,21 +69,20 @@ def signup(request):
     )
 
 
-class PasswordChangeView(FormView):
+class PasswordChangeView(FormView, LoginRequiredMixin):
+
+    """
+    A class-based handles changing password.
+    """
+
     form_class = PasswordChangeForm
     template_name = 'registration/password_change_form.html'
     success_url = reverse_lazy('user.passwd')
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(PasswordChangeView, self).dispatch(*args, **kwargs)
-
     def get_form(self, form_class):
         kwargs = self.get_form_kwargs()
         kwargs['user'] = self.request.user
-        return form_class(
-            **kwargs
-        )
+        return form_class(**kwargs)
 
     def form_valid(self, form):
         messages.success(self.request, 'Password Changed!')
