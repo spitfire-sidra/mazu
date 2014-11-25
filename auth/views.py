@@ -16,7 +16,7 @@ from django.views.generic.edit import FormView
 def index(request):
     context = dict()
     if request.user.is_authenticated():
-       return redirect(reverse_lazy('malware.list'))
+        return redirect(reverse_lazy('malware.list'))
     return render_to_response(
         'registration/login.html',
         context,
@@ -42,7 +42,7 @@ def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            new_user = form.save()
+            form.save()
             return redirect(reverse_lazy('auth.views.index'))
     else:
         form = UserCreationForm()
