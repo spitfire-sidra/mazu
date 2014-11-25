@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     'haystack',
     'djcelery',
     'core',
-    'auth',
+    'authentication',
     'authkey',
 	'samples',
     'channel',

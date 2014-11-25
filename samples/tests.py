@@ -102,7 +102,7 @@ class SampleTestCase(CoreTestCase):
         self.upload_fake_sample()
         self.assert_response_status_code(200)
         response = self.get_response()
-        self.assert_response_objects_count(response, 'malwares')
+        self.assert_response_objects_count(response, 'object_list')
 
     def test_profile_view(self):
         self.upload_fake_sample()
@@ -110,7 +110,7 @@ class SampleTestCase(CoreTestCase):
         response = self.client.get(
             reverse_lazy('malware.profile', args=[sample.sha256])
         )
-        self.assertEqual(response.context['malware'], sample)
+        self.assertEqual(response.context['object'], sample)
 
     def test_can_update(self):
         self.upload_fake_sample()

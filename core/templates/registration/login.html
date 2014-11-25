@@ -8,7 +8,7 @@
     {% endfor %}
 </ul>
 {% endif %}
-<form class="form-signin" method="post" action="{% url 'auth.views.auth' %}">
+<form class="form-signin" method="post" action="{% url 'authentication.views.auth' %}">
     {% csrf_token %}
     <h2>Please Sign In</h2>
     <input type="text" placeholder="Username" name="username" required="" autofocus="">

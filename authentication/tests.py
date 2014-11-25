@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.test import Client
 from django.test import RequestFactory
 
-from views import auth
+from authentication.views import auth
 
 
 class AuthTestCase(TestCase):
@@ -31,12 +31,12 @@ class AuthTestCase(TestCase):
         )
 
     def test_authenticate(self):
-        auth = reverse_lazy('auth.views.auth')
+        auth = reverse_lazy('authentication.views.auth')
         response = self.client.post(auth, self.post_data, follow=True)
         self.assertIsInstance(response.context['user'], User)
 
     def test_invalid_user(self):
-        auth = reverse_lazy('auth.views.auth')
+        auth = reverse_lazy('authentication.views.auth')
         self.post_data['password'] = 'wrong_password'
         response = self.client.post(auth, self.post_data, follow=True)
         self.assertIsInstance(response.context['user'], AnonymousUser)
