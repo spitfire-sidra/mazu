@@ -7,36 +7,38 @@ from django.test import Client
 from django.test import RequestFactory
 
 from authentication.views import auth
+from core.tests import random_string
 
 
 class AuthTestCase(TestCase):
+
     def setUp(self):
         self.factory = RequestFactory()
-        self.username = 'jacob'
-        self.password = 'jacob_top_secret'
-        self._create_user()
-        self._generate_post_data()
+        self.make_post_data()
+        self.create_fake_user()
 
-    def _generate_post_data(self):
+    def make_post_data(self):
+        self.username = 'jacob'
+        self.password = random_string(10)
         self.post_data = {
             'username': self.username,
             'password': self.password
         }
 
-    def _create_user(self):
+    def create_fake_user(self):
         self.user = User.objects.create_user(
-                username=self.username,
-                email='jacob@example',
-                password=self.password
+            username=self.username,
+            password=self.password,
+            email='jacob@example'
         )
 
     def test_authenticate(self):
-        auth = reverse_lazy('authentication.views.auth')
-        response = self.client.post(auth, self.post_data, follow=True)
+        target = reverse_lazy('authentication.views.auth')
+        response = self.client.post(target, self.post_data, follow=True)
         self.assertIsInstance(response.context['user'], User)
 
     def test_invalid_user(self):
-        auth = reverse_lazy('authentication.views.auth')
+        target = reverse_lazy('authentication.views.auth')
         self.post_data['password'] = 'wrong_password'
-        response = self.client.post(auth, self.post_data, follow=True)
+        response = self.client.post(target, self.post_data, follow=True)
         self.assertIsInstance(response.context['user'], AnonymousUser)
