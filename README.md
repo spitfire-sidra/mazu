@@ -14,18 +14,9 @@
 ### Ubuntu
 
 ```
-$ sudo apt-get install python-dev libxml2-dev libxslt-dev
 $ git clone https://github.com/PwnDoRa/mazu
 $ cd mazu
-$ pip install -r requirements.txt
-$ cp settings/production.example.py settings/production.py
-```
-
-Add a secret key in `settings/production.py`, like this:
-
-```
-# SECURITY WARNING: make sure to add the production secret in settings/production.py
-SECRET_KEY = '^v_m6li36$7*px46xw$)a(^&8_)sdfakfjkagu12-8=239r823ls**'
+$ sh deploy_mazu.sh
 ```
 
 ## USAGE
