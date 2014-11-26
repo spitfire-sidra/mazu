@@ -2,12 +2,19 @@
 from django.conf.urls import url
 from django.conf.urls import patterns
 
-from views import NotificationListView
-from views import NotificationDetailView
+from views import NotificationList
+from views import NotificationDetail
 
 
-urlpatterns = patterns(
-    '',
-    url(r'^list$', NotificationListView.as_view(), name='notification.list'),
-    url(r'^detail/(?P<pk>\d+)$',NotificationDetailView.as_view(), name='notification.detail'),
+urlpatterns = patterns('',
+    url(
+        r'^list$',
+        NotificationList,
+        name='notification.list'
+    ),
+    url(
+        r'^detail/(?P<pk>\d+)$',
+        NotificationDetail,
+        name='notification.detail'
+    ),
 )

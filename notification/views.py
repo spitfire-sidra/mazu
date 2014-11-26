@@ -10,39 +10,46 @@ from django.utils.decorators import method_decorator
 from django.template import RequestContext
 from django.contrib import messages
 
-from models import Notification
+from core.mixins import LoginRequiredMixin
+from notification.models import Notification
 
 
-class NotificationListView(ListView):
+class NotificationListView(ListView, LoginRequiredMixin):
+
+    """
+    Displaying all notification.
+    """
+
     model = Notification
     template_name = 'notification/list.html'
     paginate_by = 25
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(NotificationListView, self).dispatch(*args, **kwargs)
-
     def get_queryset(self):
-        return self.model.objects.filter(
-            user=self.request.user
-        )
+        return self.model.objects.filter(user=self.request.user)
 
 
-class NotificationDetailView(DetailView):
+class NotificationDetailView(DetailView, LoginRequiredMixin):
+
+    """
+    If an user click a link to a notification, then the notification will be
+    marked to read.
+    """
+
     model = Notification
     template_name = 'notification/detail.html'
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(NotificationDetailView, self).dispatch(*args, **kwargs)
-
     def get_object(self, *args, **kwargs):
-        obj = self.model.objects.get(
+        instance = self.model.objects.get(
             id=self.kwargs['pk'],
             user=self.request.user
         )
-        # Change read from False to True
-        if obj.read == False:
-            obj.read = True
-            obj.save()
-        return obj 
+
+        # change column 'read' from False to True
+        if instance.read == False:
+            instance.read = True
+            instance.save()
+        return instance
+
+
+NotificationList = NotificationListView.as_view()
+NotificationDetail = NotificationDetailView.as_view()

@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse_lazy
 
-from models import Notification
-from core.tests import *
-
+from core.tests import CoreTestCase
+from core.tests import random_string
+from notification.models import Notification
 
 class NotificationTestCase(CoreTestCase):
 
     def setUp(self):
         super(NotificationTestCase, self).setUp()
-        self._create()
+        self.set_target_model(Notification)
+        self.create_notification()
 
-    def _create(self):
+    def create_notification(self):
         self.subject = random_string(25)
         self.message = random_string(35)
         self.notification = Notification(
@@ -22,15 +23,26 @@ class NotificationTestCase(CoreTestCase):
         self.notification.save()
 
     def test_can_list(self):
-        response = self.client.get(reverse_lazy('notification.list'))
-        self.assertEqual(response.status_code, 200)
+        target = reverse_lazy('notification.list')
+        self.set_target(target)
+        self.assert_response_status_code(200)
 
-        count = Notification.objects.filter(user=self.user).count()
-        self.assertEqual(len(response.context['object_list']), count)
+        response = self.get_response()
+        self.assert_response_objects_count(
+            response,
+            'object_list',
+            user=self.user
+        )
 
     def test_can_show_detail(self):
-        self._create()
-        url = reverse_lazy('notification.detail', args=[self.notification.id])
-        response = self.client.get(url)
-        self.assertEqual(response.context['object'].subject, self.notification.subject)
-        self.assertEqual(response.context['object'].read, True)
+        target = reverse_lazy(
+            'notification.detail',
+            args=[self.notification.id]
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        response = self.get_response()
+
+        context_object = self.get_context_object(response, 'object')
+        self.assertEqual(context_object.subject, self.notification.subject)
+        self.assertEqual(context_object.read, True)

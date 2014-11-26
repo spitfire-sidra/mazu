@@ -76,7 +76,7 @@ class CoreTestCase(TestCase):
         """
         context_object = self.get_context_object(response, 'page_obj')
         if context_object:
-            return len(context_object.paginator)
+            return context_object.paginator.count
 
         context_object = self.get_context_object(response, object_name)
         if context_object:
