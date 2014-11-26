@@ -4,9 +4,9 @@ set -e
 #set -x
 
 # color flag
-red='\e[0;31m'
-yel='\e[1;33m'
-grn='\e[1;32m'
+RED='\e[0;31m'
+YEL='\e[1;33m'
+GRN='\e[1;32m'
 NC='\e[0m'
 
 
@@ -16,7 +16,7 @@ E_ROOT=1
 
 
 clear
-echo -e "${red}-= Mazu installation =-${NC}"
+echo -e "${RED}-= Mazu installation =-${NC}"
 echo "==> Here we go..."
 
 
@@ -42,11 +42,11 @@ cp settings/production.example.py settings/production.py
 
 
 echo "  > Generating production key..."
-pro_gen=$(/usr/bin/python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789") for i in range(50)])')
+PRO_GEN=$(/usr/bin/python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789") for i in range(50)])')
 
 # replace key in settings/production.py
-sed -i s/yoursecretkey/$pro_gen/g settings/production.py 
+sed -i s/yoursecretkey/$PRO_GEN/g settings/production.py 
 
 
-echo -e "  > Your key is ${yel}$pro_gen${NC}. And is now using in settings/production.py"
-echo -e "${grn}-= Great, now you're all set to go! =-${NC}"
+echo -e "  > Your key is ${YEL}$PRO_GEN${NC}. And is now using in settings/production.py"
+echo -e "${GRN}-= Great, now you're all set to go! =-${NC}"
