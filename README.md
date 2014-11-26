@@ -9,15 +9,7 @@
 - mongodb
 - libmagic
 
-## MAC OS X 10.9
-
-If your OS is above MAC OS X 10.9, pls unuse "cmd line argument hard error" first:
-
-```
-$ export ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future
-```
-
-## INSTALLATION (Ubuntu, MAC OS X)
+## INSTALLATION
 
 ### Ubuntu
 
@@ -29,21 +21,10 @@ $ pip install -r requirements.txt
 $ cp settings/production.example.py settings/production.py
 ```
 
-### MAC OS X
-
-```
-$ sudo brew install libxml2 libxslt libmagic
-$ git clone https://github.com/PwnDoRa/mazu
-$ cd mazu
-$ pip install -r requirements.txt
-$ cp settings/production.example.py settings/production.py
-```
-
-
 Add a secret key in `settings/production.py`, like this:
 
 ```
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: make sure to add the production secret in settings/production.py
 SECRET_KEY = '^v_m6li36$7*px46xw$)a(^&8_)sdfakfjkagu12-8=239r823ls**'
 ```
 
