@@ -6,19 +6,29 @@ from samples.models import SampleSource
 
 
 class ChannelForm(forms.ModelForm):
+
+    """
+    Form class used for creating, updating a channel.
+    """
+
     class Meta:
         model = Channel
-        fields = ['default', 'name', 'host', 'port', 'ident', 'secret', 'pubchans', 'subchans', 'source']
-
+        fields = [
+            'default', 'name', 'host', 'port', 'identity',
+            'secret', 'pubchans', 'subchans', 'source'
+        ]
 
     def __init__(self, *args, **kwargs):
+        # get current user
         self.user = kwargs.pop('user')
         super(ChannelForm, self).__init__(*args, **kwargs)
-        self.fields['source'] = forms.ModelChoiceField(
-            queryset=self.get_source_choices(self.user),
-            label='Source',
+        # add a filed
+        # only offers sources owned by the user
+        self.fields['source'] = self.source_field()
+
+    def source_field(self):
+        return forms.ModelChoiceField(
+            queryset=SampleSource.objects.filter(user=self.user),
+            label='Sample Source',
             required=False
         )
-
-    def get_source_choices(self, user):
-        return SampleSource.objects.filter(user=user)

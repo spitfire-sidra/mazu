@@ -21,10 +21,10 @@ def publisher():
 
     for j in jobs:
         for r in gridfs.find({'sha256': j.malware.sha256}, limit=1):
-            malware = r 
+            malware = r
 
         try:
-            hpc = hpfeeds.new(j.channel.host, int(j.channel.port), j.channel.ident.encode(), j.channel.secret.encode())
+            hpc = hpfeeds.new(j.channel.host, int(j.channel.port), j.channel.identity.encode(), j.channel.secret.encode())
         except Exception as e:
             logger.debug(e)
         else:

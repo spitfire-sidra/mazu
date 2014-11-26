@@ -95,7 +95,7 @@ class SampleUploadForm(forms.Form):
         self.fields['channels'] = self.channels_field(self.user)
 
     def channels_field(self, user):
-        queryset = Channel.objects.filter(owner=user)
+        queryset = Channel.objects.filter(user=user)
         # get all default channels
         initial = (r for r in queryset if r.default)
         params = {
@@ -194,7 +194,7 @@ class SamplePublishForm(forms.Form):
 
     def channels_field(self):
         # user are allowed to publish samples on their own channels
-        queryset = Channel.objects.filter(owner=self.user)
+        queryset = Channel.objects.filter(user=self.user)
         initial = (chann for chann in queryset if chann.default)
         field = forms.ModelMultipleChoiceField(
             required=False,

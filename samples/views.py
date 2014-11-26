@@ -133,7 +133,7 @@ class SampleUpdateView(UpdateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        # only the owner of sample can update sample attributes
+        # only the user of sample can update sample attributes
         sample = self.get_object()
         if sample.user != self.request.user:
             raise HttpResponseForbidden
@@ -185,7 +185,7 @@ class SampleDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        # only the owner of scan can delete
+        # only the user of scan can delete
         sample = self.get_object()
         if sample.user != self.request.user:
             raise HttpResponseForbidden

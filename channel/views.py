@@ -1,69 +1,45 @@
 # -*- coding: utf-8 -*-
-import json
-import base64
-import binascii
-import logging
-
-from bson.json_util import dumps
-
 from django.http import Http404
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.views.generic.edit import FormView
+from django.http import HttpResponseForbidden
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import UpdateView
 from django.views.generic.edit import DeleteView
 from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
 from django.core.urlresolvers import reverse_lazy
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from lib import hpfeeds
-from forms import ChannelForm
-from models import Channel
-from models import Queue
+from core.mixins import LoginRequiredMixin
 from core.mongodb import connect_gridfs
+from channel.forms import ChannelForm
+from channel.models import Channel
+from channel.models import Queue
 
 
-logger = logging.getLogger(__name__)
-
-
-class ChannelCreateView(CreateView):
+class ChannelCreateView(CreateView, LoginRequiredMixin):
     model = Channel
     form_class = ChannelForm
     template_name = 'channel/create.html'
     success_url = reverse_lazy('channel.list')
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(ChannelCreateView, self).dispatch(*args, **kwargs)
-
     def get_form(self, form_class):
         kwargs = self.get_form_kwargs()
         kwargs['user'] = self.request.user
-        return form_class(
-            **kwargs
-        )
+        return form_class(**kwargs)
 
     def form_valid(self, form):
-        # Save the owner of channel
-        form.instance.owner = self.request.user
+        # save the user of channel
+        form.instance.user = self.request.user
         return super(ChannelCreateView, self).form_valid(form)
 
 
-class ChannelListView(ListView):
+class ChannelListView(ListView, LoginRequiredMixin):
     model = Channel
     template_name = 'channel/list.html'
     context_object_name = 'channels'
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(ChannelListView, self).dispatch(*args, **kwargs)
-
     def get_queryset(self):
-        return self.model.objects.filter(owner=self.request.user)
+        return self.model.objects.filter(user=self.request.user)
 
 
 class ChannelUpdateView(UpdateView):
@@ -74,17 +50,15 @@ class ChannelUpdateView(UpdateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        obj = self.get_object()
-        if obj.owner != self.request.user:
-            raise Http404
+        instance = self.get_object()
+        if instance.user != self.request.user:
+            raise HttpResponseForbidden
         return super(ChannelUpdateView, self).dispatch(*args, **kwargs)
 
     def get_form(self, form_class):
         kwargs = self.get_form_kwargs()
         kwargs['user'] = self.request.user
-        return form_class(
-            **kwargs
-        )
+        return form_class(**kwargs)
 
 
 class ChannelDeleteView(DeleteView):
@@ -94,20 +68,16 @@ class ChannelDeleteView(DeleteView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        obj = self.get_object()
-        if obj.owner != self.request.user:
-            raise Http404
+        instance = self.get_object()
+        if instance.user != self.request.user:
+            raise HttpResponseForbidden
         return super(ChannelDeleteView, self).dispatch(*args, **kwargs)
 
 
-class QueueListView(ListView):
+class QueueListView(ListView, LoginRequiredMixin):
     model = Queue
     template_name = 'queue/list.html'
     context_object_name = 'queues'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(QueueListView, self).dispatch(*args, **kwargs)
 
     def get_queryset(self):
         return self.model.objects.filter(malware__user=self.request.user)
