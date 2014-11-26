@@ -22,6 +22,7 @@ def index(request):
     context = dict()
     if request.user.is_authenticated():
         return redirect(reverse_lazy('malware.list'))
+
     return render_to_response(
         'registration/login.html',
         context,
@@ -37,12 +38,12 @@ def auth(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect(reverse_lazy('malware.list'))
+        if user is not None and user.is_active:
+            login(request, user)
+            return redirect(reverse_lazy('malware.list'))
         else:
             messages.error(request, 'invalid login')
+
     return redirect(reverse_lazy('authentication.views.index'))
 
 
@@ -58,13 +59,10 @@ def signup(request):
         if form.is_valid():
             form.save()
             return redirect(reverse_lazy('authentication.views.index'))
-    else:
-        form = UserCreationForm()
+
     return render_to_response(
         "registration/register.html",
-        {
-            'form': form,
-        },
+        {'form': UserCreationForm(),},
         context_instance=RequestContext(request)
     )
 
