@@ -6,11 +6,11 @@ from django.test import TestCase
 from django.test import Client
 from django.test import RequestFactory
 
-from account.views import auth
 from core.tests import random_string
+from account.views import auth
 
 
-class AuthTestCase(TestCase):
+class AccountTestCase(TestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
