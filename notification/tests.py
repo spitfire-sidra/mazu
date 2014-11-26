@@ -5,6 +5,7 @@ from core.tests import CoreTestCase
 from core.tests import random_string
 from notification.models import Notification
 
+
 class NotificationTestCase(CoreTestCase):
 
     def setUp(self):
