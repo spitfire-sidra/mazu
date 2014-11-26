@@ -11,17 +11,16 @@ from haystack.views import basic_search
 
 admin.autodiscover()
 
-urlpatterns = patterns(
-    '',
-    url(r'^$', 'authentication.views.index'),
-    url(r'^auth$', 'authentication.views.auth'),
-    url(r'^signup$', 'authentication.views.signup'),
-    url(r'^passwd$', 'authentication.views.passwd', name='user.passwd'),
+urlpatterns = patterns('',
+    url(r'^$', 'account.views.index'),
+    url(r'^auth$', 'account.views.auth'),
+    url(r'^signup$', 'account.views.signup'),
+    url(r'^passwd$', 'account.views.passwd', name='user.passwd'),
     url(r'^logout',  logout_then_login, name='user.logout'),
 )
 
 
-urlpatterns += patterns(
+urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', login_required(basic_search)),
     url(r'^samples/', include('samples.urls')),

@@ -44,7 +44,7 @@ def auth(request):
         else:
             messages.error(request, 'invalid login')
 
-    return redirect(reverse_lazy('authentication.views.index'))
+    return redirect(reverse_lazy('account.views.index'))
 
 
 def signup(request):
@@ -58,7 +58,7 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect(reverse_lazy('authentication.views.index'))
+            return redirect(reverse_lazy('account.views.index'))
 
     return render_to_response(
         "registration/register.html",
