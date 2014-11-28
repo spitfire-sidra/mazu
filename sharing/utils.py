@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from models import Channel
+from models import HPFeedsHPFeedsChannel
 
 def get_channels():
     mapping = dict()
-    for c in Channel.objects.all():
+    for c in HPFeedsHPFeedsChannel.objects.all():
         key = '{}-{}'.format(c.owner.id, c.name)
         mapping.update({
             key: {

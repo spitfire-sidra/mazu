@@ -4,7 +4,7 @@ import logging
 from celery import shared_task
 
 from lib import hpfeeds
-from models import Queue
+from models import HPFeedsPubQueue
 from core.mongodb import connect_gridfs
 
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def publisher():
-    jobs = Queue.objects.filter(published=False)
+    jobs = HPFeedsPubQueue.objects.filter(published=False)
     try:
         gridfs = connect_gridfs()
     except Exception as e:

@@ -5,8 +5,8 @@ from django import forms
 from django.forms import ValidationError
 from django.contrib.auth.models import User
 
-from sharing.models import Channel
-from sharing.models import Queue
+from sharing.models import HPFeedsChannel
+from sharing.models import HPFeedsPubQueue
 
 from core.utils import compute_hashes
 from samples.models import Sample
@@ -95,7 +95,7 @@ class SampleUploadForm(forms.Form):
         self.fields['channels'] = self.channels_field(self.user)
 
     def channels_field(self, user):
-        queryset = Channel.objects.filter(user=user)
+        queryset = HPFeedsChannel.objects.filter(user=user)
         # get all default channels
         initial = (r for r in queryset if r.default)
         params = {
@@ -194,7 +194,7 @@ class SamplePublishForm(forms.Form):
 
     def channels_field(self):
         # user are allowed to publish samples on their own channels
-        queryset = Channel.objects.filter(user=self.user)
+        queryset = HPFeedsChannel.objects.filter(user=self.user)
         initial = (chann for chann in queryset if chann.default)
         field = forms.ModelMultipleChoiceField(
             required=False,
@@ -217,7 +217,7 @@ class SamplePublishForm(forms.Form):
             return False
         else:
             for chann in self.cleaned_data['channels']:
-                Queue(malware=sample, channel=chann).save()
+                HPFeedsPubQueue(malware=sample, channel=chann).save()
             return True
 
 

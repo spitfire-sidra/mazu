@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 from django import forms
 
-from models import Channel
+from models import HPFeedsChannel
 from samples.models import SampleSource
 
 
-class ChannelForm(forms.ModelForm):
+class HPFeedsChannelForm(forms.ModelForm):
 
     """
     Form class used for creating, updating a channel.
     """
 
     class Meta:
-        model = Channel
+        model = HPFeedsChannel
         fields = [
             'default', 'name', 'host', 'port', 'identity',
             'secret', 'pubchans', 'subchans', 'source'
@@ -21,7 +21,7 @@ class ChannelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # get current user
         self.user = kwargs.pop('user')
-        super(ChannelForm, self).__init__(*args, **kwargs)
+        super(HPFeedsChannelForm, self).__init__(*args, **kwargs)
         # add a filed
         # only offers sources owned by the user
         self.fields['source'] = self.source_field()
