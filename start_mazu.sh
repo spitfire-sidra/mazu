@@ -28,6 +28,7 @@ read -p "  > Type in port number that runs mazu : " port
 sed -i s/iptochange/$ip/g settings/production.py
 
 ./manage.py runserver $ip:$port &
+sleep 5
 
 # start celery worker
 echo "  > Starting celery worker..."
