@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from models import HPFeedsHPFeedsChannel
+from sharing.models import HPFeedsHPFeedsChannel
 
 def get_channels():
     mapping = dict()
@@ -20,6 +20,7 @@ def get_channels():
 
 
 class DictDiffer(object):
+
     """
     A dictionary difference calculator
     Originally posted on:
@@ -32,6 +33,7 @@ class DictDiffer(object):
     (3) keys same in both but changed values
     (4) keys same in both and unchanged values
     """
+
     def __init__(self, current_dict, past_dict):
         self.current_dict, self.past_dict = current_dict, past_dict
         self.current_keys, self.past_keys = [

@@ -34,13 +34,13 @@ class HPFeedsChannelTestCase(CoreTestCase):
     def test_list_view(self):
         response = self.client.get(reverse_lazy('channel.list'))
         channels = HPFeedsChannel.objects.all()
-        for c in response.context['channels']:
+        for c in response.context['object_list']:
             self.assertIn(c, channels)
 
     def test_display_own_channels(self):
         response = self.client.get(reverse_lazy('channel.list'))
         count = HPFeedsChannel.objects.filter(user=self.user).count()
-        self.assertEqual(count, len(response.context['channels']))
+        self.assertEqual(count, len(response.context['object_list']))
 
     def test_can_create(self):
         self.make_post_data()

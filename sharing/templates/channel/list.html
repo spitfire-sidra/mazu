@@ -1,4 +1,4 @@
-{% extends 'channel_base.html' %}
+{% extends 'sharing_base.html' %}
 
 {% block content %}
 <table class="ui basic table">
@@ -16,22 +16,22 @@
         </tr>
     </thead>
     <tbody>
-        {% for channel in channels %}
+        {% for object in object_list %}
         <tr>
-            <td>{{ channel.default }}</td>
-            <td>{{ channel.name }}</td>
-            <td>{{ channel.host }}</td>
-            <td>{{ channel.port }}</td>
-            <td>{{ channel.identity }}</td>
+            <td>{{ object.default }}</td>
+            <td>{{ object.name }}</td>
+            <td>{{ object.host }}</td>
+            <td>{{ object.port }}</td>
+            <td>{{ object.identity }}</td>
             <td>
-                {{ channel.secret }}
+                {{ object.secret }}
             </td>
-            <td>{{ channel.subchans }}</td>
-            <td>{{ channel.pubchans }}</td>
+            <td>{{ object.subchans }}</td>
+            <td>{{ object.pubchans }}</td>
             <td>
                 <div class="ui tiny buttons">
-                    <a class="ui button" href='{% url 'channel.update' channel.id %}'><i class="ui edit icon"></i></a>
-                    <a class="ui button" href='{% url 'channel.delete' channel.id %}'><i class="ui trash icon"></i></a>
+                    <a class="ui button" href='{% url 'channel.update' object.id %}'><i class="ui edit icon"></i></a>
+                    <a class="ui button" href='{% url 'channel.delete' object.id %}'><i class="ui trash icon"></i></a>
                 </div>
             </td>
         </tr>
@@ -43,7 +43,7 @@
     </tbody>
     <tfoot>
         <tr>
-            <th colspan='9'>Total: {{ channels.count }}</th>
+            <th colspan='9'>Total: {{ object_list.count }}</th>
         </tr>
     </tfoot>
 </table>

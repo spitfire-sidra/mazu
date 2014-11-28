@@ -43,7 +43,7 @@ class HPFeedsPubQueue(TimeStampedModel):
     This model stores all samples that are waiting for publishing.
     """
 
-    malware = models.ForeignKey('samples.Sample')
+    sample = models.ForeignKey('samples.Sample')
     channel = models.ForeignKey(HPFeedsChannel)
     published = models.BooleanField(default=False)
 

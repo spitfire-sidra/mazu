@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.http import Http404
 from django.http import HttpResponseForbidden
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import UpdateView
@@ -9,14 +8,19 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
+from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
-from core.mongodb import connect_gridfs
 from sharing.forms import HPFeedsChannelForm
 from sharing.models import HPFeedsChannel
 from sharing.models import HPFeedsPubQueue
 
 
 class HPFeedsChannelCreateView(CreateView, LoginRequiredMixin):
+
+    """
+    A view class for creating HPFeeds channels.
+    """
+
     model = HPFeedsChannel
     form_class = HPFeedsChannelForm
     template_name = 'channel/create.html'
@@ -34,26 +38,28 @@ class HPFeedsChannelCreateView(CreateView, LoginRequiredMixin):
 
 
 class HPFeedsChannelListView(ListView, LoginRequiredMixin):
+
+    """
+    Listing all channels that own by an user.
+    """
+
     model = HPFeedsChannel
     template_name = 'channel/list.html'
-    context_object_name = 'channels'
 
     def get_queryset(self):
         return self.model.objects.filter(user=self.request.user)
 
 
-class HPFeedsChannelUpdateView(UpdateView):
-    model = HPFeedsChannel
-    template_name = 'channel/update.html'
-    form_class = HPFeedsChannelForm
-    success_url = reverse_lazy('channel.list')
+class HPFeedsChannelUpdateView(UpdateView, OwnerRequiredMixin):
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user != self.request.user:
-            raise HttpResponseForbidden
-        return super(HPFeedsChannelUpdateView, self).dispatch(*args, **kwargs)
+    """
+    UpdateView for HPFeedsChannel.
+    """
+
+    model = HPFeedsChannel
+    form_class = HPFeedsChannelForm
+    template_name = 'channel/update.html'
+    success_url = reverse_lazy('channel.list')
 
     def get_form(self, form_class):
         kwargs = self.get_form_kwargs()
@@ -61,23 +67,26 @@ class HPFeedsChannelUpdateView(UpdateView):
         return form_class(**kwargs)
 
 
-class HPFeedsChannelDeleteView(DeleteView):
+class HPFeedsChannelDeleteView(DeleteView, OwnerRequiredMixin):
+
+    """
+    DeleteView for HPFeedsChannel
+    """
+
     model = HPFeedsChannel
     template_name = 'channel/delete.html'
     success_url = reverse_lazy('channel.list')
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user != self.request.user:
-            raise HttpResponseForbidden
-        return super(HPFeedsChannelDeleteView, self).dispatch(*args, **kwargs)
-
 
 class HPFeedsPubQueueListView(ListView, LoginRequiredMixin):
+
+    """
+    Listing publishing queue of an user.
+    Users are allowed to review queue own by them.
+    """
+
     model = HPFeedsPubQueue
     template_name = 'queue/list.html'
-    context_object_name = 'queues'
 
     def get_queryset(self):
         return self.model.objects.filter(sample__user=self.request.user)
