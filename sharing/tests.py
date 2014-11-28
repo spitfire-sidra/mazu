@@ -3,7 +3,7 @@ import random
 
 from django.core.urlresolvers import reverse_lazy
 
-from channel.models import Channel
+from sharing.models import Channel
 from core.tests import CoreTestCase
 from core.tests import random_string
 

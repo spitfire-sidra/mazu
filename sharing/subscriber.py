@@ -17,7 +17,7 @@ from django.core.urlresolvers import reverse_lazy
 from lib import hpfeeds
 from lib.dictdiffer import DictDiffer
 
-from channel.utils import get_channels
+from sharing.utils import get_channels
 from samples.utils import save_malware
 from notification.models import Notification
 

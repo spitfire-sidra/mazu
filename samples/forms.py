@@ -5,8 +5,8 @@ from django import forms
 from django.forms import ValidationError
 from django.contrib.auth.models import User
 
-from channel.models import Channel
-from channel.models import Queue
+from sharing.models import Channel
+from sharing.models import Queue
 
 from core.utils import compute_hashes
 from samples.models import Sample

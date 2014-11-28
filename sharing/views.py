@@ -11,9 +11,9 @@ from django.utils.decorators import method_decorator
 
 from core.mixins import LoginRequiredMixin
 from core.mongodb import connect_gridfs
-from channel.forms import ChannelForm
-from channel.models import Channel
-from channel.models import Queue
+from sharing.forms import ChannelForm
+from sharing.models import Channel
+from sharing.models import Queue
 
 
 class ChannelCreateView(CreateView, LoginRequiredMixin):

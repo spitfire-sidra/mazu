@@ -11,11 +11,12 @@ from haystack.views import basic_search
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^$', 'account.views.auth'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', login_required(basic_search)),
     url(r'^account/', include('account.urls')),
     url(r'^samples/', include('samples.urls')),
     url(r'^authkey/', include('authkey.urls')),
-    url(r'^channel/', include('channel.urls')),
+    url(r'^channel/', include('sharing.urls')),
     url(r'^notification/', include('notification.urls')),
 )

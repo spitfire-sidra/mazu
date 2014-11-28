@@ -43,7 +43,7 @@ INSTALLED_APPS = (
     'account',
     'authkey',
 	'samples',
-    'channel',
+    'sharing',
     'notification',
 )
 
