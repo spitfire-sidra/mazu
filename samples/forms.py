@@ -217,7 +217,7 @@ class SamplePublishForm(forms.Form):
             return False
         else:
             for chann in self.cleaned_data['channels']:
-                HPFeedsPubQueue(malware=sample, channel=chann).save()
+                HPFeedsPubQueue(sample=sample, channel=chann).save()
             return True
 
 

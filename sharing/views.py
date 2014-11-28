@@ -80,5 +80,5 @@ class HPFeedsPubQueueListView(ListView, LoginRequiredMixin):
     context_object_name = 'queues'
 
     def get_queryset(self):
-        return self.model.objects.filter(malware__user=self.request.user)
+        return self.model.objects.filter(sample__user=self.request.user)
 

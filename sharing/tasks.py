@@ -20,15 +20,15 @@ def publisher():
         logger.debug(e)
 
     for j in jobs:
-        for r in gridfs.find({'sha256': j.malware.sha256}, limit=1):
-            malware = r
+        for r in gridfs.find({'sha256': j.sample.sha256}, limit=1):
+            sample = r
 
         try:
             hpc = hpfeeds.new(j.channel.host, int(j.channel.port), j.channel.identity.encode(), j.channel.secret.encode())
         except Exception as e:
             logger.debug(e)
         else:
-            data = malware.read()
+            data = sample.read()
             hpc.publish([j.channel.pubchans], data)
             error_msg = hpc.wait()
             if error_msg:
