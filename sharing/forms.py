@@ -28,7 +28,7 @@ class HPFeedsChannelForm(forms.ModelForm):
 
     def source_field(self):
         return forms.ModelChoiceField(
-            queryset=SampleSource.objects.filter(user=self.user),
+            required=False,
             label='Sample Source',
-            required=False
+            queryset=SampleSource.objects.filter(user=self.user)
         )

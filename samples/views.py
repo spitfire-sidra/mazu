@@ -3,10 +3,8 @@ import logging
 
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render
-from django.utils.decorators import method_decorator
 from django.http import Http404
 from django.http import HttpResponse
-from django.http import HttpResponseForbidden
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormMixin
@@ -15,8 +13,8 @@ from django.views.generic.edit import CreateView
 from django.views.generic.edit import UpdateView
 from django.views.generic.edit import DeleteView
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 
+from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
 from core.mongodb import get_compressed_file
 from samples.utils import delete_sample
@@ -33,7 +31,6 @@ from samples.forms import SampleSourceForm
 logger = logging.getLogger(__name__)
 
 
-@login_required
 def download(request, slug):
     """
     A function-based view for downloading sample
@@ -120,24 +117,17 @@ class SampleUploadView(FormView, LoginRequiredMixin):
         return super(SampleUploadView, self).form_valid(form)
 
 
-class SampleUpdateView(UpdateView):
+class SampleUpdateView(UpdateView, OwnerRequiredMixin):
 
     """
     A class-based view for updating sample attributes.
+    Only the user of sample can update sample attributes
     """
 
     model = Sample
-    template_name = 'sample/update.html'
     form_class = SampleUpdateForm
+    template_name = 'sample/update.html'
     success_url = reverse_lazy('malware.list')
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        # only the user of sample can update sample attributes
-        sample = self.get_object()
-        if sample.user != self.request.user:
-            raise HttpResponseForbidden
-        return super(SampleUpdateView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
         return self.model.objects.get(slug=self.kwargs['slug'])
@@ -173,23 +163,16 @@ class SampleListView(ListView, FormMixin, LoginRequiredMixin):
         return self.get(request, *args, **kwargs)
 
 
-class SampleDeleteView(DeleteView):
+class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
     A class-based view for deleting a sample.
+    Only the owner can delete the sample.
     """
 
     model = Sample
     template_name = 'sample/delete.html'
     success_url = reverse_lazy('malware.list')
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        # only the user of scan can delete
-        sample = self.get_object()
-        if sample.user != self.request.user:
-            raise HttpResponseForbidden
-        return super(SampleDeleteView, self).dispatch(*args, **kwargs)
 
     def get_object(self, **kwargs):
         return self.model.objects.get(slug=self.kwargs['slug'])
@@ -231,10 +214,11 @@ class SampleSourceCreateView(CreateView, LoginRequiredMixin):
         return super(SampleSourceCreateView, self).form_valid(form)
 
 
-class SampleSourceUpdateView(UpdateView):
+class SampleSourceUpdateView(UpdateView, OwnerRequiredMixin):
 
     """
-    UpdateView for SampleSource
+    UpdateView for SampleSource.
+    Users can a source which owned by them.
     """
 
     model = SampleSource
@@ -242,14 +226,6 @@ class SampleSourceUpdateView(UpdateView):
     form_class = SampleSourceForm
     template_name = 'sample_source/update.html'
     success_url = reverse_lazy('source.list')
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        # users can a source which owned by them
-        source = self.get_object()
-        if source.user != self.request.user:
-            raise HttpResponseForbidden
-        return super(SampleSourceUpdateView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
         return self.model.objects.get(
@@ -272,7 +248,7 @@ class SampleSourceListView(ListView, LoginRequiredMixin):
         return self.model.objects.filter(user=self.request.user)
 
 
-class SampleSourceDeleteView(DeleteView):
+class SampleSourceDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
     DeleteView for SampleSource
@@ -282,13 +258,6 @@ class SampleSourceDeleteView(DeleteView):
     template_name = 'sample_source/delete.html'
     success_url = reverse_lazy('source.list')
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        source = self.get_object()
-        if source.user != self.request.user:
-            raise HttpResponseForbidden
-        return super(SampleSourceDeleteView, self).dispatch(*args, **kwargs)
-
     def get_object(self, **kwargs):
         return self.model.objects.get(
             slug=self.kwargs['slug'],
@@ -296,7 +265,7 @@ class SampleSourceDeleteView(DeleteView):
         )
 
 
-class SampleSourceDetailView(DetailView):
+class SampleSourceDetailView(DetailView, OwnerRequiredMixin):
 
     """
     DetailView for SampleSource
@@ -304,13 +273,6 @@ class SampleSourceDetailView(DetailView):
 
     model = SampleSource
     template_name = 'sample_source/detail.html'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        source = self.get_object()
-        if source.user != self.request.user:
-            raise HttpResponseForbidden
-        return super(SampleSourceDetailView, self).dispatch(*args, **kwargs)
 
     def get_object(self, **kwargs):
         return self.model.objects.get(
