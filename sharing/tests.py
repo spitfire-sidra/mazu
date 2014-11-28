@@ -12,6 +12,7 @@ class HPFeedsChannelTestCase(CoreTestCase):
 
     def setUp(self):
         super(HPFeedsChannelTestCase, self).setUp()
+        self.set_target_model(HPFeedsChannel)
         self.create_fake_channel()
 
     def make_post_data(self):
@@ -32,33 +33,41 @@ class HPFeedsChannelTestCase(CoreTestCase):
         HPFeedsChannel(**self.channel).save()
 
     def test_list_view(self):
-        response = self.client.get(reverse_lazy('channel.list'))
-        channels = HPFeedsChannel.objects.all()
-        for c in response.context['object_list']:
-            self.assertIn(c, channels)
-
-    def test_display_own_channels(self):
-        response = self.client.get(reverse_lazy('channel.list'))
-        count = HPFeedsChannel.objects.filter(user=self.user).count()
-        self.assertEqual(count, len(response.context['object_list']))
+        self.set_target(reverse_lazy('channel.list'))
+        self.assert_response_status_code(200)
+        response = self.get_response()
+        self.assert_response_objects_count(
+            response,
+            'object_list',
+            user=self.user
+        )
 
     def test_can_create(self):
+        expected = HPFeedsChannel.objects.all().count() + 1
         self.make_post_data()
-        expected_count = HPFeedsChannel.objects.all().count() + 1
         self.client.post(reverse_lazy('channel.create'), self.channel)
         count = HPFeedsChannel.objects.all().count()
-        self.assertEqual(count, expected_count)
+        self.assertEqual(count, expected)
 
     def test_can_update(self):
-        pk = HPFeedsChannel.objects.get(name=self.channel['name'], user=self.user).id
+        object_id = HPFeedsChannel.objects.get(
+            name=self.channel['name'],
+            user=self.user
+        ).id
         self.make_post_data()
-        self.client.post(reverse_lazy('channel.update', args=[pk]), self.channel)
-        updated_channel = HPFeedsChannel.objects.get(id=pk)
-        self.assertEqual(updated_channel.name, self.channel['name'])
+        self.client.post(
+            reverse_lazy('channel.update', args=[object_id]),
+            self.channel
+        )
+        updated = HPFeedsChannel.objects.get(id=object_id)
+        self.assertEqual(updated.name, self.channel['name'])
 
     def test_can_delete(self):
-        expected_count = HPFeedsChannel.objects.all().count() - 1
-        pk = HPFeedsChannel.objects.get(name=self.channel['name'], user=self.user).id
-        self.client.post(reverse_lazy('channel.delete', args=[pk]))
+        object_id = HPFeedsChannel.objects.get(
+            name=self.channel['name'],
+            user=self.user
+        ).id
+        expected = HPFeedsChannel.objects.all().count() - 1
+        self.client.post(reverse_lazy('channel.delete', args=[object_id]))
         count = HPFeedsChannel.objects.all().count()
-        self.assertEqual(count, expected_count)
+        self.assertEqual(count, expected)
