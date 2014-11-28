@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from django.http import HttpResponseForbidden
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import UpdateView
 from django.views.generic.edit import DeleteView
 from django.views.generic.list import ListView
 from django.core.urlresolvers import reverse_lazy
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 
 from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
