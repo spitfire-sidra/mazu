@@ -108,8 +108,8 @@ class CoreTestCase(TestCase):
             expected_count = self.model.objects.filter(**kwargs).count()
         else:
             expected_count = self.model.objects.all().count()
-        objects_count = self.try_get_context_object_count(response, object_name)
-        self.assertEqual(objects_count, expected_count)
+        count = self.try_get_context_object_count(response, object_name)
+        self.assertEqual(count, expected_count)
 
 
 class MongodbTestCase(TestCase):
