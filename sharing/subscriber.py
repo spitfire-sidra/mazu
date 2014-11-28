@@ -14,12 +14,12 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 from django.db import connection
 from django.core.urlresolvers import reverse_lazy
 
-from lib import hpfeeds
-from lib.dictdiffer import DictDiffer
-
-from sharing.utils import get_channels
-from samples.utils import save_malware
 from notification.models import Notification
+from samples.utils import save_malware
+from sharing.modules import hpfeeds
+from sharing.utils import DictDiffer
+from sharing.utils import get_channels
+
 
 
 SUBJECT='YOU GOT A NEW MALWARE'
