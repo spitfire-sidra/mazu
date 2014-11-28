@@ -20,7 +20,7 @@ class HPFeedsChannelCreateView(CreateView, LoginRequiredMixin):
 
     model = HPFeedsChannel
     form_class = HPFeedsChannelForm
-    template_name = 'channel/create.html'
+    template_name = 'hpfeeds_channel/create.html'
     success_url = reverse_lazy('channel.list')
 
     def get_form(self, form_class):
@@ -41,7 +41,7 @@ class HPFeedsChannelListView(ListView, LoginRequiredMixin):
     """
 
     model = HPFeedsChannel
-    template_name = 'channel/list.html'
+    template_name = 'hpfeeds_channel/list.html'
 
     def get_queryset(self):
         return self.model.objects.filter(user=self.request.user)
@@ -55,7 +55,7 @@ class HPFeedsChannelUpdateView(UpdateView, OwnerRequiredMixin):
 
     model = HPFeedsChannel
     form_class = HPFeedsChannelForm
-    template_name = 'channel/update.html'
+    template_name = 'hpfeeds_channel/update.html'
     success_url = reverse_lazy('channel.list')
 
     def get_form(self, form_class):
@@ -71,7 +71,7 @@ class HPFeedsChannelDeleteView(DeleteView, OwnerRequiredMixin):
     """
 
     model = HPFeedsChannel
-    template_name = 'channel/delete.html'
+    template_name = 'hpfeeds_channel/delete.html'
     success_url = reverse_lazy('channel.list')
 
 
@@ -83,7 +83,7 @@ class HPFeedsPubQueueListView(ListView, LoginRequiredMixin):
     """
 
     model = HPFeedsPubQueue
-    template_name = 'queue/list.html'
+    template_name = 'hpfeeds_pubqueue/list.html'
 
     def get_queryset(self):
         return self.model.objects.filter(sample__user=self.request.user)
