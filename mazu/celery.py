@@ -13,12 +13,12 @@ from settings.celery_settings import CELERY_RESULT_BACKEND
 
 
 mazu_tasks = {
-    'run-all-widgets': {
+    'run_all_widgets': {
         'task': 'samples.tasks.run_all_widgets',
         'schedule': crontab(hour=21, minute=30),
     },
-    'exec-publisher': {
-        'task': 'channel.tasks.publisher',
+    'check_hpfeeds_pubqueue': {
+        'task': 'sharing.tasks.check_hpfeeds_pubqueue',
         'schedule': crontab(minute='*/3'),
     },
 }
@@ -26,7 +26,7 @@ mazu_tasks = {
 app = Celery(CELERY_APPNAME)
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.update(
-    BROKER_URL = CELERY_BROKER,
+    BROKER_URL=CELERY_BROKER,
     CELERY_RESULT_BACKEND=CELERY_RESULT_BACKEND,
     CELERYBEAT_SCHEDULE=mazu_tasks
 )

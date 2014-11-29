@@ -57,7 +57,7 @@ def save_sample(buf, **kwargs):
     try to save these arguments as attributes of the sample. Keyword argument
     'md5' would be ignored, because mongodb also saves md5 in GridFS.
 
-    >>> save_sample_gridfs('HelloWorld!', user='spitfire', age='18 forever')
+    >>> save_sample('HelloWorld!', user='spitfire', age='18 forever')
     True
     """
     ignored_attrs = ('md5')
