@@ -25,7 +25,7 @@ class HPFeedsChannel(TimeStampedModel):
     source = models.ForeignKey('samples.SampleSource', null=True, blank=True)
 
     def __unicode__(self):
-        return "HPFeeds Channel-#{0}-{1}".fromat(self.id, self.name)
+        return "HPFeedsChannel-#{0}-{1}".fromat(self.id, self.name)
 
     def save(self, *args, **kwargs):
         if not self.id:

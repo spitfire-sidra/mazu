@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from django import forms
 
-from models import HPFeedsChannel
 from samples.models import SampleSource
+from sharing.models import HPFeedsChannel
 
 
 class HPFeedsChannelForm(forms.ModelForm):
