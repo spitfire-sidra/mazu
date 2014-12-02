@@ -18,7 +18,7 @@ from django.utils.decorators import method_decorator
 from models import AuthKey
 
 
-REQUIRED_PERMISSIONS = ['authkey.add_authkey', 'authkey.change_authkey', 'authkey.delete_authkey']
+REQUIRED_PERMISSIONS = ['brokers.add_authkey', 'brokers.change_authkey', 'brokers.delete_authkey']
 
 
 def can_access_authkey(user):

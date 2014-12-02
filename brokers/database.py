@@ -21,9 +21,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 
 from django.contrib.auth.models import User
 from utils import custom_split
-from authkey.models import Log
-from authkey.models import ConnStats
-from authkey.models import AuthKey
+from brokers.models import Log
+from brokers.models import ConnStats
+from brokers.models import AuthKey
 
 
 class Database(object):

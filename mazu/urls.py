@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     url(r'^search/$', login_required(basic_search)),
     url(r'^account/', include('account.urls')),
     url(r'^samples/', include('samples.urls')),
-    url(r'^authkey/', include('authkey.urls')),
+    url(r'^brokers/', include('brokers.urls')),
     url(r'^channel/', include('sharing.urls')),
     url(r'^notification/', include('notification.urls')),
 )

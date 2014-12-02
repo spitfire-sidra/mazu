@@ -1,10 +1,36 @@
-# -*- cofing: utf-8 -*-
+# -*- coding: utf-8 -*-
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import Permission
 
 from models import AuthKey
 from core.tests import CoreTestCase
 from core.tests import random_string
+
+from django.test import TestCase
+
+from utils import custom_split
+from hpfeeds_broker import Server
+
+
+class CustomSplitTestCase(TestCase):
+    def setUp(self):
+        self._test_cases()
+
+    def _test_cases(self):
+        res = ['a', 'b', 'c']
+        self.test_cases = [
+            ('a,b,c', res),
+            ('a,b;c', res),
+            ('a b c ', res),
+            ('a, b, c', res),
+            ('a , b, c,', res),
+            ('  a  b  c  ', res)
+        ]
+
+    def test_split(self):
+        for s, e in self.test_cases:
+            res = custom_split(s)
+            self.assertEqual(res, e)
 
 
 PERMISSIONS = ['add_authkey', 'change_authkey', 'delete_authkey']

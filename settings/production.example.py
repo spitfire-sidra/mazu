@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     'djcelery',
     'core',
     'account',
-    'authkey',
+    'brokers',
 	'samples',
     'sharing',
     'notification',
