@@ -27,6 +27,22 @@ class HPFeedsChannel(TimeStampedModel):
     def __unicode__(self):
         return "HPFeedsChannel-#{0}-{1}".fromat(self.id, self.name)
 
+    def split_chans(self, text):
+        """
+        Split channels by comma. Remove empty items and strip spaces.
+
+        For example:
+        >>> [x.strip(' ') for x in 'a, b,    c,d,,,'.split(',') if x]
+        ['a', 'b', 'c', 'd']
+        """
+        return [x.strip(' ') for x in text.split(',') if x]
+
+    def get_pubchans(self):
+        return self.split_chans(self.pubchans)
+
+    def get_subchans(self):
+        return self.split_chans(self.subchans)
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.slug = slugify(self.name)

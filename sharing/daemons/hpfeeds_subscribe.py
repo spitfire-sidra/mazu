@@ -1,33 +1,35 @@
 # -*- coding: utf-8 -*-
+"""
+Experimental feature. This feature have not been tested.
+"""
 import os
 import sys
 import time
 import logging
 from multiprocessing import Process
 
+# setup django environment
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 )
 sys.path.append(PROJECT_ROOT)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 
-from django.db import connection
-from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth.models import User
 
-from notification.models import Notification
+from samples.models import Sample
+from samples.utils import get_file_attrs
 from samples.utils import save_sample
-from sharing.modules import hpfeeds
+from samples.utils import delete_sample
 from sharing.utils import DictDiffer
 from sharing.models import HPFeedsChannel
-
-
-SUBJECT = 'You got a new sample'
-MESSAGE = 'You can view detail about the malware at <a href="{}">{}</a>.'
+from sharing.modules import hpfeeds
 
 
 # used for storing hfpeeds client mapping
 subchans_mapping = dict()
 subprocess_mapping = dict()
+
 
 def hpfeeds_subchans_mapping():
     """
@@ -41,57 +43,12 @@ def hpfeeds_subchans_mapping():
         mapping[key] = dict()
         mapping[key]['host'] = chan.host
         mapping[key]['port'] = chan.port
-        mapping[key]['identity'] = chan.identity
+        mapping[key]['ident'] = chan.identity
         mapping[key]['secret'] = chan.secret
-        mapping[key]['subchans'] = [chan.subchans]
-        mapping[key]['user'] = chan.user
-        mapping[key]['source'] = chan.source
+        mapping[key]['subchans'] = chan.get_subchans()
+        mapping[key]['user_id'] = chan.user.id
+        mapping[key]['source_id'] = getattr(chan.source, 'id', None)
     return mapping
-
-
-
-def hpfeeds_client(**kwargs):
-    """
-    Creating a hpfeeds client to subscribe message feeds from HPFeeds.
-    """
-
-    def on_message(identity, channel, payload):
-        """
-        Becasue subprocess can not get the db connection of Django. We close
-        the db connection here to force the subprocess get a new db connection.
-        """
-        from django.db import connection
-        connection.close()
-        sha256 = save_sample(payload, user=user, source=source)
-        link = reverse_lazy('malware.profile', args=[sha256])
-        Notification(
-            user=user, subject=SUBJECT, message=MESSAGE.format(link, sha256)
-        ).save()
-
-    def on_error(payload):
-        """
-        Handling errors.
-        """
-        print >>sys.stderr, ' -> errormessage from server: {0}'.format(payload)
-        hpc.stop()
-
-    host = kwargs.get('host', None)
-    port = kwargs.get('port', None)
-    identity = kwargs.get('identity', None)
-    secret = kwargs.get('secret', None)
-    subchans = kwargs.get('subchans', None)
-    user = kwargs.get('user', None)
-    source = kwargs.get('source', None)
-    hpfeeds_client = hpfeeds.new(host, port, ident, secret)
-    hpfeeds_client.subscribe(subchans)
-    hpfeeds_client.run(on_message, on_error)
-
-
-def create_subscribe_process(host, port, ident, secret, subchans, user, source):
-    p = Process(target=hpfeeds_client, args=(
-        host, port, ident, secret, subchans, user, source))
-    p.start()
-    return p
 
 
 def subprocess_mapping_handler():
@@ -110,25 +67,78 @@ def subprocess_mapping_handler():
     diff = DictDiffer(current_subchans_mapping, subchans_mapping)
 
     for key in diff.added():
-        c = current_subchans_mapping[key]
-        p = create_subscribe_process(c['host'], c['port'], c['ident'], c[
-                              'secret'], c['subchans'], c['user'], c['source'])
-        subprocess_mapping.update({key: p})
+        kwargs = current_subchans_mapping[key]
+        proc = create_subscribe_process(**kwargs)
+        subprocess_mapping.update({key: proc})
 
     for key in diff.removed():
-        p = subprocess_mapping[key]
-        p.terminate()
+        proc = subprocess_mapping[key]
+        proc.terminate()
         del subprocess_mapping[key]
 
     for key in diff.changed():
-        p = subprocess_mapping[key]
-        p.terminate()
+        proc = subprocess_mapping[key]
+        proc.terminate()
         del subprocess_mapping[key]
-        c = current_subchans_mapping[key]
-        p = create_subscribe_process(
-            c['host'], c['port'], c['ident'], c['secret'], c['subchans'])
-        subprocess_mapping.update({key: p})
+        kwargs = current_subchans_mapping[key]
+        proc = create_subscribe_process(**kwargs)
+        subprocess_mapping.update({key: proc})
     return True
+
+
+def save_hpfeeds_payload(payload, user_id, source_id):
+    """
+    Save the payload received from hpfeeds
+    """
+    user = User.objects.get(id=user_id)
+    attrs = get_file_attrs(payload)
+    attrs['user'] = user
+    if save_sample(payload):
+        try:
+            Sample(**attrs).save()
+        except Exception:
+            # if didn't save attributes into database,
+            # delete the sample that saved in GridFS.
+            delete_sample(attrs['sha256'])
+        else:
+            return True
+    return False
+
+
+def hpfeeds_client(host=None, port=None, ident=None, secret=None,
+                   subchans=None, user_id=None, source_id=None):
+    """
+    Creating a hpfeeds client to subscribe message feeds from HPFeeds.
+    """
+
+    def on_message(ident, chanel, payload):
+        """
+        Because subprocess can not get the db connection of Django. We close
+        the db connection here to force the subprocess get a new db connection.
+        """
+        from django.db import connection
+        connection.close()
+        save_hpfeeds_payload(payload, user_id, source_id)
+
+    def on_error(payload):
+        """
+        Handling errors.
+        """
+        print >>sys.stderr, ' -> errormessage from server: {0}'.format(payload)
+        hpfeeds_client.stop()
+
+    hpfeeds_client = hpfeeds.new(host, port, ident, secret)
+    hpfeeds_client.subscribe(subchans)
+    hpfeeds_client.run(on_message, on_error)
+
+
+def create_subscribe_process(**kwargs):
+    """
+    create a new process
+    """
+    proc = Process(target=hpfeeds_client, kwargs=kwargs)
+    proc.start()
+    return proc
 
 
 def main():
@@ -155,6 +165,6 @@ if __name__ == '__main__':
         sys.exit(main())
     except KeyboardInterrupt:
         # terminate all processes
-        for k, v in subchans_mapping.items():
-            v.terminate()
+        for _, process in subchans_mapping.items():
+            process.terminate()
         sys.exit(0)
