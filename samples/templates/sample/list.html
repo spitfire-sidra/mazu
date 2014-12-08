@@ -23,7 +23,7 @@
                 {% if object.desc %}
                 <p>{{ object.desc }}</p>
                 {% endif %}
-                <p>{{ object.type }}</p>
+                <p>{{ object.filetype }}</p>
                 <p>MD5 {{ object.md5 }}</a></p>
                 <p>SHA256 <a href='{% url 'malware.profile' object.sha256 %}'>{{ object.sha256 }}</a></p>
                 <p><a href='{{ object.sha256 | virustotal_link}}'>VirusTotal</a></p>

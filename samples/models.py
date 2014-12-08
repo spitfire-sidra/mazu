@@ -46,7 +46,7 @@ class Sample(TimeStampedModel):
     sha256 = models.CharField(max_length=64)
     sha512 = models.CharField(max_length=128)
     ssdeep = models.CharField(max_length=255)
-    type = models.CharField(max_length=255, default='Unknown')
+    filetype = models.CharField(max_length=255, default='Unknown')
     size = models.IntegerField(default=0)
     crc32 = models.IntegerField(max_length=255)
     source = models.ForeignKey(SampleSource, blank=True, null=True)

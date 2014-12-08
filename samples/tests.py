@@ -117,12 +117,12 @@ class SampleTestCase(CoreTestCase):
         target = reverse_lazy('malware.update', args=[self.hashes.sha256])
         self.set_target(target)
         self.assert_response_status_code(200)
-        random_type = random_string(8)
+        random_filetype = random_string(8)
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         response = self.client.post(
             reverse_lazy('malware.update', args=[self.hashes.sha256]),
             {
-                'type': random_type,
+                'filetype': random_filetype,
                 'size': sample.size,
                 'crc32': sample.crc32,
                 'md5': sample.md5,
@@ -133,7 +133,7 @@ class SampleTestCase(CoreTestCase):
             }
         )
         sample = Sample.objects.get(sha256=self.hashes.sha256)
-        self.assertEqual(sample.type, random_type)
+        self.assertEqual(sample.filetype, random_filetype)
 
     def test_can_delete(self):
         self.upload_fake_sample()

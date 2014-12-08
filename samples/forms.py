@@ -28,7 +28,7 @@ class SampleFilterForm(forms.Form):
         label='Username',
         queryset=User.objects.filter(is_active=True)
     )
-    type = forms.CharField(required=False, label='File Type')
+    filetype = forms.CharField(required=False, label='File Type')
     start = forms.DateField(
         required=False,
         widget=forms.DateInput(
@@ -57,8 +57,10 @@ class SampleFilterForm(forms.Form):
         if self.cleaned_data['user']:
             samples = samples.filter(user=self.cleaned_data['user'])
 
-        if self.cleaned_data['type']:
-            samples = samples.filter(type__icontains=self.cleaned_data['type'])
+        if self.cleaned_data['filetype']:
+            samples = samples.filter(
+                filetype__icontains=self.cleaned_data['filetype']
+            )
 
         return samples
 
@@ -230,11 +232,11 @@ class SampleUpdateForm(forms.ModelForm):
     class Meta:
         model = Sample
         fields = [
-            'type', 'size', 'crc32', 'md5',
+            'filetype', 'size', 'crc32', 'md5',
             'sha1', 'sha256', 'sha512', 'ssdeep'
         ]
         labels = {
-            'type': 'File Type',
+            'filetype': 'File Type',
             'size': 'File Size',
             'crc32': 'CRC32',
             'md5': 'MD5',

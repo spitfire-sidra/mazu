@@ -32,7 +32,7 @@ def get_file_attrs(fp):
         attrs['sha512'] = hashes.sha512
         attrs['ssdeep'] = hashes.ssdeep
         attrs['size'] = getattr(fp, 'size', 0)
-        attrs['type'] = magic.from_buffer(buf)
+        attrs['filetype'] = magic.from_buffer(buf)
         attrs['crc32'] = binascii.crc32(buf)
         fp.seek(0)
     return attrs
