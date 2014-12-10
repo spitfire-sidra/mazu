@@ -49,7 +49,6 @@ class Sample(TimeStampedModel):
     filetype = models.CharField(max_length=255, default='Unknown')
     size = models.IntegerField(default=0)
     crc32 = models.IntegerField(max_length=255)
-    source = models.ForeignKey(SampleSource, blank=True, null=True)
     slug = models.SlugField(max_length=128)
     user = models.ForeignKey('auth.User')
 
@@ -76,6 +75,7 @@ class SampleExtraInfo(TimeStampedModel):
 
     sample = models.ForeignKey(Sample)
     name = models.CharField(max_length=255, null=True, blank=True)
+    sample_source = models.ForeignKey(SampleSource, blank=True, null=True)
     link = models.TextField(null=True, blank=True)
     descr = models.TextField(default='', null=True, blank=True)
 
