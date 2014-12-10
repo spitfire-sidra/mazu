@@ -74,7 +74,7 @@ class SampleExtraInfo(TimeStampedModel):
     """
 
     sample = models.ForeignKey(Sample)
-    name = models.CharField(max_length=255, null=True, blank=True)
+    filename = models.CharField(max_length=255, null=True, blank=True)
     sample_source = models.ForeignKey(SampleSource, blank=True, null=True)
     link = models.TextField(null=True, blank=True)
     descr = models.TextField(default='', null=True, blank=True)
