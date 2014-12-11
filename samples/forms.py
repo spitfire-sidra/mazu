@@ -94,20 +94,6 @@ class SampleUploadForm(forms.Form):
         # !dirty hack!
         # Adding a form field that only list samples sources owned by an user
         self.fields['sample_source'] = self.sample_source_field(self.user)
-        self.fields['channels'] = self.channels_field(self.user)
-
-    def channels_field(self, user):
-        queryset = HPFeedsChannel.objects.filter(user=user)
-        # get all default channels
-        initial = (r for r in queryset if r.default)
-        params = {
-            'required': False,
-            'queryset': queryset,
-            'label': 'Select channels to publish',
-            'widget': forms.CheckboxSelectMultiple,
-            'initial': initial
-        }
-        return forms.ModelMultipleChoiceField(**params)
 
     def sample_source_field(self, user):
         queryset = SampleSource.objects.filter(user=user)
@@ -134,19 +120,6 @@ class SampleUploadForm(forms.Form):
         else:
             raise ValidationError('Duplicated sample.')
 
-    def clean(self):
-        """
-        Cleaning all fields in this form class. If a user choose to publish a
-        sample but did not choice any channls, ValidationError would be raised.
-        """
-        cleaned_data = super(SampleUploadForm, self).clean()
-
-        if cleaned_data['publish'] and len(cleaned_data['channels']) == 0:
-            raise ValidationError('Please select a channel at least.')
-        else:
-            cleaned_data['channels'] = []
-        return cleaned_data
-
     def save_sample(self):
         """
         Saving a sample and its attributes.
@@ -170,9 +143,6 @@ class SampleUploadForm(forms.Form):
             return False
         else:
             return True
-
-    def save_publish_queue(self):
-        pass
 
 
 class SamplePublishForm(forms.Form):
