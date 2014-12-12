@@ -16,6 +16,25 @@ from samples.utils import delete_sample
 from samples.utils import get_file_attrs
 
 
+class SampleSourceForm(forms.ModelForm):
+
+    """
+    SampleSourceForm is a form class for updating and creating SampleSource.
+    """
+
+    class Meta:
+        model = SampleSource
+        fields = ['name', 'link', 'descr']
+        labels = {
+            'name': 'Source Name',
+            'descr': 'Description'
+        }
+        widgets = {
+            'name': forms.TextInput(),
+            'descr': forms.Textarea()
+        }
+
+
 class SampleFilterForm(forms.Form):
 
     """
@@ -145,54 +164,6 @@ class SampleUploadForm(forms.Form):
             return True
 
 
-class SamplePublishForm(forms.Form):
-
-    """
-    User can choice channels that a sample will be published.
-    """
-
-    sample = forms.CharField(
-        required=False,
-        label='',
-        widget=forms.HiddenInput,
-    )
-
-    def __init__(self, *args, **kwargs):
-        # get current user instance
-        self.user = kwargs.pop('user')
-        super(SamplePublishForm, self).__init__(*args, **kwargs)
-        # add a field 'channels'
-        self.fields['channels'] = self.channels_field()
-
-    def channels_field(self):
-        # user are allowed to publish samples on their own channels
-        queryset = HPFeedsChannel.objects.filter(user=self.user)
-        initial = (chann for chann in queryset if chann.default)
-        field = forms.ModelMultipleChoiceField(
-            required=False,
-            queryset=queryset,
-            initial=initial,
-            label='Publish to',
-            widget=forms.CheckboxSelectMultiple
-        )
-
-    def clean_channels(self):
-        channels = self.cleaned_data['channels']
-        if len(channels) == 0:
-            ValidationError('Please choice at least one channel.')
-        return channels
-
-    def save(self):
-        try:
-            sample = Sample.objects.get(sha256=self.cleaned_data['sample'])
-        except sample.DoesNotExist:
-            return False
-        else:
-            for chann in self.cleaned_data['channels']:
-                HPFeedsPubQueue(sample=sample, channel=chann).save()
-            return True
-
-
 class SampleUpdateForm(forms.ModelForm):
 
     """
@@ -202,11 +173,11 @@ class SampleUpdateForm(forms.ModelForm):
     class Meta:
         model = Sample
         fields = [
-            'filetype', 'size', 'crc32', 'md5',
+            'filetypes', 'size', 'crc32', 'md5',
             'sha1', 'sha256', 'sha512', 'ssdeep'
         ]
         labels = {
-            'filetype': 'File Type',
+            'filetypes': 'File Type',
             'size': 'File Size',
             'crc32': 'CRC32',
             'md5': 'MD5',
@@ -214,23 +185,4 @@ class SampleUpdateForm(forms.ModelForm):
             'sha256': 'SHA256',
             'sha512': 'SHA512',
             'ssdeep': 'ssdeep',
-        }
-
-
-class SampleSourceForm(forms.ModelForm):
-
-    """
-    SampleSourceForm is a form class for updating and creating SampleSource.
-    """
-
-    class Meta:
-        model = SampleSource
-        fields = ['name', 'link', 'descr']
-        labels = {
-            'name': 'Label',
-            'descr': 'Description'
-        }
-        widgets = {
-            'name': forms.TextInput(),
-            'descr': forms.Textarea()
         }

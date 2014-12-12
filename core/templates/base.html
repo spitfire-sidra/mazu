@@ -1,79 +1,63 @@
 {% load staticfiles %}
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>MAZU - Malware Repository</title>
-        {% include 'base_head.html' %}
-    </head>
-    <body>
-        <div class="ui two column page grid">
-            <div class="three wide column">
-                <div class="row">
-                    {% block menu %}
-                        {% include 'base_menu.html' %}
-                    {% endblock menu %}
-                </div>
-            </div>
-            <div class="thirteen wide column">
-                <div class="row">
-                {% block header %}
-                {% endblock header %}
-                </div>
-                <div class="row">
-                    <div class="ui breadcrumb">
-                        <a class="section">MAZU</a>
-                        {% block breadcrumb %}
-                        {% endblock breadcrumb %}
-                    </div> 
-                    <br />
-                </div>
-                <div class="row">
-                    <form method="get" action="/search/">
-                    {% csrf_token %}
-                    <div class="ui fluid action input">
-                        <input name="q" type="text" placeholder="Search...">
-                        <input name="models" type="hidden" value="malware.malware">
-                        <div class="ui button">Search</div>
-                    </div>
-                    </form>
-                </div>
-                <div class="ui section divider"></div>
-                <div class="row">
-                {% block secondarymenu %}
-                {% endblock secondarymenu %}
-                </div>
 
-                {% block message %}
-                {% if messages %}
-                <div class="row">
-                    <ul class="messages">
-                        {% for message in messages %}
-                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-                {% endblock message %}
+<head>
+    <meta charset="utf-8">
+    <title>MAZU - Malware Repository</title>
+    {% include 'base_head.html' %}
+</head>
 
+<body>
 
-                <div class="row">
-                {% block content %}
-                {% endblock content %}
-                </div>
-                <div class="row">
-                {% block pagination %}
-                {% endblock pagination %}
-                </div>
-                <div class="row">
-                {% block footer %}
-                    {% include 'base_foot.html' %}
-                {% endblock footer %}
-                </div>
-            </div>
-        </div>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        {% block javascript %}
-        {% endblock javascript %}
-    </body>
+    {% block menu %}
+        {% include 'base_menu.html' %}
+    {% endblock menu %}
+    <br />
+
+    {% block header %}
+    {% endblock header %}
+    <br />
+
+    {% block breadcrumb %}
+    {% endblock breadcrumb %}
+    <br />
+
+    <form method="get" action="/search/">
+        {% csrf_token %}
+        <input name="q" type="text" placeholder="">
+        <input name="models" type="hidden" value="samples.sample">
+        <input name="submit" type="submit" value="search" />
+    </form>
+    <br />
+
+    {% block secondarymenu %}
+    {% endblock secondarymenu %}
+    <br />
+
+    {% block message %}
+        {% if messages %}
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        {% endif %}
+    {% endblock message %}
+    <br />
+
+    {% block content %}
+    {% endblock content %}
+    <br />
+
+    {% block pagination %}
+    {% endblock pagination %}
+    <br />
+
+    {% block footer %}
+        {% include 'base_foot.html' %}
+    {% endblock footer %}
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    {% block javascript %} {% endblock javascript %}
+</body>
+
 </html>

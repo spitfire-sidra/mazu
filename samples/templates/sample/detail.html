@@ -2,17 +2,17 @@
 {% load virustotal %}
 {% block content %}
 
-{{ object.name }}
-{{ object.reference }}
-{{ object.filetype }}
-{{ object.size }}
-{{ object.crc32 }}
-{{ object.md5 }}
-{{ object.sha1 }}
-{{ object.sha256 }}
-<a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a>
-{{ object.sha512 }}
-{{ object.ssdeep }}
-{{ object.desc }}
+{{ object.name }}<br />
+{{ object.reference }}<br />
+{{ object.filetype }}<br />
+{{ object.size }}<br />
+{{ object.crc32 }}<br />
+{{ object.md5 }}<br />
+{{ object.sha1 }}<br />
+{{ object.sha256 }}<br />
+<a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
+{{ object.sha512 }}<br />
+{{ object.ssdeep }}<br />
+{{ object.desc }}<br />
 
 {% endblock content %}

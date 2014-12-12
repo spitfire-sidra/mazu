@@ -1,41 +1,24 @@
 {% extends 'samples_app_base.html' %}
-
 {% load virustotal %}
-
 {% block content %}
 <br />
 <form action='' method='post'>
-    {% csrf_token %}
-    {{ filter.as_p }}
+    {% csrf_token %} {{ filter_form.as_p }}
     <input type='submit' name='submit' value='submit'>
 </form>
-<h2 class="ui header">Recently</h2>
-<div class="ui selection list">
-    {% for object in object_list %}
-    <div class="item">
-            <div class="header">
-                <h4 class="ui header">
-                {{ object.name }}
-                </h4>
-            </div>
-            <div class="description">
-                {% if object.desc %}
-                <p>{{ object.desc }}</p>
-                {% endif %}
-                <p>{{ object.filetype }}</p>
-                <p>MD5 {{ object.md5 }}</a></p>
-                <p>SHA256 <a href='{% url 'malware.profile' object.sha256 %}'>{{ object.sha256 }}</a></p>
-                <p><a href='{{ object.sha256 | virustotal_link}}'>VirusTotal</a></p>
-                <p></p>
-                <div class="right floated tiny ui buttons">
-                    <a class="ui button" href='{% url 'malware.update' object.sha256 %}'><i class="ui edit icon"></i></a>
-                    <a class="ui button" href='{% url 'malware.delete' object.sha256 %}'><i class="ui trash icon"></i></a>
-                    <a class="ui button" href='{% url 'malware.download' object.sha256 %}'><i class="ui download icon"></i></a>
-                    <a class="ui button" href='{% url 'malware.publish' object.sha256 %}'><i class="ui share icon"></i></a>
-                </div>
-            </div>
-    </div>
-    {% empty %}
-    {% endfor %}
-</div>
+
+{% for object in object_list %}
+{{ object.name }}
+{{ object.desc }}
+{{ object.filetype }}
+{{ object.md5 }}
+<a href='{% url ' malware.profile ' object.sha256 %}'>{{ object.sha256 }}
+<a href='{{ object.sha256 | virustotal_link}}'>VirusTotal</a>
+<br />
+<a href='{% url ' malware.update ' object.sha256 %}'>update</a>
+<a href='{% url ' malware.delete ' object.sha256 %}'>delete</a>
+<a href='{% url ' malware.download ' object.sha256 %}'>download</a>
+{% empty %}
+{% endfor %}
+
 {% endblock content %}

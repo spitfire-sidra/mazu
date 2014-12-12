@@ -27,6 +27,16 @@ def random_string(k=5):
     return ''.join([random.choice(choices) for i in range(k)])
 
 
+def random_http_link():
+    """
+    Return a random http link.
+
+    >>> random_http_link()
+    'http://YMluq.example.com/'
+    """
+    return 'http://{0}.example.com/'.format(random_string())
+
+
 class CoreTestCase(TestCase):
 
     """
@@ -110,6 +120,13 @@ class CoreTestCase(TestCase):
             expected_count = self.model.objects.all().count()
         count = self.try_get_context_object_count(response, object_name)
         self.assertEqual(count, expected_count)
+
+    def send_post_request(self):
+        self.response = self.client.post(
+            self.target,
+            self.post_data,
+            follow=True
+        )
 
 
 class MongodbTestCase(TestCase):

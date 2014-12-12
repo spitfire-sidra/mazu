@@ -7,6 +7,29 @@ from django.template.defaultfilters import slugify
 from core.models import TimeStampedModel
 
 
+class SampleSource(TimeStampedModel):
+
+    """
+    SampleSource model stores information of sample sources.
+    """
+
+    name = models.CharField(max_length=255)
+    link = models.URLField(null=True, blank=True)
+    descr = models.TextField(null=True, blank=True)
+    user = models.ForeignKey('auth.User')
+
+    def __unicode__(self):
+        return '#{0}-{1}'.format(self.user.name, self.name)
+
+    def get_absolute_url(self):
+        return reverse_lazy('source.detail',args=[self.pk])
+
+    class Meta:
+        ordering = ['name']
+        # every user can create own sources
+        unique_together = ('user', 'name')
+
+
 class Filename(TimeStampedModel):
 
     """
@@ -17,16 +40,20 @@ class Filename(TimeStampedModel):
     name = models.CharField(max_length=255)
     user = models.ForeignKey('auth.User')
 
+    class Meta:
+        ordering = ['-created']
 
-class Description(TimeStampedModel):
+
+class Filetype(TimeStampedModel):
 
     """
-    This models saves descriptions of a sample. A sample can have multiple
-    descriptions, and a description might map to samples.
+    This models saves filetype.
     """
 
-    text = models.TextField()
-    user = models.ForeignKey('auth.User')
+    filetype = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ['filetype']
 
 
 class Link(TimeStampedModel):
@@ -38,45 +65,17 @@ class Link(TimeStampedModel):
 
     KIND_CHOICES = (
         (0, 'Download Link'),
-        (1, 'Report Link'),
-        (2, 'Related Link'),
+        (1, 'Analysis Report Link'),
+        (2, 'Other'),
     )
 
     url = models.TextField(validators=[URLValidator()])
+    heading = models.CharField(max_length=255, null=True, blank=True)
     kind = models.IntegerField(max_length=2, choices=KIND_CHOICES, default=0)
     user = models.ForeignKey('auth.User')
 
     class Meta:
         ordering = ['kind', '-created']
-
-
-class SampleSource(TimeStampedModel):
-
-    """
-    SampleSource model stores information of sample sources.
-    """
-
-    name = models.CharField(max_length=255)
-    slug = models.SlugField()
-    link = models.URLField(null=True, blank=True)
-    descr = models.TextField(null=True, blank=True)
-    user = models.ForeignKey('auth.User')
-
-    def __unicode__(self):
-        return self.label
-
-    def get_absolute_url(self):
-        return reverse_lazy('source.list')
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.slug = slugify(self.name)
-        super(SampleSource, self).save(*args, **kwargs)
-
-    class Meta:
-        ordering = ['name']
-        # every user can create own sources
-        unique_together = ('user', 'name')
 
 
 class Sample(TimeStampedModel):
@@ -90,12 +89,11 @@ class Sample(TimeStampedModel):
     sha256 = models.CharField(max_length=64)
     sha512 = models.CharField(max_length=128)
     ssdeep = models.CharField(max_length=255)
-    filetype = models.CharField(max_length=255, default='Unknown')
     size = models.IntegerField(default=0)
     crc32 = models.IntegerField(max_length=255)
-    sources = models.ManyToManyField(SampleSource, null=True, blank=True)
+    filetypes = models.ManyToManyField(Filetype, null=True, blank=True)
     filenames = models.ManyToManyField(Filename, null=True, blank=True)
-    descriptions = models.ManyToManyField(Description, null=True, blank=True)
+    sources = models.ManyToManyField(SampleSource, null=True, blank=True)
     user = models.ForeignKey('auth.User')
 
     def __unicode__(self):
@@ -108,6 +106,29 @@ class Sample(TimeStampedModel):
         ordering = ['-created', '-updated']
 
 
-class DownloadLog(TimeStampedModel):
+class Description(TimeStampedModel):
+
+    """
+    This models saves descriptions of a sample. A sample can have multiple
+    descriptions, and a description might map to samples.
+    """
+
+    text = models.TextField()
+    sample = models.ForeignKey(Sample)
     user = models.ForeignKey('auth.User')
-    malware = models.CharField(max_length=128)
+
+    class Meta:
+        ordering = ['-created']
+
+
+class AccessLog(TimeStampedModel):
+
+    """
+    This models saves activity when a user download a samples.
+    """
+
+    sample = models.ForeignKey(Sample)
+    user = models.ForeignKey('auth.User')
+
+    class Meta:
+        ordering = ['-created']

@@ -3,10 +3,13 @@
 {% block content %}
 
 {% for object in object_list %}
-{{ object.label }}
-{{ object.descr }}
+    {{ object.name }}<br />
+    {{ object.link }}<br />
+    {{ object.descr }}<br />
+    <a href="{% url 'source.detail' object.pk %}">detail</a>
+    <a href="{% url 'source.update' object.pk %}">update</a>
 {% empty %}
-No malware source yet.
+    No sample source yet.
 {% endfor %}
 
 {% endblock content %}
