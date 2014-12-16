@@ -143,7 +143,7 @@ class SampleTestCase(CoreTestCase):
         fp = open(self.filepath, 'rb')
         self.hashes = compute_hashes(fp.read())
         fp.seek(0)
-        target = reverse_lazy('malware.upload')
+        target = reverse_lazy('sample.upload')
         self.set_target(target)
         self.random_post_data(fp)
         self.send_post_request()
@@ -178,13 +178,13 @@ class SampleTestCase(CoreTestCase):
         self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         response = self.client.get(
-            reverse_lazy('malware.profile', kwargs={'sha256': sample.sha256})
+            reverse_lazy('sample.detail', kwargs={'sha256': sample.sha256})
         )
         self.assertEqual(response.context['object'], sample)
 
     def test_can_update(self):
         self.upload_sample()
-        target = reverse_lazy('malware.update', kwargs={'sha256': self.hashes.sha256})
+        target = reverse_lazy('sample.update', kwargs={'sha256': self.hashes.sha256})
         self.set_target(target)
         self.assert_response_status_code(200)
         sample = Sample.objects.get(sha256=self.hashes.sha256)
@@ -193,7 +193,7 @@ class SampleTestCase(CoreTestCase):
         self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         self.client.post(
-            reverse_lazy('malware.delete', kwargs={'sha256':sample.sha256}),
+            reverse_lazy('sample.delete', kwargs={'sha256':sample.sha256}),
             {
                 'pk': sample.pk
             }

@@ -168,7 +168,7 @@ class SampleUploadView(FormView, LoginRequiredMixin):
 
     template_name = 'sample/upload.html'
     form_class = SampleUploadForm
-    success_url = reverse_lazy('malware.upload')
+    success_url = reverse_lazy('sample.upload')
 
     def get_form_kwargs(self):
         kwargs = super(SampleUploadView, self).get_form_kwargs()

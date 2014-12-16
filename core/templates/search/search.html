@@ -19,7 +19,7 @@
 
             {% for result in page.object_list %}
                 <p>
-                    <a href="{% url 'malware.profile' result.object.sha256 %}">{{ result.object.md5 }}</a>
+                    <a href="{% url 'sample.detail' result.object.sha256 %}">{{ result.object.md5 }}</a>
                 </p>
             {% empty %}
                 <p>No results found.</p>

@@ -52,26 +52,26 @@ urlpatterns += patterns('',
     url(
         r'^upload/$',
         SampleUpload,
-        name='malware.upload'
+        name='sample.upload'
     ),
     url(
         r'^update/(?P<sha256>[\w]+)$',
         SampleUpdate,
-        name='malware.update'
+        name='sample.update'
     ),
     url(
         r'^download/(?P<sha256>[\w]+)$',
         download,
-        name='malware.download'
+        name='sample.download'
     ),
     url(
         r'^delete/(?P<sha256>[\w]+)$',
         SampleDelete,
-        name='malware.delete'
+        name='sample.delete'
     ),
     url(
         r'^profile/(?P<sha256>[\w]+)$',
         SampleDetail,
-        name='malware.profile'
+        name='sample.detail'
     ),
 )
