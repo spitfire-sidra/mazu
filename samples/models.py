@@ -53,6 +53,9 @@ class Filetype(TimeStampedModel):
     filetype = models.CharField(max_length=255)
     detector = models.CharField(max_length=255)
 
+    def __unicode__(self):
+        return '{0} {1}'.format(self.detector, self.filetype)
+
     class Meta:
         ordering = ['filetype']
         unique_together = ('filetype', 'detector')
