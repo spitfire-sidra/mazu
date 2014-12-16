@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import hashlib
-import binascii
 import logging
 
 import ssdeep

@@ -3,18 +3,13 @@ import os
 import logging
 import binascii
 
-import magic
-import ssdeep
-
-from django.core.exceptions import MultipleObjectsReturned
-
 from core.mongodb import connect_gridfs
 from core.mongodb import delete_file
 from core.utils import compute_hashes
 from core.utils import dynamic_import
-from samples.filetypes.filetype import FileTypeDetector
 from samples.models import Sample
 from samples.models import Filetype
+from samples.filetypes.filetype import FileTypeDetector
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +19,10 @@ dynamic_import('samples', 'filetypes')
 
 
 class FiletypeHelper(object):
+
+    """
+    A helper class helps you to get file types.
+    """
 
     def __init__(self):
         self.filetypes = list()
@@ -49,6 +48,10 @@ class FiletypeHelper(object):
 
 
 class SampleHelper(object):
+
+    """
+    A helper class handles sample related operations.
+    """
 
     def __init__(self, fp):
         self.fp = fp
@@ -78,8 +81,7 @@ class SampleHelper(object):
         """
         return delete_file('sha256', sha256)
 
-    @staticmethod
-    def save_sample(buf, **kwargs):
+    def save_sample(self, **kwargs):
         """
         Saving a sample into mongodb.
         You can pass any keyword arguments to this function. This function will
@@ -91,9 +93,8 @@ class SampleHelper(object):
         True
         """
         ignored_attrs = ['md5']
-        hashes = compute_hashes(buf)
 
-        if SampleHelper.sample_exists(hashes.sha256):
+        if SampleHelper.sample_exists(self.hashes.sha256):
             return False
 
         for k in ignored_attrs:
@@ -104,11 +105,12 @@ class SampleHelper(object):
 
         try:
             gridfs = connect_gridfs()
-        except Exception:
+        except Exception as e:
+            logger.debug(e)
             return False
         else:
             with gridfs.new_file() as fp:
-                fp.write(str(buf))
+                fp.write(str(self.content))
                 # save all attributes
                 for attr, value in kwargs.items():
                     setattr(fp, attr, value)
@@ -131,8 +133,12 @@ class SampleHelper(object):
         return None
 
     def get_content(self):
-        if hasattr(self.fp, 'read'):
-            return self.fp.read()
+        if hasattr(self.fp, 'read') and hasattr(self.fp, 'tell') \
+            and hasattr(self.fp, 'seek'):
+            pos = self.fp.tell()
+            content = self.fp.read()
+            self.fp.seek(pos)
+            return content
         return None
 
     def get_sample_attrs(self):
@@ -146,7 +152,6 @@ class SampleHelper(object):
         attrs['sha512'] = self.hashes.sha512
         attrs['ssdeep'] = self.hashes.ssdeep
         attrs['size'] = self.size
-        attrs['filetypes'] = self.filetype_helper.get_object_list()
         attrs['crc32'] = self.crc32
         return attrs
 
@@ -156,16 +161,14 @@ class SampleHelper(object):
         """
         attrs = self.get_sample_attrs()
         attrs['user'] = user
-        filetypes = attrs.pop('filetypes')
-        if self.save_sample(self.content):
+        if self.save_sample():
             try:
-                saved_sample = Sample(**attrs)
-                saved_sample.save()
+                sample = Sample(**attrs)
+                sample.save()
             except Exception:
-                saved_sample.delete()
-                delete_sample(attrs['sha256'])
+                SampleHelper.delete_sample(attrs['sha256'])
             else:
-                saved_sample.filetypes = filetypes
-                saved_sample.save()
+                sample.filetypes = self.filetype_helper.get_object_list()
+                sample.save()
                 return True
         return False

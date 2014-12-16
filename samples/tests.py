@@ -24,7 +24,7 @@ def get_temp_folder():
     return temp_test_folder
 
 
-def make_fake_sample_file():
+def make_sample_file():
     """
     Making a fake sample file for testing
     """
@@ -127,57 +127,55 @@ class SampleTestCase(CoreTestCase):
         super(SampleTestCase, self).tearDown()
         remove_temp_folder()
 
-    def upload_fake_sample(self, filepath=None):
+    def random_post_data(self, fp):
+        self.post_data = {
+            'sample': fp,
+            'share': False,
+        }
+
+    def upload_sample(self, filepath=None):
         if not filepath:
-            self.filepath = make_fake_sample_file()
+            self.filepath = make_sample_file()
             self.filename = random_string(8)
         else:
             self.filepath = filepath
-        fp = open(self.filepath, 'rb')
-        # compute hashes here
-        self.hashes = compute_hashes(fp.read())
-        # reset file pointer
-        fp.seek(0)
-        self.send_post_request(fp)
-        fp.close()
 
-    def send_post_request(self, fp):
-        self.response = self.client.post(
-            reverse_lazy('malware.upload'),
-            {
-                'sample': fp,
-                'share': False,
-            },
-            follow=True
-        )
+        fp = open(self.filepath, 'rb')
+        self.hashes = compute_hashes(fp.read())
+        fp.seek(0)
+        target = reverse_lazy('malware.upload')
+        self.set_target(target)
+        self.random_post_data(fp)
+        self.send_post_request()
+        fp.close()
 
     def test_can_upload(self):
         # test can save sample in GridFS
         gridfs = connect_gridfs()
-        self.upload_fake_sample()
+        self.upload_sample()
         count = gridfs.find({'md5': self.hashes.md5}).count()
         self.assertGreater(count, 0)
 
         # test can not upload duplicated sample
         # use the same file which just created
-        self.upload_fake_sample(self.filepath)
+        self.upload_sample(self.filepath)
         response = self.get_response()
         expected_errors = 'Duplicated sample.'
         form_all_errors = response.context['form'].errors['sample']
         self.assertIn(expected_errors, form_all_errors)
 
     def test_list_view(self):
+        self.upload_sample()
         target = reverse_lazy('sample.list')
         self.set_target(target)
         self.set_target_model(Sample)
 
-        self.upload_fake_sample()
         self.assert_response_status_code(200)
         response = self.get_response()
         self.assert_response_objects_count(response, 'object_list')
 
     def test_profile_view(self):
-        self.upload_fake_sample()
+        self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         response = self.client.get(
             reverse_lazy('malware.profile', kwargs={'sha256': sample.sha256})
@@ -185,14 +183,14 @@ class SampleTestCase(CoreTestCase):
         self.assertEqual(response.context['object'], sample)
 
     def test_can_update(self):
-        self.upload_fake_sample()
+        self.upload_sample()
         target = reverse_lazy('malware.update', kwargs={'sha256': self.hashes.sha256})
         self.set_target(target)
         self.assert_response_status_code(200)
         sample = Sample.objects.get(sha256=self.hashes.sha256)
 
     def test_can_delete(self):
-        self.upload_fake_sample()
+        self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         self.client.post(
             reverse_lazy('malware.delete', kwargs={'sha256':sample.sha256}),
