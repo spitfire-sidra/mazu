@@ -8,16 +8,20 @@
 </form>
 
 {% for object in object_list %}
-    {{ object.name }}
-    {{ object.desc }}
-    {{ object.filetype }}
-    {{ object.md5 }}
-    <a href='{% url 'malware.profile' object.sha256 %}'>{{ object.sha256 }}
-    <a href='{{ object.sha256 | virustotal_link}}'>VirusTotal</a>
-    <br />
-    <a href='{% url 'malware.update' object.sha256 %}'>update</a>
-    <a href='{% url 'malware.delete' object.sha256 %}'>delete</a>
-    <a href='{% url 'malware.download' object.sha256 %}'>download</a>
+    {{ object.name }}<br />
+    {{ object.desc }}<br />
+    {% for filename in object.filenames.all %}
+        {{ filename }}<br />
+    {% endfor %}
+    {% for filetype in object.filetypes.all %}
+        {{ filetype.detector }} {{ filetype.filetype }}<br />
+    {% endfor %}
+    {{ object.md5 }}<br />
+    <a href='{{ object.sha256 | virustotal_link}}'>VirusTotal</a><br />
+    <a href='{% url 'malware.profile' object.sha256 %}'>detail<br />
+    <a href='{% url 'malware.update' object.sha256 %}'>update</a><br />
+    <a href='{% url 'malware.delete' object.sha256 %}'>delete</a><br />
+    <a href='{% url 'malware.download' object.sha256 %}'>download</a><br />
 {% empty %}
 {% endfor %}
 

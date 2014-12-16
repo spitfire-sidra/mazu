@@ -40,6 +40,9 @@ class Filename(TimeStampedModel):
     name = models.CharField(max_length=255)
     user = models.ForeignKey('auth.User')
 
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         ordering = ['-created']
 
@@ -78,6 +81,9 @@ class Link(TimeStampedModel):
     heading = models.CharField(max_length=255, null=True, blank=True)
     kind = models.IntegerField(max_length=2, choices=KIND_CHOICES, default=0)
     user = models.ForeignKey('auth.User')
+
+    def _unicode__(self):
+        return "[{0}]({1})".format(self.heading, self.url)
 
     class Meta:
         ordering = ['kind', '-created']
@@ -121,6 +127,9 @@ class Description(TimeStampedModel):
     text = models.TextField()
     sample = models.ForeignKey(Sample)
     user = models.ForeignKey('auth.User')
+
+    def __unicode__(self):
+        return self.pk
 
     class Meta:
         ordering = ['-created']
