@@ -17,7 +17,7 @@ from django.contrib import messages
 from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
 from core.mongodb import get_compressed_file
-from samples.utils import delete_sample
+from samples.utils import SampleHelper
 from samples.models import Sample
 from samples.models import SampleSource
 from samples.models import AccessLog
@@ -229,7 +229,7 @@ class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 
     def delete(self, request, *args, **kwargs):
         # delete the sample which existing in GridFS
-        delete_sample(self.kwargs['sha256'])
+        SampleHelper.delete_sample(self.kwargs['sha256'])
         return super(SampleDeleteView, self).delete(request, *args, **kwargs)
 
 

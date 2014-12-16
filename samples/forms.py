@@ -14,7 +14,6 @@ from samples.models import Filename
 from samples.models import Description
 from samples.models import Sample
 from samples.models import SampleSource
-from samples.utils import sample_exists
 from samples.utils import SampleHelper
 
 
@@ -98,7 +97,7 @@ class SampleUploadForm(forms.Form):
         sample = self.cleaned_data['sample']
         pos = sample.tell()
         hashes = compute_hashes(sample.read())
-        if sample_exists(sha256=hashes.sha256):
+        if SampleHelper.sample_exists(sha256=hashes.sha256):
             raise ValidationError('Duplicated sample.')
         else:
             sample.seek(pos)

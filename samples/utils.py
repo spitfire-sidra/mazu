@@ -23,62 +23,6 @@ logger = logging.getLogger(__name__)
 dynamic_import('samples', 'filetypes')
 
 
-def sample_exists(sha256):
-    """
-    To check a sample is existing or not.
-    """
-    try:
-        Sample.objects.get(sha256=sha256)
-    except Sample.DoesNotExist:
-        return False
-    else:
-        return True
-
-
-def delete_sample(sha256):
-    """
-    Deleting a sample which sha256 equals variable 'sha256'
-    """
-    return delete_file('sha256', sha256)
-
-
-def save_sample(buf, **kwargs):
-    """
-    Saving a sample into mongodb.
-    You can pass any keyword arguments to this function. This function will
-    try to save these arguments as attributes of the sample. Keyword argument
-    'md5' would be ignored, because mongodb also saves md5 in GridFS. In mazu,
-    we only save sha256 as an extra attribute.
-
-    >>> save_sample('HelloWorld!', user='spitfire', age='18 forever')
-    True
-    """
-    ignored_attrs = ['md5']
-    hashes = compute_hashes(buf)
-
-    if sample_exists(hashes.sha256):
-        return False
-
-    for k in ignored_attrs:
-        try:
-            kwargs.pop(k)
-        except KeyError:
-            pass
-
-    try:
-        gridfs = connect_gridfs()
-    except Exception:
-        return False
-    else:
-        with gridfs.new_file() as fp:
-            fp.write(str(buf))
-            # save all attributes
-            for attr, value in kwargs.items():
-                setattr(fp, attr, value)
-        return True
-
-
-
 class FiletypeHelper(object):
 
     def __init__(self):
@@ -114,6 +58,61 @@ class SampleHelper(object):
         self.hashes = compute_hashes(self.content)
         self.filetype_helper = FiletypeHelper()
         self.filetype_helper.identify(self.content)
+
+    @staticmethod
+    def sample_exists(sha256):
+        """
+        To check a sample is existing or not.
+        """
+        try:
+            Sample.objects.get(sha256=sha256)
+        except Sample.DoesNotExist:
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def delete_sample(sha256):
+        """
+        Deleting a sample which sha256 equals variable 'sha256'
+        """
+        return delete_file('sha256', sha256)
+
+    @staticmethod
+    def save_sample(buf, **kwargs):
+        """
+        Saving a sample into mongodb.
+        You can pass any keyword arguments to this function. This function will
+        try to save these arguments as attributes of the sample. Keyword argument
+        'md5' would be ignored, because mongodb also saves md5 in GridFS. In mazu,
+        we only save sha256 as an extra attribute.
+
+        >>> save_sample('HelloWorld!', user='spitfire', age='18 forever')
+        True
+        """
+        ignored_attrs = ['md5']
+        hashes = compute_hashes(buf)
+
+        if SampleHelper.sample_exists(hashes.sha256):
+            return False
+
+        for k in ignored_attrs:
+            try:
+                kwargs.pop(k)
+            except KeyError:
+                pass
+
+        try:
+            gridfs = connect_gridfs()
+        except Exception:
+            return False
+        else:
+            with gridfs.new_file() as fp:
+                fp.write(str(buf))
+                # save all attributes
+                for attr, value in kwargs.items():
+                    setattr(fp, attr, value)
+            return True
 
     def get_size(self):
         """
@@ -158,7 +157,7 @@ class SampleHelper(object):
         attrs = self.get_sample_attrs()
         attrs['user'] = user
         filetypes = attrs.pop('filetypes')
-        if save_sample(self.content):
+        if self.save_sample(self.content):
             try:
                 saved_sample = Sample(**attrs)
                 saved_sample.save()
