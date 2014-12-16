@@ -21,7 +21,7 @@ def index(request):
     """
     context = dict()
     if request.user.is_authenticated():
-        return redirect(reverse_lazy('malware.list'))
+        return redirect(reverse_lazy('sample.list'))
 
     return render_to_response(
         'registration/login.html',
@@ -40,7 +40,7 @@ def auth(request):
         user = authenticate(username=username, password=password)
         if user is not None and user.is_active:
             login(request, user)
-            return redirect(reverse_lazy('malware.list'))
+            return redirect(reverse_lazy('sample.list'))
         else:
             messages.error(request, 'invalid login')
 
@@ -52,7 +52,7 @@ def signup(request):
     If an user had login, then redirect to index.
     """
     if request.user.is_authenticated():
-        return redirect(reverse_lazy('malware.list'))
+        return redirect(reverse_lazy('sample.list'))
 
     if request.method == 'POST':
         form = UserCreationForm(request.POST)

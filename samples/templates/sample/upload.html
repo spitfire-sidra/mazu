@@ -4,6 +4,9 @@
 <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <input class="ui button" type="submit" value="Upload Malware">
+    {{ filename_formset.as_p }}
+    {{ description_form.as_p }}
+    {{ link_formset.as_p }}
+    <input type="submit" value="Submit">
 </form>
 {% endblock content %}

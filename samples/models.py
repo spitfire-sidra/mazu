@@ -19,7 +19,7 @@ class SampleSource(TimeStampedModel):
     user = models.ForeignKey('auth.User')
 
     def __unicode__(self):
-        return '#{0}-{1}'.format(self.user.name, self.name)
+        return '{0}'.format(self.name)
 
     def get_absolute_url(self):
         return reverse_lazy('source.detail',args=[self.pk])
@@ -51,9 +51,11 @@ class Filetype(TimeStampedModel):
     """
 
     filetype = models.CharField(max_length=255)
+    detector = models.CharField(max_length=255)
 
     class Meta:
         ordering = ['filetype']
+        unique_together = ('filetype', 'detector')
 
 
 class Link(TimeStampedModel):
@@ -100,7 +102,7 @@ class Sample(TimeStampedModel):
         return self.sha256
 
     def get_absolute_url(self):
-        return reverse_lazy('malware.list')
+        return reverse_lazy('sample.list')
 
     class Meta:
         ordering = ['-created', '-updated']

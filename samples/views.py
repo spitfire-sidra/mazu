@@ -25,24 +25,27 @@ from samples.forms import SampleUploadForm
 from samples.forms import SampleUpdateForm
 from samples.forms import SampleFilterForm
 from samples.forms import SampleSourceForm
+from samples.forms import DescriptionForm
+from samples.forms import FilenameFormSet
+from samples.forms import LinkFormSet
 
 
 logger = logging.getLogger(__name__)
 
 
-def download(request, slug):
+def download(request, sha256):
     """
     A function-based view for downloading sample
     """
     try:
-        sample = get_compressed_file('sha256', slug)
+        sample = get_compressed_file('sha256', sha256)
     except Exception as e:
         logger.debug(e)
         messages.error(request, 'Oops! We got an error!')
         return render(request, 'error.html')
     else:
         if sample:
-            response_body = 'attachment; filename={}.zip'.format(slug)
+            response_body = 'attachment; filename={}.zip'.format(sha256)
             response = HttpResponse(sample.read())
             response['Content-Type'] = 'application/x-zip'
             response['Content-Disposition'] = response_body
@@ -132,8 +135,13 @@ class SampleListView(ListView, FormMixin, LoginRequiredMixin):
     model = Sample
     template_name = 'sample/list.html'
     form_class = SampleFilterForm
-    success_url = reverse_lazy('malware.list')
+    success_url = reverse_lazy('sample.list')
     filtered_queryset = None
+
+    def get_form_kwargs(self):
+        kwargs = super(SampleUploadView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(SampleListView, self).get_context_data(**kwargs)
@@ -162,13 +170,10 @@ class SampleUploadView(FormView, LoginRequiredMixin):
     form_class = SampleUploadForm
     success_url = reverse_lazy('malware.upload')
 
-    def get_form(self, form_class):
-        """
-        Get current user instance, and initialize the form class.
-        """
-        kwargs = self.get_form_kwargs()
+    def get_form_kwargs(self):
+        kwargs = super(SampleUploadView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
-        return form_class(**kwargs)
+        return kwargs
 
     def form_invalid(self, form):
         messages.info(
@@ -178,11 +183,18 @@ class SampleUploadView(FormView, LoginRequiredMixin):
         return super(SampleUploadView, self).form_invalid(form)
 
     def form_valid(self, form):
-        if form.save_sample():
+        if form.save():
             messages.info(self.request, 'Success!')
         else:
             messages.warning(self.request, 'Can not save sample!')
         return super(SampleUploadView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(SampleUploadView, self).get_context_data(**kwargs)
+        context['filename_formset'] = FilenameFormSet()
+        context['link_formset'] = LinkFormSet()
+        context['description_form'] = DescriptionForm()
+        return context
 
 
 class SampleUpdateView(UpdateView, OwnerRequiredMixin):
@@ -195,10 +207,10 @@ class SampleUpdateView(UpdateView, OwnerRequiredMixin):
     model = Sample
     form_class = SampleUpdateForm
     template_name = 'sample/update.html'
-    success_url = reverse_lazy('malware.list')
+    success_url = reverse_lazy('sample.list')
 
     def get_object(self):
-        return self.model.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
 class SampleDeleteView(DeleteView, OwnerRequiredMixin):
@@ -210,14 +222,14 @@ class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 
     model = Sample
     template_name = 'sample/delete.html'
-    success_url = reverse_lazy('malware.list')
+    success_url = reverse_lazy('sample.list')
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(sha256=self.kwargs['sha256'])
 
     def delete(self, request, *args, **kwargs):
         # delete the sample which existing in GridFS
-        delete_sample(self.kwargs['slug'])
+        delete_sample(self.kwargs['sha256'])
         return super(SampleDeleteView, self).delete(request, *args, **kwargs)
 
 
@@ -231,7 +243,7 @@ class SampleDetailView(DetailView, LoginRequiredMixin):
     template_name = 'sample/detail.html'
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
 SampleSourceList = SampleSourceListView.as_view()

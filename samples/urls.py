@@ -47,7 +47,7 @@ urlpatterns += patterns('',
     url(
         r'^list/$',
         SampleList,
-        name='malware.list'
+        name='sample.list'
     ),
     url(
         r'^upload/$',
@@ -55,17 +55,22 @@ urlpatterns += patterns('',
         name='malware.upload'
     ),
     url(
-        r'^download/(?P<slug>[\w]+)/$',
+        r'^update/(?P<sha256>[\w]+)$',
+        SampleUpdate,
+        name='malware.update'
+    ),
+    url(
+        r'^download/(?P<sha256>[\w]+)$',
         download,
         name='malware.download'
     ),
     url(
-        r'^list/(?P<slug>[\w]+)/$',
-        SampleList,
-        name='malware.source.filter'
+        r'^delete/(?P<sha256>[\w]+)$',
+        SampleDelete,
+        name='malware.delete'
     ),
     url(
-        r'^profile/(?P<slug>[\w]+)/$',
+        r'^profile/(?P<sha256>[\w]+)$',
         SampleDetail,
         name='malware.profile'
     ),

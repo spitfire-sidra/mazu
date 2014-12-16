@@ -146,8 +146,7 @@ class SampleTestCase(CoreTestCase):
             reverse_lazy('malware.upload'),
             {
                 'sample': fp,
-                #'name': filename,
-                #'description': random_string(),
+                'share': False,
             },
             follow=True
         )
@@ -168,7 +167,7 @@ class SampleTestCase(CoreTestCase):
         self.assertIn(expected_errors, form_all_errors)
 
     def test_list_view(self):
-        target = reverse_lazy('malware.list')
+        target = reverse_lazy('sample.list')
         self.set_target(target)
         self.set_target_model(Sample)
 
@@ -181,40 +180,24 @@ class SampleTestCase(CoreTestCase):
         self.upload_fake_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         response = self.client.get(
-            reverse_lazy('malware.profile', args=[sample.sha256])
+            reverse_lazy('malware.profile', kwargs={'sha256': sample.sha256})
         )
         self.assertEqual(response.context['object'], sample)
 
     def test_can_update(self):
         self.upload_fake_sample()
-        target = reverse_lazy('malware.update', args=[self.hashes.sha256])
+        target = reverse_lazy('malware.update', kwargs={'sha256': self.hashes.sha256})
         self.set_target(target)
         self.assert_response_status_code(200)
-        random_filetype = random_string(8)
         sample = Sample.objects.get(sha256=self.hashes.sha256)
-        response = self.client.post(
-            reverse_lazy('malware.update', args=[self.hashes.sha256]),
-            {
-                'filetype': random_filetype,
-                'size': sample.size,
-                'crc32': sample.crc32,
-                'md5': sample.md5,
-                'sha1': sample.sha1,
-                'sha256': sample.sha256,
-                'sha512': sample.sha512,
-                'ssdeep': sample.ssdeep,
-            }
-        )
-        sample = Sample.objects.get(sha256=self.hashes.sha256)
-        self.assertEqual(sample.filetype, random_filetype)
 
     def test_can_delete(self):
         self.upload_fake_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         self.client.post(
-            reverse_lazy('malware.delete', args=[sample.sha256]),
+            reverse_lazy('malware.delete', kwargs={'sha256':sample.sha256}),
             {
-                'pk': sample.id
+                'pk': sample.pk
             }
         )
         try:
