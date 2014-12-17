@@ -27,7 +27,7 @@ from samples.forms import SampleFilterForm
 from samples.forms import SampleSourceForm
 from samples.forms import DescriptionForm
 from samples.forms import FilenameFormSet
-from samples.forms import LinkFormSet
+from samples.forms import HyperlinkFormSet
 
 
 logger = logging.getLogger(__name__)
@@ -191,9 +191,6 @@ class SampleUploadView(FormView, LoginRequiredMixin):
 
     def get_context_data(self, **kwargs):
         context = super(SampleUploadView, self).get_context_data(**kwargs)
-        context['filename_formset'] = FilenameFormSet()
-        context['link_formset'] = LinkFormSet()
-        context['description_form'] = DescriptionForm()
         return context
 
 

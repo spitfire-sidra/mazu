@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 
 from core.utils import compute_hashes
 
-from samples.models import Link
+from samples.models import Hyperlink
 from samples.models import Filename
 from samples.models import Description
 from samples.models import Sample
@@ -36,17 +36,17 @@ class SampleSourceForm(forms.ModelForm):
         }
 
 
-class LinkForm(forms.ModelForm):
+class HyperlinkForm(forms.ModelForm):
 
     """
     A form class for saving links
     """
 
     class Meta:
-        model = Link
-        fields = ['heading', 'url', 'kind']
+        model = Hyperlink
+        fields = ['headline', 'link', 'kind']
         widgets = {
-            'url': forms.URLInput()
+            'link': forms.URLInput()
         }
 
 
@@ -189,4 +189,4 @@ class SampleUpdateForm(forms.ModelForm):
 
 # Formsets
 FilenameFormSet = formset_factory(FilenameForm)
-LinkFormSet = formset_factory(LinkForm)
+HyperlinkFormSet = formset_factory(HyperlinkForm)

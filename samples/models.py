@@ -64,7 +64,7 @@ class Filetype(TimeStampedModel):
         unique_together = ('filetype', 'detector')
 
 
-class Link(TimeStampedModel):
+class Hyperlink(TimeStampedModel):
 
     """
     This model saves sample's links. Download links, report links or
@@ -77,8 +77,8 @@ class Link(TimeStampedModel):
         (2, 'Other'),
     )
 
-    url = models.TextField(validators=[URLValidator()])
-    heading = models.CharField(max_length=255, null=True, blank=True)
+    link = models.TextField(validators=[URLValidator()])
+    headline = models.CharField(max_length=255, null=True, blank=True)
     kind = models.IntegerField(max_length=2, choices=KIND_CHOICES, default=0)
     user = models.ForeignKey('auth.User')
 
