@@ -18,12 +18,10 @@
 
 # Others
 
-* [ ] review comment blocks, see if it is easy to understand. assigned to kunyuchen
+* [ ] review comment blocks(notificatons)
 
-        * [ ] notificatons
+* [ ] review comment blocks(account)
 
-        * [ ] account
+* [ ] review comment blocks(mazu)
 
-        * [ ] mazu
-
-        * [ ] sharing
+* [ ] review comment blocks(sharing)
