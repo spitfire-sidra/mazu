@@ -16,5 +16,11 @@
 
 * [ ] issue
 
-### Others
-* [ ] issue: review comment blocks, see if it is easy to understand. assigned to kunyuchen
+# Others
+
+* [ ] review comment blocks, see if it is easy to understand. assigned to kunyuchen
+
+        * [ ] notificatons
+        * [ ] account
+        * [ ] mazu
+        * [ ] sharing
