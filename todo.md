@@ -2,19 +2,19 @@
 
 ### Models
 
-[ ] issue
+* [ ] issue
 
 ### Views
 
-[ ] issue
+* [ ] issue
 
 ### Templates
 
-[ ] issue
+* [ ] issue
 
 ### Tests
 
-[ ] issue
+* [ ] issue
 
 ### Others
-[ ] issue: review comment blocks, see if it is easy to understand. assigned to kunyuchen
+* [ ] issue: review comment blocks, see if it is easy to understand. assigned to kunyuchen
