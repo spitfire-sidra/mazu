@@ -12,7 +12,7 @@
 ### Tests
 * [ ] issue
 
-# Others
+### Others
 * [ ] review comment blocks(notificatons)
 * [ ] review comment blocks(account)
 * [ ] review comment blocks(mazu)
