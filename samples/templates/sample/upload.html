@@ -1,12 +1,8 @@
 {% extends 'samples_app_base.html' %}
-
+{% load crispy_forms_tags %}
 {% block content %}
 <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    {{ filename_formset.as_p }}
-    {{ description_form.as_p }}
-    {{ link_formset.as_p }}
-    <input type="submit" value="Submit">
+    {% crispy form %}
 </form>
 {% endblock content %}

@@ -7,6 +7,9 @@ from django.forms import ValidationError
 from django.forms.formsets import formset_factory
 from django.contrib.auth.models import User
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Field, ButtonHolder, Submit
+
 from core.utils import compute_hashes
 
 from samples.models import Hyperlink
@@ -82,12 +85,35 @@ class SampleUploadForm(forms.Form):
     A form for uploading sample.
     """
 
+    filename = forms.CharField(required=False)
+    description = forms.CharField(required=False, widget=forms.Textarea)
     sample = forms.FileField()
     share = forms.BooleanField(required=False, help_text='Yes')
 
     def __init__(self, user, *args, **kwargs):
         super(SampleUploadForm, self).__init__(*args, **kwargs)
         self.user = user
+        self.fields['source'] = self.source_field(self.user)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('sample'),
+            Field('share'),
+            Field('source'),
+            Field('filename'),
+            Field('description'),
+            ButtonHolder(
+                Submit('submit', 'submit')
+            )
+        )
+
+    def source_field(self, user):
+        queryset = SampleSource.objects.filter(user=user)
+        params = {
+            'required': False,
+            'queryset': queryset,
+            'label': 'Source'
+        }
+        return forms.ModelChoiceField(**params)
 
     def clean_sample(self):
         """
