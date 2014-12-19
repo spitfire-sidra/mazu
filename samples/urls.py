@@ -5,40 +5,39 @@ from django.conf.urls import url
 from samples.views import download
 from samples.views import SampleList
 from samples.views import SampleUpload
-from samples.views import SampleUpdate
 from samples.views import SampleDelete
 from samples.views import SampleDetail
-from samples.views import SampleSourceList
-from samples.views import SampleSourceCreate
-from samples.views import SampleSourceUpdate
-from samples.views import SampleSourceDelete
-from samples.views import SampleSourceDetail
+from samples.views import SourceList
+from samples.views import SourceCreate
+from samples.views import SourceUpdate
+from samples.views import SourceDelete
+from samples.views import SourceDetail
 
 
 urlpatterns = patterns('',
     url(
         r'^source/list/$',
-        SampleSourceList,
+        SourceList,
         name='source.list'
     ),
     url(
         r'^source/create/$',
-        SampleSourceCreate,
+        SourceCreate,
         name='source.create'
     ),
     url(
         r'^source/update/(?P<pk>\d+)/$',
-        SampleSourceUpdate,
+        SourceUpdate,
         name='source.update'
     ),
     url(
         r'^source/delete/(?P<pk>\d+)/$',
-        SampleSourceDelete,
+        SourceDelete,
         name='source.delete'
     ),
     url(
         r'^source/detail/(?P<pk>\d+)/$',
-        SampleSourceDetail,
+        SourceDetail,
         name='source.detail'
     ),
 )
@@ -53,11 +52,6 @@ urlpatterns += patterns('',
         r'^upload/$',
         SampleUpload,
         name='sample.upload'
-    ),
-    url(
-        r'^update/(?P<sha256>[\w]+)$',
-        SampleUpdate,
-        name='sample.update'
     ),
     url(
         r'^download/(?P<sha256>[\w]+)$',

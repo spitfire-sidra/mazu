@@ -11,7 +11,7 @@ from core.tests import random_http_link
 from core.utils import compute_hashes
 from samples.utils import SampleHelper
 from samples.models import Sample
-from samples.models import SampleSource
+from samples.models import Source
 
 
 def get_temp_folder():
@@ -44,15 +44,15 @@ def remove_temp_folder():
     shutil.rmtree(temp_folder)
 
 
-class SampleSourceTestCase(CoreTestCase):
+class SourceTestCase(CoreTestCase):
 
     """
-    Test cases for SampleSource
+    Test cases for Source
     """
 
     def setUp(self):
-        super(SampleSourceTestCase, self).setUp()
-        self.set_target_model(SampleSource)
+        super(SourceTestCase, self).setUp()
+        self.set_target_model(Source)
 
     def create_sample_source(self):
         target = reverse_lazy('source.create')
@@ -178,7 +178,7 @@ class SampleTestCase(CoreTestCase):
         response = self.get_response()
         self.assert_response_objects_count(response, 'object_list')
 
-    def test_profile_view(self):
+    def test_detail_view(self):
         self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
         target = reverse_lazy('sample.detail', kwargs={'sha256': sample.sha256})
@@ -186,13 +186,6 @@ class SampleTestCase(CoreTestCase):
         self.assert_response_status_code(200)
         response = self.get_response()
         self.assertEqual(response.context['object'], sample)
-
-    def test_can_update(self):
-        self.upload_sample()
-        target = reverse_lazy('sample.update', kwargs={'sha256': self.hashes.sha256})
-        self.set_target(target)
-        self.assert_response_status_code(200)
-        sample = Sample.objects.get(sha256=self.hashes.sha256)
 
     def test_can_delete(self):
         self.upload_sample()

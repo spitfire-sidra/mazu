@@ -7,10 +7,10 @@ from django.template.defaultfilters import slugify
 from core.models import TimeStampedModel
 
 
-class SampleSource(TimeStampedModel):
+class Source(TimeStampedModel):
 
     """
-    SampleSource model stores information of sample sources.
+    Source model stores information of sample sources.
     """
 
     name = models.CharField(max_length=255)
@@ -105,7 +105,7 @@ class Sample(TimeStampedModel):
     crc32 = models.IntegerField(max_length=255)
     filetypes = models.ManyToManyField(Filetype, null=True, blank=True)
     filenames = models.ManyToManyField(Filename, null=True, blank=True)
-    sources = models.ManyToManyField(SampleSource, null=True, blank=True)
+    sources = models.ManyToManyField(Source, null=True, blank=True)
     user = models.ForeignKey('auth.User')
 
     def __unicode__(self):

@@ -19,18 +19,18 @@ from samples.models import Hyperlink
 from samples.models import Filename
 from samples.models import Description
 from samples.models import Sample
-from samples.models import SampleSource
+from samples.models import Source
 from samples.utils import SampleHelper
 
 
-class SampleSourceForm(forms.ModelForm):
+class SourceForm(forms.ModelForm):
 
     """
-    SampleSourceForm is a form class for updating and creating SampleSource.
+    SourceForm is a form class for updating and creating Source.
     """
 
     class Meta:
-        model = SampleSource
+        model = Source
         fields = ['name', 'link', 'descr']
         labels = {
             'name': 'Source Name',
@@ -111,7 +111,7 @@ class SampleUploadForm(forms.Form):
         )
 
     def source_field(self, user):
-        queryset = SampleSource.objects.filter(user=user)
+        queryset = Source.objects.filter(user=user)
         params = {
             'required': False,
             'queryset': queryset,

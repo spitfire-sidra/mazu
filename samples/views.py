@@ -19,12 +19,11 @@ from core.mixins import LoginRequiredMixin
 from core.mongodb import get_compressed_file
 from samples.utils import SampleHelper
 from samples.models import Sample
-from samples.models import SampleSource
+from samples.models import Source
 from samples.models import AccessLog
 from samples.forms import SampleUploadForm
-from samples.forms import SampleUpdateForm
 from samples.forms import SampleFilterForm
-from samples.forms import SampleSourceForm
+from samples.forms import SourceForm
 from samples.forms import DescriptionForm
 from samples.forms import FilenameFormSet
 from samples.forms import HyperlinkFormSet
@@ -55,13 +54,13 @@ def download(request, sha256):
             raise Http404
 
 
-class SampleSourceListView(ListView, LoginRequiredMixin):
+class SourceListView(ListView, LoginRequiredMixin):
 
     """
-    ListView for SampleSource
+    ListView for Source
     """
 
-    model = SampleSource
+    model = Source
     template_name = 'sample_source/list.html'
 
     def get_queryset(self):
@@ -69,34 +68,34 @@ class SampleSourceListView(ListView, LoginRequiredMixin):
         return self.model.objects.filter(user=self.request.user)
 
 
-class SampleSourceCreateView(CreateView, LoginRequiredMixin):
+class SourceCreateView(CreateView, LoginRequiredMixin):
 
     """
     A class-based view for creating sample source.
     """
 
-    model = SampleSource
+    model = Source
     fields = ['name', 'link', 'descr']
-    form_class = SampleSourceForm
+    form_class = SourceForm
     template_name = 'sample_source/create.html'
     success_url = reverse_lazy('source.list')
 
     def form_valid(self, form):
         # Saving the user who create the sample source
         form.instance.user = self.request.user
-        return super(SampleSourceCreateView, self).form_valid(form)
+        return super(SourceCreateView, self).form_valid(form)
 
 
-class SampleSourceUpdateView(UpdateView, OwnerRequiredMixin):
+class SourceUpdateView(UpdateView, OwnerRequiredMixin):
 
     """
-    UpdateView for SampleSource.
+    UpdateView for Source.
     Users can a source which owned by them.
     """
 
-    model = SampleSource
+    model = Source
     fields = ['name', 'link', 'descr']
-    form_class = SampleSourceForm
+    form_class = SourceForm
     template_name = 'sample_source/update.html'
 
     def get_success_url(self):
@@ -104,24 +103,24 @@ class SampleSourceUpdateView(UpdateView, OwnerRequiredMixin):
         return reverse_lazy('source.detail',  kwargs={'pk': source.pk})
 
 
-class SampleSourceDeleteView(DeleteView, OwnerRequiredMixin):
+class SourceDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
-    DeleteView for SampleSource
+    DeleteView for Source
     """
 
-    model = SampleSource
+    model = Source
     template_name = 'sample_source/delete.html'
     success_url = reverse_lazy('source.list')
 
 
-class SampleSourceDetailView(DetailView, LoginRequiredMixin):
+class SourceDetailView(DetailView, LoginRequiredMixin):
 
     """
-    DetailView for SampleSource
+    DetailView for Source
     """
 
-    model = SampleSource
+    model = Source
     template_name = 'sample_source/detail.html'
 
 
@@ -194,22 +193,6 @@ class SampleUploadView(FormView, LoginRequiredMixin):
         return context
 
 
-class SampleUpdateView(UpdateView, OwnerRequiredMixin):
-
-    """
-    A class-based view for updating sample attributes.
-    Only the user of sample can update sample attributes
-    """
-
-    model = Sample
-    form_class = SampleUpdateForm
-    template_name = 'sample/update.html'
-    success_url = reverse_lazy('sample.list')
-
-    def get_object(self):
-        return self.model.objects.get(sha256=self.kwargs['sha256'])
-
-
 class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
@@ -243,13 +226,12 @@ class SampleDetailView(DetailView, LoginRequiredMixin):
         return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
-SampleSourceList = SampleSourceListView.as_view()
-SampleSourceCreate = SampleSourceCreateView.as_view()
-SampleSourceUpdate = SampleSourceUpdateView.as_view()
-SampleSourceDelete = SampleSourceDeleteView.as_view()
-SampleSourceDetail = SampleSourceDetailView.as_view()
+SourceList = SourceListView.as_view()
+SourceCreate = SourceCreateView.as_view()
+SourceUpdate = SourceUpdateView.as_view()
+SourceDelete = SourceDeleteView.as_view()
+SourceDetail = SourceDetailView.as_view()
 SampleList = SampleListView.as_view()
 SampleUpload = SampleUploadView.as_view()
 SampleDetail = SampleDetailView.as_view()
 SampleDelete = SampleDeleteView.as_view()
-SampleUpdate = SampleUpdateView.as_view()

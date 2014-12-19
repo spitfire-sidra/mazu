@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import forms
 
-from samples.models import SampleSource
+from samples.models import Source
 from sharing.models import HPFeedsChannel
 
 
@@ -30,5 +30,5 @@ class HPFeedsChannelForm(forms.ModelForm):
         return forms.ModelChoiceField(
             required=False,
             label='Sample Source',
-            queryset=SampleSource.objects.filter(user=self.user)
+            queryset=Source.objects.filter(user=self.user)
         )
