@@ -72,6 +72,7 @@ class FilenameForm(forms.ModelForm):
 class DescriptionForm(forms.ModelForm):
 
     """
+    This class saves descriptions.
     """
 
     class Meta:
@@ -195,30 +196,6 @@ class SampleFilterForm(forms.Form):
             )
 
         return samples
-
-
-class SampleUpdateForm(forms.ModelForm):
-
-    """
-    Form class for updating sample
-    """
-
-    class Meta:
-        model = Sample
-        fields = [
-            'filetypes', 'size', 'crc32', 'md5',
-            'sha1', 'sha256', 'sha512', 'ssdeep'
-        ]
-        labels = {
-            'filetypes': 'File Type',
-            'size': 'File Size',
-            'crc32': 'CRC32',
-            'md5': 'MD5',
-            'sha1': 'SHA1',
-            'sha256': 'SHA256',
-            'sha512': 'SHA512',
-            'ssdeep': 'ssdeep',
-        }
 
 
 # Formsets

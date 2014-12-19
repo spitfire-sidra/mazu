@@ -7,9 +7,13 @@
     {{ filetype }}<br />
 {% endfor %}
 
-{% for filename in object.filename.all %}
-    {{ filename }}<br />
+{% for filename in object.filenames.all %}
+    {{ filename.name }}
+    {% if filename.user == request.user %}
+        <a href="{{ filename.pk }}">remove</a><br />
+    {% endif %}
 {% endfor %}
+<a href="">add filename</a><br />
 
 {{ object.size }}<br />
 {{ object.crc32 }}<br />
@@ -19,11 +23,10 @@
 {{ object.sha512 }}<br />
 {{ object.ssdeep }}<br />
 
-
-
 {% for descr in object.description_set.all %}
     {{ descr.text }}<br />
 {% endfor %}
+<a href="">update description</a><br />
 
 <a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
 
