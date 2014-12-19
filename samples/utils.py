@@ -100,6 +100,7 @@ class SampleHelper(object):
 
         try:
             descr = Description(sample=sample, text=text, user=user)
+            descr.save()
         except Exception:
             return False
         else:

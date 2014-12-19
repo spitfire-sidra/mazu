@@ -1,18 +1,30 @@
 {% extends 'samples_app_base.html' %}
 {% load virustotal %}
+
 {% block content %}
 
-{{ object.name }}<br />
-{{ object.reference }}<br />
-{{ object.filetype }}<br />
+{% for filetype in object.filetypes.all %}
+    {{ filetype }}<br />
+{% endfor %}
+
+{% for filename in object.filename.all %}
+    {{ filename }}<br />
+{% endfor %}
+
 {{ object.size }}<br />
 {{ object.crc32 }}<br />
 {{ object.md5 }}<br />
 {{ object.sha1 }}<br />
 {{ object.sha256 }}<br />
-<a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
 {{ object.sha512 }}<br />
 {{ object.ssdeep }}<br />
-{{ object.desc }}<br />
+
+
+
+{% for descr in object.description_set.all %}
+    {{ descr.text }}<br />
+{% endfor %}
+
+<a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
 
 {% endblock content %}

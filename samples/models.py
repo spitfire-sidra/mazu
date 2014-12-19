@@ -130,7 +130,7 @@ class Description(TimeStampedModel):
     user = models.ForeignKey('auth.User')
 
     def __unicode__(self):
-        return self.pk
+        return self.text
 
     class Meta:
         ordering = ['-created']
