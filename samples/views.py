@@ -19,14 +19,15 @@ from core.mixins import LoginRequiredMixin
 from core.mongodb import get_compressed_file
 from samples.utils import SampleHelper
 from samples.models import Sample
+from samples.models import Filename
+from samples.models import Description
 from samples.models import Source
 from samples.models import AccessLog
 from samples.forms import SampleUploadForm
 from samples.forms import SampleFilterForm
 from samples.forms import SourceForm
+from samples.forms import FilenameForm
 from samples.forms import DescriptionForm
-from samples.forms import FilenameFormSet
-from samples.forms import HyperlinkFormSet
 
 
 logger = logging.getLogger(__name__)
@@ -226,6 +227,50 @@ class SampleDetailView(DetailView, LoginRequiredMixin):
         return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
+class SampleUpdateView(SampleDetailView):
+
+    def get_context_data(self, **kwargs):
+        sample = self.get_object()
+        context = super(SampleUpdateView, self).get_context_data(**kwargs)
+        return context
+
+
+class FilenameDeleteView(DeleteView, OwnerRequiredMixin):
+
+    """
+    A class-based view for deleting a filename.
+    Only the owner can delete the filename.
+    """
+
+    model = Filename
+    template_name = 'sample/delete.html'
+    success_url = reverse_lazy('sample.list')
+
+    def get_object(self, **kwargs):
+        return self.model.objects.get(id=self.kwargs['pk'])
+
+    def delete(self, request, *args, **kwargs):
+        return super(FilenameDeleteView, self).delete(request, *args, **kwargs)
+
+
+class DescriptionDeleteView(DeleteView, OwnerRequiredMixin):
+
+    """
+    A class-based view for deleting a description.
+    Only the owner can delete the description.
+    """
+
+    model = Description
+    template_name = 'sample/delete.html'
+    success_url = reverse_lazy('sample.list')
+
+    def get_object(self, **kwargs):
+        return self.model.objects.get(id=self.kwargs['pk'])
+
+    def delete(self, request, *args, **kwargs):
+        return super(DescriptionDeleteView, self).delete(request, *args, **kwargs)
+
+
 SourceList = SourceListView.as_view()
 SourceCreate = SourceCreateView.as_view()
 SourceUpdate = SourceUpdateView.as_view()
@@ -235,3 +280,6 @@ SampleList = SampleListView.as_view()
 SampleUpload = SampleUploadView.as_view()
 SampleDetail = SampleDetailView.as_view()
 SampleDelete = SampleDeleteView.as_view()
+SampleUpdate = SampleUpdateView.as_view()
+FilenameDelete = FilenameDeleteView.as_view()
+DescriptionDelete = DescriptionDeleteView.as_view()

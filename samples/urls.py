@@ -7,6 +7,9 @@ from samples.views import SampleList
 from samples.views import SampleUpload
 from samples.views import SampleDelete
 from samples.views import SampleDetail
+from samples.views import SampleUpdate
+from samples.views import FilenameDelete
+from samples.views import DescriptionDelete
 from samples.views import SourceList
 from samples.views import SourceCreate
 from samples.views import SourceUpdate
@@ -67,5 +70,20 @@ urlpatterns += patterns('',
         r'^profile/(?P<sha256>[\w]+)$',
         SampleDetail,
         name='sample.detail'
+    ),
+    url(
+        r'^update/(?P<sha256>[\w]+)$',
+        SampleUpdate,
+        name='sample.update'
+    ),
+    url(
+        r'^filename/delete/(?P<pk>\d+)$',
+        FilenameDelete,
+        name='filename.delete'
+    ),
+    url(
+        r'^descr/delete/(?P<pk>\d+)$',
+        DescriptionDelete,
+        name='descr.delete'
     ),
 )

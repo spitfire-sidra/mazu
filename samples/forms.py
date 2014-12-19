@@ -6,6 +6,7 @@ from django.db import OperationalError
 from django.forms import ValidationError
 from django.forms.formsets import formset_factory
 from django.contrib.auth.models import User
+from django.forms.models import inlineformset_factory
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -196,8 +197,3 @@ class SampleFilterForm(forms.Form):
             )
 
         return samples
-
-
-# Formsets
-FilenameFormSet = formset_factory(FilenameForm)
-HyperlinkFormSet = formset_factory(HyperlinkForm)
