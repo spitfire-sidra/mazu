@@ -193,7 +193,6 @@ class SampleFilterForm(forms.Form):
 
         if self.cleaned_data['filetype']:
             samples = samples.filter(
-                filetype__icontains=self.cleaned_data['filetype']
+                filetypes__filetype__icontains=self.cleaned_data['filetype']
             )
-
         return samples
