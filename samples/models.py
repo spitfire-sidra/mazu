@@ -45,6 +45,7 @@ class Filename(TimeStampedModel):
 
     class Meta:
         ordering = ['-created']
+        unique_together = ('user', 'name')
 
 
 class Filetype(TimeStampedModel):

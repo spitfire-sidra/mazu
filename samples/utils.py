@@ -9,6 +9,8 @@ from core.utils import compute_hashes
 from core.utils import dynamic_import
 from samples.models import Sample
 from samples.models import Filetype
+from samples.models import Filename
+from samples.models import Description
 from samples.filetypes.filetype import FileTypeDetector
 
 
@@ -80,6 +82,28 @@ class SampleHelper(object):
         Deleting a sample which sha256 equals variable 'sha256'
         """
         return delete_file('sha256', sha256)
+
+    @staticmethod
+    def append_filename(sample, filename, user):
+        if not filename:
+            return None
+
+        obj, _ = Filename.objects.get_or_create(name=filename, user=user)
+        if not sample.filenames.filter(id=obj.id).exists():
+            sample.filenames.add(obj)
+            sample.save()
+
+    @staticmethod
+    def save_description(sample, text, user):
+        if not text:
+            return None
+
+        try:
+            descr = Description(sample=sample, text=text, user=user)
+        except Exception:
+            return False
+        else:
+            return True
 
     def save_sample(self, **kwargs):
         """
@@ -170,5 +194,5 @@ class SampleHelper(object):
             else:
                 sample.filetypes = self.filetype_helper.get_object_list()
                 sample.save()
-                return True
+                return sample
         return False

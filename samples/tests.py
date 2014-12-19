@@ -9,6 +9,7 @@ from core.tests import CoreTestCase
 from core.tests import random_string
 from core.tests import random_http_link
 from core.utils import compute_hashes
+from samples.utils import SampleHelper
 from samples.models import Sample
 from samples.models import SampleSource
 
@@ -122,6 +123,7 @@ class SampleTestCase(CoreTestCase):
 
     def setUp(self):
         super(SampleTestCase, self).setUp()
+        self.helper = SampleHelper
 
     def tearDown(self):
         super(SampleTestCase, self).tearDown()
@@ -131,6 +133,9 @@ class SampleTestCase(CoreTestCase):
         self.post_data = {
             'sample': fp,
             'share': False,
+            'source': '',
+            'filename': random_string(),
+            'description': random_string(),
         }
 
     def upload_sample(self, filepath=None):
@@ -169,7 +174,6 @@ class SampleTestCase(CoreTestCase):
         target = reverse_lazy('sample.list')
         self.set_target(target)
         self.set_target_model(Sample)
-
         self.assert_response_status_code(200)
         response = self.get_response()
         self.assert_response_objects_count(response, 'object_list')
@@ -177,9 +181,10 @@ class SampleTestCase(CoreTestCase):
     def test_profile_view(self):
         self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
-        response = self.client.get(
-            reverse_lazy('sample.detail', kwargs={'sha256': sample.sha256})
-        )
+        target = reverse_lazy('sample.detail', kwargs={'sha256': sample.sha256})
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        response = self.get_response()
         self.assertEqual(response.context['object'], sample)
 
     def test_can_update(self):
@@ -192,16 +197,8 @@ class SampleTestCase(CoreTestCase):
     def test_can_delete(self):
         self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
-        self.client.post(
-            reverse_lazy('sample.delete', kwargs={'sha256':sample.sha256}),
-            {
-                'pk': sample.pk
-            }
-        )
-        try:
-            Sample.objects.get(sha256=self.hashes.sha256)
-        except Sample.DoesNotExist:
-            does_exist = False
-        else:
-            does_exist = True
-        self.assertFalse(does_exist)
+        target = reverse_lazy('sample.delete', kwargs={'sha256':sample.sha256})
+        self.set_target(target)
+        self.post_data = {'pk': sample.pk}
+        self.send_post_request()
+        self.assertFalse(self.helper.sample_exists(sample.sha256), False)

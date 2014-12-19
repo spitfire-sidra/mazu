@@ -8,7 +8,10 @@ from django.forms.formsets import formset_factory
 from django.contrib.auth.models import User
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, ButtonHolder, Submit
+from crispy_forms.layout import Layout
+from crispy_forms.layout import Field
+from crispy_forms.layout import ButtonHolder
+from crispy_forms.layout import Submit
 
 from core.utils import compute_hashes
 
@@ -133,11 +136,16 @@ class SampleUploadForm(forms.Form):
         """
         Saving a sample and its attributes.
         """
+        filename = self.cleaned_data['filename']
+        descr = self.cleaned_data['description']
         sample = self.cleaned_data['sample']
         sample_helper = SampleHelper(sample)
-        if sample_helper.save(user=self.user):
-            return True
-        return False
+        saved_sample = sample_helper.save(user=self.user)
+        if not saved_sample:
+            return False
+        sample_helper.append_filename(saved_sample, filename, self.user)
+        sample_helper.save_description(saved_sample, descr, self.user)
+        return True
 
 
 class SampleFilterForm(forms.Form):
