@@ -227,12 +227,13 @@ class SampleDetailView(DetailView, LoginRequiredMixin):
         return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
-class SampleUpdateView(SampleDetailView):
+class SampleUpdateView(DetailView, LoginRequiredMixin):
 
-    def get_context_data(self, **kwargs):
-        sample = self.get_object()
-        context = super(SampleUpdateView, self).get_context_data(**kwargs)
-        return context
+    model = Sample
+    template_name = 'sample/update.html'
+
+    def get_object(self, **kwargs):
+        return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
 class FilenameDeleteView(DeleteView, OwnerRequiredMixin):

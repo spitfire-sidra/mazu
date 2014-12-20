@@ -1,9 +1,45 @@
 {% extends 'samples_app_base.html' %}
-
+{% load virustotal %}
+{% load crispy_forms_tags %}
 {% block content %}
-<form action="" method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Update">
-</form>
+
+{% for filetype in object.filetypes.all %}
+    {{ filetype }}<br />
+{% endfor %}
+
+{% for filename in object.filenames.all %}
+    {{ filename.name }}
+    {% if filename.user == request.user %}
+        <a href="{% url 'filename.delete' filename.pk %}">remove</a><br />
+    {% endif %}
+{% endfor %}
+<a href="">add</a><br />
+
+{% for source in object.sources.all %}
+    {{ source.name }}
+    {% if source.user == request.user %}
+        <a href="">remove</a><br />
+    {% endif %}
+{% endfor %}
+<a href="">add</a><br />
+
+
+{{ object.size }}<br />
+{{ object.crc32 }}<br />
+{{ object.md5 }}<br />
+{{ object.sha1 }}<br />
+{{ object.sha256 }}<br />
+{{ object.sha512 }}<br />
+{{ object.ssdeep }}<br />
+
+{% for descr in object.description_set.all %}
+    {{ descr.text }}
+    {% if descr.user == request.user %}
+        <a href="">update</a>&nbsp;
+        <a href="{% url 'descr.delete' descr.pk %}">remove</a><br />
+    {% endif %}
+{% endfor %}
+
+<a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
+
 {% endblock content %}

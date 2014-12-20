@@ -8,10 +8,7 @@
 {% endfor %}
 
 {% for filename in object.filenames.all %}
-    {{ filename.name }}
-    {% if filename.user == request.user %}
-        <a href="{% url 'filename.delete' filename.pk %}">remove</a><br />
-    {% endif %}
+    {{ filename.name }}<br />
 {% endfor %}
 
 
@@ -24,10 +21,7 @@
 {{ object.ssdeep }}<br />
 
 {% for descr in object.description_set.all %}
-    {{ descr.text }}
-    {% if descr.user == request.user %}
-        <a href="{% url 'descr.delete' descr.pk %}">remove</a><br />
-    {% endif %}
+    {{ descr.text }}<br />
 {% endfor %}
 
 <a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
