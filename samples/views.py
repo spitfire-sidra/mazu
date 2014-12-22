@@ -63,7 +63,7 @@ class SourceListView(ListView, LoginRequiredMixin):
     """
 
     model = Source
-    template_name = 'sample_source/list.html'
+    template_name = 'source/list.html'
 
     def get_queryset(self):
         # users can see sample sources that owned by them
@@ -79,7 +79,7 @@ class SourceCreateView(CreateView, LoginRequiredMixin):
     model = Source
     fields = ['name', 'link', 'descr']
     form_class = SourceForm
-    template_name = 'sample_source/create.html'
+    template_name = 'source/create.html'
     success_url = reverse_lazy('source.list')
 
     def form_valid(self, form):
@@ -98,7 +98,7 @@ class SourceUpdateView(UpdateView, OwnerRequiredMixin):
     model = Source
     fields = ['name', 'link', 'descr']
     form_class = SourceForm
-    template_name = 'sample_source/update.html'
+    template_name = 'source/update.html'
 
     def get_success_url(self):
         source = self.get_object()
@@ -112,7 +112,7 @@ class SourceDeleteView(DeleteView, OwnerRequiredMixin):
     """
 
     model = Source
-    template_name = 'sample_source/delete.html'
+    template_name = 'source/delete.html'
     success_url = reverse_lazy('source.list')
 
 
@@ -123,7 +123,7 @@ class SourceDetailView(DetailView, LoginRequiredMixin):
     """
 
     model = Source
-    template_name = 'sample_source/detail.html'
+    template_name = 'source/detail.html'
 
 
 class SampleListView(ListView, FormMixin, LoginRequiredMixin):
