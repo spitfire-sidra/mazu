@@ -57,18 +57,52 @@ class HyperlinkForm(forms.ModelForm):
         }
 
 
-class FilenameForm(forms.ModelForm):
+class FilenameRemoveForm(forms.Form):
+
+    """
+    A form class for removing filenames
+    """
+
+    filename = forms.CharField(widget=forms.HiddenInput)
+    sample = forms.CharField(widget=forms.HiddenInput)
+
+    def remove_filename(self, user):
+        sha256 = self.cleaned_data['sample']
+        filename_id = self.cleaned_data['filename']
+        try:
+            sample = Sample.objects.get(sha256=sha256)
+            filename = Filename.objects.get(id=filename_id)
+        except Sample.DoesNotExist:
+            raise Http404
+        except Filename.DoesNotExist:
+            raise Http404
+        else:
+            SampleHelper.pop_filename(sample, filename, user)
+
+
+class FilenameAppendForm(forms.Form):
 
     """
     A form class for saving filenames
     """
 
-    class Meta:
-        model = Filename
-        fields = ['name']
-        labels = {
-            'name': 'Filename'
-        }
+    filename = forms.CharField()
+    sample = forms.CharField(widget=forms.HiddenInput)
+
+    def append_filename(self, user):
+        sha256 = self.cleaned_data['sample']
+        filename = self.cleaned_data['filename']
+        try:
+            sample = Sample.objects.get(sha256=sha256)
+            filename, _ = Filename.objects.get_or_create(
+                name=filename,
+                user=user
+            )
+        except Sample.DoesNotExist:
+            raise Http404
+        else:
+            SampleHelper.append_filename(sample, filename, user)
+
 
 class DescriptionForm(forms.ModelForm):
 

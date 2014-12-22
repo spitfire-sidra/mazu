@@ -10,10 +10,11 @@
 {% for filename in object.filenames.all %}
     {{ filename.name }}
     {% if filename.user == request.user %}
-        <a href="{% url 'filename.delete' filename.pk %}">remove</a><br />
+        <a href="{% url 'filename.remove' object.sha256 filename.pk %}">remove</a>
+        <a href="{% url 'filename.delete' filename.pk %}">delete</a><br />
     {% endif %}
 {% endfor %}
-<a href="">add</a><br />
+<a href="{% url 'filename.append' object.sha256 %}">add</a><br />
 
 {% for source in object.sources.all %}
     {{ source.name }}

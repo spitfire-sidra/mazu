@@ -26,7 +26,8 @@ from samples.models import AccessLog
 from samples.forms import SampleUploadForm
 from samples.forms import SampleFilterForm
 from samples.forms import SourceForm
-from samples.forms import FilenameForm
+from samples.forms import FilenameRemoveForm
+from samples.forms import FilenameAppendForm
 from samples.forms import DescriptionForm
 
 
@@ -236,6 +237,53 @@ class SampleUpdateView(DetailView, LoginRequiredMixin):
         return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
+class FilenameRemoveView(FormView, OwnerRequiredMixin):
+
+    template_name = 'sample/remove.html'
+    form_class = FilenameRemoveForm
+    success_url = reverse_lazy('sample.list')
+
+    def get_initial(self):
+        initial = super(FilenameRemoveView, self).get_initial()
+        try:
+            sample = Sample.objects.get(sha256=self.kwargs['sha256'])
+            filename = Filename.objects.get(id=self.kwargs['filename_pk'])
+        except Sample.DoesNotExist:
+            raise Http404
+        except Filename.DoesNotExist:
+            raise Http404
+        else:
+            initial['filename'] = filename.pk
+            initial['sample'] = sample.sha256
+        return initial
+
+    def form_valid(self, form):
+        form.remove_filename(self.request.user)
+        return super(FilenameRemoveView, self).form_valid(form)
+
+
+class FilenameAppendView(FormView, OwnerRequiredMixin):
+
+    template_name = 'sample/append_filename.html'
+    form_class = FilenameAppendForm
+    success_url = reverse_lazy('sample.list')
+
+    def get_initial(self):
+        initial = super(FilenameAppendView, self).get_initial()
+        try:
+            sample = Sample.objects.get(sha256=self.kwargs['sha256'])
+        except Sample.DoesNotExist:
+            raise Http404
+        else:
+            initial['sample'] = sample.sha256
+        return initial
+
+    def form_valid(self, form):
+        form.append_filename(self.request.user)
+        return super(FilenameAppendView, self).form_valid(form)
+
+
+
 class FilenameDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
@@ -283,4 +331,6 @@ SampleDetail = SampleDetailView.as_view()
 SampleDelete = SampleDeleteView.as_view()
 SampleUpdate = SampleUpdateView.as_view()
 FilenameDelete = FilenameDeleteView.as_view()
+FilenameRemove = FilenameRemoveView.as_view()
+FilenameAppend = FilenameAppendView.as_view()
 DescriptionDelete = DescriptionDeleteView.as_view()

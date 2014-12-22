@@ -9,6 +9,8 @@ from samples.views import SampleDelete
 from samples.views import SampleDetail
 from samples.views import SampleUpdate
 from samples.views import FilenameDelete
+from samples.views import FilenameRemove
+from samples.views import FilenameAppend
 from samples.views import DescriptionDelete
 from samples.views import SourceList
 from samples.views import SourceCreate
@@ -80,6 +82,16 @@ urlpatterns += patterns('',
         r'^filename/delete/(?P<pk>\d+)$',
         FilenameDelete,
         name='filename.delete'
+    ),
+    url(
+        r'^filename/remove/(?P<sha256>[\w]+)/(?P<filename_pk>\d+)$',
+        FilenameRemove,
+        name='filename.remove'
+    ),
+    url(
+        r'^filename/append/(?P<sha256>[\w]+)$',
+        FilenameAppend,
+        name='filename.append'
     ),
     url(
         r'^descr/delete/(?P<pk>\d+)$',

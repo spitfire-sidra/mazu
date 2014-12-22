@@ -94,6 +94,20 @@ class SampleHelper(object):
             sample.save()
 
     @staticmethod
+    def pop_filename(sample, filename, user):
+        if not filename:
+            return None
+
+        try:
+            obj = Filename.objects.get(name=filename, user=user)
+        except Filename.DoesNotExist:
+            return False
+
+        if sample.filenames.remove(obj):
+            return True
+        return False
+
+    @staticmethod
     def save_description(sample, text, user):
         if not text:
             return None
