@@ -102,7 +102,7 @@ class SourceUpdateView(UpdateView, OwnerRequiredMixin):
 
     def get_success_url(self):
         source = self.get_object()
-        return reverse_lazy('source.detail',  kwargs={'pk': source.pk})
+        return reverse_lazy('source.detail', kwargs={'pk': source.pk})
 
 
 class SourceDeleteView(DeleteView, OwnerRequiredMixin):
