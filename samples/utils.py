@@ -92,6 +92,8 @@ class SampleHelper(object):
         if not sample.filenames.filter(id=obj.id).exists():
             sample.filenames.add(obj)
             sample.save()
+            return True
+        return False
 
     @staticmethod
     def pop_filename(sample, filename, user):
@@ -104,6 +106,17 @@ class SampleHelper(object):
             return False
 
         if sample.filenames.remove(obj):
+            return True
+        return False
+
+    @staticmethod
+    def append_source(sample, source):
+        if not source:
+            return None
+
+        if not sample.sources.filter(id=source.id).exists():
+            sample.sources.add(source)
+            sample.save()
             return True
         return False
 

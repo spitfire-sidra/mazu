@@ -22,7 +22,7 @@
         <a href="">remove</a><br />
     {% endif %}
 {% endfor %}
-<a href="">add</a><br />
+<a href="{% url 'source.append' object.sha256 %}">add</a><br />
 
 
 {{ object.size }}<br />
@@ -36,8 +36,8 @@
 {% for descr in object.description_set.all %}
     {{ descr.text }}
     {% if descr.user == request.user %}
-        <a href="">update</a>&nbsp;
-        <a href="{% url 'descr.delete' descr.pk %}">remove</a><br />
+        <a href="{% url 'descr.update' descr.pk %}">update</a>&nbsp;
+        <a href="{% url 'descr.delete' descr.pk %}">delete</a><br />
     {% endif %}
 {% endfor %}
 

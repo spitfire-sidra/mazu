@@ -43,6 +43,42 @@ class SourceForm(forms.ModelForm):
         }
 
 
+class SourceAppendForm(forms.Form):
+
+    """
+    A form class for appending a Source to 'Sample.sources'.
+    """
+
+    sample = forms.CharField(widget=forms.HiddenInput)
+
+    def __init__(self, user, *args, **kwargs):
+        super(SourceAppendForm, self).__init__(*args, **kwargs)
+        self.user = user
+        self.fields['source'] = self.source_field(self.user)
+
+    def source_field(self, user):
+        queryset = Source.objects.filter(user=user)
+        params = {
+            'required': False,
+            'queryset': queryset,
+            'label': 'Source'
+        }
+        return forms.ModelChoiceField(**params)
+
+    def append_source(self):
+        sha256 = self.cleaned_data['sample']
+        source = self.cleaned_data['source']
+        try:
+            sample = Sample.objects.get(sha256=sha256)
+        except Sample.DoesNotExist:
+            raise Http404
+        except Source.DoesNotExist:
+            raise Http404
+        else:
+            SampleHelper.append_source(sample, source)
+            return sample
+
+
 class HyperlinkForm(forms.ModelForm):
 
     """
@@ -102,6 +138,7 @@ class FilenameAppendForm(forms.Form):
             raise Http404
         else:
             SampleHelper.append_filename(sample, filename, user)
+            return sample
 
 
 class DescriptionForm(forms.ModelForm):

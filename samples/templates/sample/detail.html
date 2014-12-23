@@ -11,6 +11,9 @@
     {{ filename.name }}<br />
 {% endfor %}
 
+{% for source in object.sources.all %}
+    {{ source.name }}
+{% endfor %}
 
 {{ object.size }}<br />
 {{ object.crc32 }}<br />

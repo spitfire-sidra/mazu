@@ -26,6 +26,7 @@ from samples.models import AccessLog
 from samples.forms import SampleUploadForm
 from samples.forms import SampleFilterForm
 from samples.forms import SourceForm
+from samples.forms import SourceAppendForm
 from samples.forms import FilenameRemoveForm
 from samples.forms import FilenameAppendForm
 from samples.forms import DescriptionForm
@@ -66,7 +67,7 @@ class SourceListView(ListView, LoginRequiredMixin):
     template_name = 'source/list.html'
 
     def get_queryset(self):
-        # users can see sample sources that owned by them
+        # users can see sample sources that owned by themself
         return self.model.objects.filter(user=self.request.user)
 
 
@@ -83,7 +84,7 @@ class SourceCreateView(CreateView, LoginRequiredMixin):
     success_url = reverse_lazy('source.list')
 
     def form_valid(self, form):
-        # Saving the user who create the sample source
+        # Saving the user who creates the source
         form.instance.user = self.request.user
         return super(SourceCreateView, self).form_valid(form)
 
@@ -92,7 +93,7 @@ class SourceUpdateView(UpdateView, OwnerRequiredMixin):
 
     """
     UpdateView for Source.
-    Users can a source which owned by them.
+    Users can update a source which owned by himself.
     """
 
     model = Source
@@ -108,7 +109,7 @@ class SourceUpdateView(UpdateView, OwnerRequiredMixin):
 class SourceDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
-    DeleteView for Source
+    DeleteView for Source.
     """
 
     model = Source
@@ -119,18 +120,53 @@ class SourceDeleteView(DeleteView, OwnerRequiredMixin):
 class SourceDetailView(DetailView, LoginRequiredMixin):
 
     """
-    DetailView for Source
+    DetailView for Source.
     """
 
     model = Source
     template_name = 'source/detail.html'
 
 
+class SourceAppendView(FormView, OwnerRequiredMixin):
+
+    """
+    Building a relationship between a Sample and a Source.
+    """
+
+    template_name = 'sample/append_source.html'
+    form_class = SourceAppendForm
+
+    def get_initial(self):
+        initial = super(SourceAppendView, self).get_initial()
+        try:
+            sample = Sample.objects.get(sha256=self.kwargs['sha256'])
+        except Sample.DoesNotExist:
+            raise Http404
+        else:
+            initial['sample'] = sample.sha256
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super(SourceAppendView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_success_url(self):
+        return reverse_lazy(
+            'sample.detail',
+            kwargs={'sha256': self.sample.sha256}
+        )
+
+    def form_valid(self, form):
+        self.sample = form.append_source()
+        return super(SourceAppendView, self).form_valid(form)
+
+
 class SampleListView(ListView, FormMixin, LoginRequiredMixin):
 
     """
-    A ListView that displays samples and a filter form. This class also
-    handles the POST request of filter form.
+    A ListView that displays samples and a filter form.
+    This class also handles the POST request from the filter form.
     """
 
     model = Sample
@@ -198,8 +234,8 @@ class SampleUploadView(FormView, LoginRequiredMixin):
 class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
-    A class-based view for deleting a sample.
-    Only the owner can delete the sample.
+    DeleteView for Sample.
+    Only the owner of the sample can delete it.
     """
 
     model = Sample
@@ -218,7 +254,7 @@ class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 class SampleDetailView(DetailView, LoginRequiredMixin):
 
     """
-    Detail view of Sample
+    DetailView for Sample.
     """
 
     model = Sample
@@ -230,6 +266,11 @@ class SampleDetailView(DetailView, LoginRequiredMixin):
 
 class SampleUpdateView(DetailView, LoginRequiredMixin):
 
+    """
+    UpdateView for Sample.
+    Actually, it's a DetailView but uses a different template.
+    """
+
     model = Sample
     template_name = 'sample/update.html'
 
@@ -239,9 +280,12 @@ class SampleUpdateView(DetailView, LoginRequiredMixin):
 
 class FilenameRemoveView(FormView, OwnerRequiredMixin):
 
+    """
+    This class just breaks the relationship between a Filename and a Sample.
+    """
+
     template_name = 'sample/remove.html'
     form_class = FilenameRemoveForm
-    success_url = reverse_lazy('sample.list')
 
     def get_initial(self):
         initial = super(FilenameRemoveView, self).get_initial()
@@ -257,16 +301,25 @@ class FilenameRemoveView(FormView, OwnerRequiredMixin):
             initial['sample'] = sample.sha256
         return initial
 
+    def get_success_url(self):
+        return reverse_lazy(
+            'sample.detail',
+            kwargs={'sha256': self.sample.sha256}
+        )
+
     def form_valid(self, form):
-        form.remove_filename(self.request.user)
+        self.sample = form.remove_filename(self.request.user)
         return super(FilenameRemoveView, self).form_valid(form)
 
 
 class FilenameAppendView(FormView, OwnerRequiredMixin):
 
+    """
+    Building a relationship between a Sample and a Filename.
+    """
+
     template_name = 'sample/append_filename.html'
     form_class = FilenameAppendForm
-    success_url = reverse_lazy('sample.list')
 
     def get_initial(self):
         initial = super(FilenameAppendView, self).get_initial()
@@ -278,17 +331,24 @@ class FilenameAppendView(FormView, OwnerRequiredMixin):
             initial['sample'] = sample.sha256
         return initial
 
-    def form_valid(self, form):
-        form.append_filename(self.request.user)
-        return super(FilenameAppendView, self).form_valid(form)
+    def get_success_url(self):
+        return reverse_lazy(
+            'sample.detail',
+            kwargs={'sha256': self.sample.sha256}
+        )
 
+    def form_valid(self, form):
+        self.sample = form.append_filename(self.request.user)
+        return super(FilenameAppendView, self).form_valid(form)
 
 
 class FilenameDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
     A class-based view for deleting a filename.
-    Only the owner can delete the filename.
+    This CBV not only breaks the relationship between a Filename and
+    Samples but deletes the Filename from database.
+    Only the owner can delete the filename which owned by himself.
     """
 
     model = Filename
@@ -298,15 +358,12 @@ class FilenameDeleteView(DeleteView, OwnerRequiredMixin):
     def get_object(self, **kwargs):
         return self.model.objects.get(id=self.kwargs['pk'])
 
-    def delete(self, request, *args, **kwargs):
-        return super(FilenameDeleteView, self).delete(request, *args, **kwargs)
-
 
 class DescriptionDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
-    A class-based view for deleting a description.
-    Only the owner can delete the description.
+    DeleteView for Description.
+    Only the owner of the description can delete the description.
     """
 
     model = Description
@@ -316,10 +373,25 @@ class DescriptionDeleteView(DeleteView, OwnerRequiredMixin):
     def get_object(self, **kwargs):
         return self.model.objects.get(id=self.kwargs['pk'])
 
-    def delete(self, request, *args, **kwargs):
-        return super(DescriptionDeleteView, self).delete(request, *args, **kwargs)
+
+class DescriptionUpdateView(UpdateView, OwnerRequiredMixin):
+
+    """
+    UpdateView for Description.
+    Only the owner of the description can update the description.
+    """
+
+    model = Description
+    fields = ['text']
+    form_class = DescriptionForm
+    template_name = 'sample/update_description.html'
+    success_url = reverse_lazy('sample.list')
+
+    def get_object(self, **kwargs):
+        return self.model.objects.get(id=self.kwargs['pk'])
 
 
+# Alias
 SourceList = SourceListView.as_view()
 SourceCreate = SourceCreateView.as_view()
 SourceUpdate = SourceUpdateView.as_view()
@@ -333,4 +405,6 @@ SampleUpdate = SampleUpdateView.as_view()
 FilenameDelete = FilenameDeleteView.as_view()
 FilenameRemove = FilenameRemoveView.as_view()
 FilenameAppend = FilenameAppendView.as_view()
+SourceAppend = SourceAppendView.as_view()
 DescriptionDelete = DescriptionDeleteView.as_view()
+DescriptionUpdate = DescriptionUpdateView.as_view()
