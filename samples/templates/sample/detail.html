@@ -25,5 +25,5 @@
 {% endfor %}
 
 <a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
-
+<a href='{% url 'sample.update' object.sha256 %}'>update<br />
 {% endblock content %}
