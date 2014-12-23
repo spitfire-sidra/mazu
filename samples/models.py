@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.core.validators import URLValidator
 from django.core.urlresolvers import reverse_lazy
-from django.template.defaultfilters import slugify
+from django.core.validators import URLValidator
 
 from core.models import TimeStampedModel
 
@@ -68,8 +67,8 @@ class Filetype(TimeStampedModel):
 class Hyperlink(TimeStampedModel):
 
     """
-    This model saves sample's links. Download links, report links or
-    related links.
+    This model saves sample's links.
+    Download links, report links or related links.
     """
 
     KIND_CHOICES = (
@@ -84,7 +83,7 @@ class Hyperlink(TimeStampedModel):
     user = models.ForeignKey('auth.User')
 
     def _unicode__(self):
-        return "[{0}]({1})".format(self.heading, self.url)
+        return "[{0}]({1})".format(self.headline, self.link)
 
     class Meta:
         ordering = ['kind', '-created']
@@ -121,8 +120,8 @@ class Sample(TimeStampedModel):
 class Description(TimeStampedModel):
 
     """
-    This models saves descriptions of a sample. A sample can have multiple
-    descriptions, and a description might map to samples.
+    This models saves descriptions of a sample.
+    A sample can have multiple descriptions.
     """
 
     text = models.TextField()
@@ -139,7 +138,7 @@ class Description(TimeStampedModel):
 class AccessLog(TimeStampedModel):
 
     """
-    This models saves activity when a user download a samples.
+    This models saves logs when users download samples.
     """
 
     sample = models.ForeignKey(Sample)
