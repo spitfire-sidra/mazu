@@ -27,6 +27,7 @@ from samples.forms import SampleUploadForm
 from samples.forms import SampleFilterForm
 from samples.forms import SourceForm
 from samples.forms import SourceAppendForm
+from samples.forms import SourceRemoveForm
 from samples.forms import FilenameRemoveForm
 from samples.forms import FilenameAppendForm
 from samples.forms import DescriptionForm
@@ -160,6 +161,40 @@ class SourceAppendView(FormView, OwnerRequiredMixin):
     def form_valid(self, form):
         self.sample = form.append_source()
         return super(SourceAppendView, self).form_valid(form)
+
+
+class SourceRemoveView(FormView, OwnerRequiredMixin):
+
+    """
+    This class just breaks the relationship between a Source and a Sample.
+    """
+
+    template_name = 'sample/remove.html'
+    form_class = SourceRemoveForm
+
+    def get_initial(self):
+        initial = super(SourceRemoveView, self).get_initial()
+        try:
+            sample = Sample.objects.get(sha256=self.kwargs['sha256'])
+            source = Source.objects.get(id=self.kwargs['source_pk'])
+        except Sample.DoesNotExist:
+            raise Http404
+        except Source.DoesNotExist:
+            raise Http404
+        else:
+            initial['source'] = source.pk
+            initial['sample'] = sample.sha256
+        return initial
+
+    def get_success_url(self):
+        return reverse_lazy(
+            'sample.detail',
+            kwargs={'sha256': self.sample.sha256}
+        )
+
+    def form_valid(self, form):
+        self.sample = form.remove_source(self.request.user)
+        return super(SourceRemoveView, self).form_valid(form)
 
 
 class SampleListView(ListView, FormMixin, LoginRequiredMixin):
@@ -406,5 +441,6 @@ FilenameDelete = FilenameDeleteView.as_view()
 FilenameRemove = FilenameRemoveView.as_view()
 FilenameAppend = FilenameAppendView.as_view()
 SourceAppend = SourceAppendView.as_view()
+SourceRemove = SourceRemoveView.as_view()
 DescriptionDelete = DescriptionDeleteView.as_view()
 DescriptionUpdate = DescriptionUpdateView.as_view()

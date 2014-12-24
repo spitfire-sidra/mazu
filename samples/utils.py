@@ -121,6 +121,17 @@ class SampleHelper(object):
         return False
 
     @staticmethod
+    def pop_source(sample, source):
+        if not source:
+            return None
+
+        if sample.sources.filter(id=source.id).exists():
+            sample.sources.remove(source)
+            sample.save()
+            return True
+        return False
+
+    @staticmethod
     def save_description(sample, text, user):
         if not text:
             return None

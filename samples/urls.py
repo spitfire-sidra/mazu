@@ -19,7 +19,7 @@ from samples.views import SourceCreate
 from samples.views import SourceUpdate
 from samples.views import SourceDelete
 from samples.views import SourceDetail
-
+from samples.views import SourceRemove
 
 urlpatterns = patterns('',
     url(
@@ -99,6 +99,11 @@ urlpatterns += patterns('',
         r'^source/append/(?P<sha256>[\w]+)$',
         SourceAppend,
         name='source.append'
+    ),
+    url(
+        r'^source/remove/(?P<sha256>[\w]+)/(?P<source_pk>\d+)$',
+        SourceRemove,
+        name='source.remove'
     ),
     url(
         r'^descr/delete/(?P<pk>\d+)$',

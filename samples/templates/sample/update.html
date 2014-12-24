@@ -19,7 +19,7 @@
 {% for source in object.sources.all %}
     {{ source.name }}
     {% if source.user == request.user %}
-        <a href="">remove</a><br />
+        <a href="{% url 'source.remove' object.sha256 source.pk %}">remove</a><br />
     {% endif %}
 {% endfor %}
 <a href="{% url 'source.append' object.sha256 %}">add</a><br />

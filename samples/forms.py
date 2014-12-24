@@ -79,6 +79,30 @@ class SourceAppendForm(forms.Form):
             return sample
 
 
+class SourceRemoveForm(forms.Form):
+
+    """
+    A form class for removing a source from 'Sample.sources'.
+    """
+
+    source = forms.CharField(widget=forms.HiddenInput)
+    sample = forms.CharField(widget=forms.HiddenInput)
+
+    def remove_source(self, user):
+        sha256 = self.cleaned_data['sample']
+        source_id = self.cleaned_data['source']
+        try:
+            sample = Sample.objects.get(sha256=sha256)
+            source = Source.objects.get(id=source_id)
+        except Sample.DoesNotExist:
+            raise Http404
+        except Source.DoesNotExist:
+            raise Http404
+        else:
+            SampleHelper.pop_source(sample, source)
+            return sample
+
+
 class HyperlinkForm(forms.ModelForm):
 
     """
