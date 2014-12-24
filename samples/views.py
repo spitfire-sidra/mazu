@@ -159,7 +159,7 @@ class SourceAppendView(FormView, OwnerRequiredMixin):
         )
 
     def form_valid(self, form):
-        self.sample = form.append_source()
+        self.sample = form.append()
         return super(SourceAppendView, self).form_valid(form)
 
 

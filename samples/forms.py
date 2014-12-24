@@ -2,17 +2,14 @@
 from datetime import date
 
 from django import forms
-from django.db import OperationalError
 from django.forms import ValidationError
-from django.forms.formsets import formset_factory
 from django.contrib.auth.models import User
-from django.forms.models import inlineformset_factory
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.layout import Field
-from crispy_forms.layout import ButtonHolder
 from crispy_forms.layout import Submit
+from crispy_forms.layout import ButtonHolder
 
 from core.utils import compute_hashes
 
@@ -24,59 +21,96 @@ from samples.models import Source
 from samples.utils import SampleHelper
 
 
+class SampleBaseForm(forms.Form):
+
+    """
+    SampleRequiredForm contains a CharField which has widget 'HiddenInput'.
+    The CharField stores a sha256 value for indicating which sample will be
+    affected.
+    """
+
+    sample = forms.CharField(widget=forms.HiddenInput)
+
+    def get_sample(self):
+        """
+        Trying to get the Sample by the sha256 value.
+
+        Returns:
+            None - not found
+            An instance of Sample - success
+        """
+        sha256 = self.cleaned_data['sample']
+        try:
+            sample = Sample.objects.get(sha256=sha256)
+        except Sample.DoesNotExist:
+            return None
+        else:
+            return sample
+        return None
+
+
+class UserRequiredBaseForm(forms.Form):
+
+    """
+    UserRequiredBaseForm overwrites the __init__(*args, **kwargs) method of
+    'forms.Form'. If any form class extends this Mixin, then you must overwrite
+    the get_form_kwargs() method in yours CBV(Class-based View). The method
+    must return a dict that contains 'User' instance with key 'user'.
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        super(UserRequiredBaseForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+
 class SourceForm(forms.ModelForm):
 
     """
-    SourceForm is a form class for updating and creating Source.
+    SourceForm is a form class for updating and creating a Source.
     """
 
     class Meta:
         model = Source
         fields = ['name', 'link', 'descr']
-        labels = {
-            'name': 'Source Name',
-            'descr': 'Description'
-        }
-        widgets = {
-            'name': forms.TextInput(),
-            'descr': forms.Textarea()
-        }
+        labels = {'name': 'Source Name', 'descr': 'Description'}
+        widgets = {'name': forms.TextInput(), 'descr': forms.Textarea()}
 
 
-class SourceAppendForm(forms.Form):
+class SourceAppendForm(SampleBaseForm, UserRequiredBaseForm):
 
     """
     A form class for appending a Source to 'Sample.sources'.
     """
 
-    sample = forms.CharField(widget=forms.HiddenInput)
-
     def __init__(self, user, *args, **kwargs):
-        super(SourceAppendForm, self).__init__(*args, **kwargs)
-        self.user = user
-        self.fields['source'] = self.source_field(self.user)
+        # setup self.user
+        super(SourceAppendForm, self).__init__(user, *args, **kwargs)
+        # add a field for Source
+        self.fields['source'] = self.make_source_field()
 
-    def source_field(self, user):
-        queryset = Source.objects.filter(user=user)
-        params = {
-            'required': False,
-            'queryset': queryset,
-            'label': 'Source'
-        }
-        return forms.ModelChoiceField(**params)
+    def make_source_field(self):
+        """
+        Making a ModelChoiceField for Source.
+        """
+        return forms.ModelChoiceField(
+            queryset=Source.objects.filter(user=self.user)
+        )
 
-    def append_source(self):
-        sha256 = self.cleaned_data['sample']
+    def append(self):
+        """
+        Appending a source instance to 'Sample.sources'.
+
+        Returns:
+            An instance of 'Sample' - success
+            False - failed
+        """
         source = self.cleaned_data['source']
-        try:
-            sample = Sample.objects.get(sha256=sha256)
-        except Sample.DoesNotExist:
-            raise Http404
-        except Source.DoesNotExist:
-            raise Http404
-        else:
-            SampleHelper.append_source(sample, source)
+        sample = self.get_sample()
+
+        if SampleHelper.append_source(sample, source):
             return sample
+
+        return False
 
 
 class SourceRemoveForm(forms.Form):

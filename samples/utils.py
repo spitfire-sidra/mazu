@@ -113,6 +113,17 @@ class SampleHelper(object):
 
     @staticmethod
     def append_source(sample, source):
+        """
+        Appending a Source to 'Sample.sources'.
+
+        Args:
+            sample - an instance of Sample
+            source - an instance of Source
+
+        Returns:
+            True - success
+            False - failed
+        """
         if not source:
             return None
 
