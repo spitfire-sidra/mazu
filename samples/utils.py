@@ -3,6 +3,8 @@ import os
 import logging
 import binascii
 
+from django.core.files.base import ContentFile
+
 from core.mongodb import connect_gridfs
 from core.mongodb import delete_file
 from core.utils import compute_hashes
@@ -143,6 +145,10 @@ class SampleHelper(object):
             return False
         else:
             return True
+
+    @staticmethod
+    def payload_to_content_file(payload):
+        return ContentFile(payload)
 
     def save_sample(self, **kwargs):
         """
