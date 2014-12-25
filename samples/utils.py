@@ -34,7 +34,9 @@ class FiletypeHelper(object):
     >>> file_type_helper = FiletypeHelper()
     >>> file_type_helper.identify(file.read())
     >>> file_types = file_type_helper.get_object_list()
-    ['PNG image data, 800 x 665, 8-bit/color RGBA, non-interlaced']
+    [
+        ('PNG image data...', 'python-magic')
+    ]
     """
 
     def __init__(self):
