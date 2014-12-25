@@ -4,6 +4,7 @@ from datetime import date
 from django import forms
 from django.forms import ValidationError
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
@@ -166,7 +167,7 @@ class FilenameAppendForm(SampleBaseForm, UserRequiredBaseForm):
         """
         data = self.cleaned_data['filename']
         try:
-            filename, _ = Filename.objects.get_or_create(
+            filename, created = Filename.objects.get_or_create(
                 name=data,
                 user=self.user
             )
@@ -224,20 +225,6 @@ class FilenameRemoveForm(SampleBaseForm, UserRequiredBaseForm):
         return (sample, result)
 
 
-class HyperlinkForm(forms.ModelForm):
-
-    """
-    A form class for saving links
-    """
-
-    class Meta:
-        model = Hyperlink
-        fields = ['headline', 'link', 'kind']
-        widgets = {
-            'link': forms.URLInput()
-        }
-
-
 class DescriptionForm(forms.ModelForm):
 
     """
@@ -252,21 +239,38 @@ class DescriptionForm(forms.ModelForm):
         }
 
 
-class SampleUploadForm(forms.Form):
+# This form class is not used yet.
+class HyperlinkForm(forms.ModelForm):
 
     """
-    A form for uploading sample.
+    A form class for saving links.
     """
 
+    class Meta:
+        model = Hyperlink
+        fields = ['headline', 'link', 'kind']
+        widgets = {
+            'link': forms.URLInput()
+        }
+
+
+class SampleUploadForm(UserRequiredBaseForm):
+
+    """
+    A form class for uploading sample. We are trying to keep this form simple.
+    So this form only provides one filename field, one description field and
+    one source field for the user who wants to upload a sample.
+    """
+
+    sample = forms.FileField()
     filename = forms.CharField(required=False)
     description = forms.CharField(required=False, widget=forms.Textarea)
-    sample = forms.FileField()
     share = forms.BooleanField(required=False, help_text='Yes')
 
     def __init__(self, user, *args, **kwargs):
-        super(SampleUploadForm, self).__init__(*args, **kwargs)
-        self.user = user
-        self.fields['source'] = self.source_field(self.user)
+        # setup 'self.user'.
+        super(SampleUploadForm, self).__init__(user, *args, **kwargs)
+        self.fields['source'] = self.make_source_field()
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Field('sample'),
@@ -279,42 +283,68 @@ class SampleUploadForm(forms.Form):
             )
         )
 
-    def source_field(self, user):
-        queryset = Source.objects.filter(user=user)
-        params = {
-            'required': False,
-            'queryset': queryset,
-            'label': 'Source'
-        }
-        return forms.ModelChoiceField(**params)
+    def make_source_field(self):
+        """
+        Users are only allowed to choice their own source.
+        """
+        return forms.ModelChoiceField(
+            label='Source',
+            required=False,
+            queryset=Source.objects.filter(user=self.user)
+        )
 
     def clean_sample(self):
         """
         Cleaning the sample field. If a sample already exists in database,
         then ValidationError will be raised.
         """
-        sample = self.cleaned_data['sample']
-        pos = sample.tell()
-        hashes = compute_hashes(sample.read())
+        temp_file = self.cleaned_data['sample']
+        pos = temp_file.tell()
+        hashes = compute_hashes(temp_file.read())
         if SampleHelper.sample_exists(sha256=hashes.sha256):
-            raise ValidationError('Duplicated sample.')
+            raise ValidationError(_('Duplicated sample.'))
         else:
-            sample.seek(pos)
-            return sample
+            temp_file.seek(pos)
+            return temp_file
+
+    def clean_filename(self):
+        """
+        Trying to get the filename instance. If it is none, then creates one.
+
+        Returns:
+            an instance of Filename - valid
+
+        Raises:
+            ValidationError - invalid
+        """
+        data = self.cleaned_data['filename']
+        try:
+            filename, created = Filename.objects.get_or_create(
+                name=data,
+                user=self.user
+            )
+        except Exception as e:
+            raise ValidationError(_('Invalid value.'))
+        else:
+            return filename
 
     def save(self):
         """
         Saving a sample and its attributes.
         """
+        # file pointer
+        sample_fp = self.cleaned_data['sample']
+        # an instance of Filename
         filename = self.cleaned_data['filename']
-        descr = self.cleaned_data['description']
-        sample = self.cleaned_data['sample']
-        sample_helper = SampleHelper(sample)
-        saved_sample = sample_helper.save(user=self.user)
-        if not saved_sample:
+        text = self.cleaned_data['description']
+
+        helper = SampleHelper(sample_fp)
+        sample = helper.save(user=self.user)
+        if not sample:
             return False
-        sample_helper.append_filename(saved_sample, filename, self.user)
-        sample_helper.save_description(saved_sample, descr, self.user)
+
+        helper.append_filename(sample, filename)
+        helper.save_description(sample, text, self.user)
         return True
 
 

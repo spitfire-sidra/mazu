@@ -25,7 +25,16 @@ dynamic_import('samples', 'filetypes')
 class FiletypeHelper(object):
 
     """
-    A helper class helps you to get file types.
+    A helper class helps you to get file types. You can customize a file type
+    detector module. This helper class would try to load your module, and get
+    the reuslt automatically.
+
+    Usage:
+    >>> file = open('photo.png')
+    >>> file_type_helper = FiletypeHelper()
+    >>> file_type_helper.identify(file.read())
+    >>> file_types = file_type_helper.get_object_list()
+    ['PNG image data, 800 x 665, 8-bit/color RGBA, non-interlaced']
     """
 
     def __init__(self):
@@ -38,7 +47,7 @@ class FiletypeHelper(object):
             self.filetypes.append(filetype)
 
     def get_object(self, filetype, detector):
-        obj, _ = Filetype.objects.get_or_create(
+        obj, created = Filetype.objects.get_or_create(
             filetype=filetype,
             detector=detector
         )
@@ -65,6 +74,10 @@ class SampleHelper(object):
         self.hashes = compute_hashes(self.content)
         self.filetype_helper = FiletypeHelper()
         self.filetype_helper.identify(self.content)
+
+    @staticmethod
+    def payload_to_content_file(payload):
+        return ContentFile(payload)
 
     @staticmethod
     def sample_exists(sha256):
@@ -106,6 +119,17 @@ class SampleHelper(object):
 
     @staticmethod
     def remove_filename(sample, filename):
+        """
+        Removing the filename instance form 'sample.filenames'.
+
+        Args:
+            sample - an instance of Sample
+            filename - an instance of filename
+
+        Returns:
+            True - success
+            False - failed
+        """
         if not sample.filenames.filter(id=filename.id).exists():
             sample.filenames.remove(filename)
             sample.save()
@@ -155,20 +179,27 @@ class SampleHelper(object):
 
     @staticmethod
     def save_description(sample, text, user):
-        if not text:
-            return None
+        """
+        Saving description about a sample.
 
-        try:
-            descr = Description(sample=sample, text=text, user=user)
-            descr.save()
-        except Exception:
-            return False
-        else:
-            return True
+        Args:
+            sample - an instance of Sample
+            text - description
+            user - an instance of User for marking who creates the description.
 
-    @staticmethod
-    def payload_to_content_file(payload):
-        return ContentFile(payload)
+        Returns:
+            True - success
+            False - failed
+        """
+        if sample and text and user:
+            try:
+                descr = Description(sample=sample, text=text, user=user)
+                descr.save()
+            except Exception as e:
+                logger.debug(e)
+            else:
+                return True
+        return False
 
     def save_sample(self, **kwargs):
         """
