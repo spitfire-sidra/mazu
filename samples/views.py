@@ -146,6 +146,9 @@ class SampleUpdateBaseView(FormView):
     """
 
     def get_success_url(self):
+        """
+        If sample updated, then the view will be redirect to the following URL.
+        """
         return reverse_lazy(
             'sample.update',
             kwargs={'sha256': self.sample.sha256}

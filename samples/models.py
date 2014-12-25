@@ -21,7 +21,7 @@ class Source(TimeStampedModel):
         return '{0}'.format(self.name)
 
     def get_absolute_url(self):
-        return reverse_lazy('source.detail',args=[self.pk])
+        return reverse_lazy('source.detail', args=[self.pk])
 
     class Meta:
         ordering = ['name']
@@ -82,7 +82,7 @@ class Hyperlink(TimeStampedModel):
     kind = models.IntegerField(max_length=2, choices=KIND_CHOICES, default=0)
     user = models.ForeignKey('auth.User')
 
-    def _unicode__(self):
+    def __unicode__(self):
         return "[{0}]({1})".format(self.headline, self.link)
 
     class Meta:
@@ -143,6 +143,9 @@ class AccessLog(TimeStampedModel):
 
     sample = models.ForeignKey(Sample)
     user = models.ForeignKey('auth.User')
+
+    def __unicode__(self):
+        return 'Access log #{0}'.format(self.id)
 
     class Meta:
         ordering = ['-created']

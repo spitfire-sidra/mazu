@@ -11,7 +11,6 @@ from core.utils import compute_hashes
 from core.utils import dynamic_import
 from samples.models import Sample
 from samples.models import Filetype
-from samples.models import Filename
 from samples.models import Description
 from samples.filetypes.filetype import FileTypeDetector
 
@@ -35,7 +34,8 @@ class FiletypeHelper(object):
     >>> file_type_helper.identify(file.read())
     >>> file_types = file_type_helper.get_object_list()
     [
-        ('PNG image data...', 'python-magic')
+        'python-magic PNG image data...',
+        '......'
     ]
     """
 
@@ -44,11 +44,14 @@ class FiletypeHelper(object):
         self.object_list = list()
 
     def identify(self, content):
+        """
+        Getting all file types.
+        """
         for module in FileTypeDetector.__subclasses__():
             filetype = module().from_file_content(content)
             self.filetypes.append(filetype)
 
-    def get_object(self, filetype, detector):
+    def get_or_create(self, filetype, detector):
         obj, created = Filetype.objects.get_or_create(
             filetype=filetype,
             detector=detector
@@ -57,7 +60,7 @@ class FiletypeHelper(object):
 
     def get_object_list(self):
         for filetype, detector in self.filetypes:
-            obj = self.get_object(filetype, detector)
+            obj = self.get_or_create(filetype, detector)
             self.object_list.append(obj)
         return self.object_list
 
@@ -79,12 +82,32 @@ class SampleHelper(object):
 
     @staticmethod
     def payload_to_content_file(payload):
+        """
+        This method operates on string content (bytes also supported),
+        rather than an actual file.
+        It's possible that we only get the string content of malware
+        rather than an actual file.
+
+        https://docs.djangoproject.com/en/1.7/ref/files/file/
+
+        Argus:
+            payload - string (bytes also support)
+
+        Returns:
+            an instance of ContentFile
+        """
         return ContentFile(payload)
 
     @staticmethod
     def sample_exists(sha256):
         """
         To check a sample is existing or not.
+
+        Args:
+            sha256 - a sha256 hash (string)
+
+        >>> SampleHelper.sample_exists('73b49....')
+        True
         """
         try:
             Sample.objects.get(sha256=sha256)
@@ -96,7 +119,13 @@ class SampleHelper(object):
     @staticmethod
     def delete_sample(sha256):
         """
-        Deleting a sample which sha256 equals variable 'sha256'
+        Deleting a sample from GridFS which sha256 equals variable 'sha256'
+
+        Args:
+            sha256 - a sha256 hash (string)
+
+        >>> SampleHelper.sample_exists('73b49....')
+        True
         """
         return delete_file('sha256', sha256)
 
@@ -151,13 +180,11 @@ class SampleHelper(object):
             True - success
             False - failed
         """
-        if not source:
-            return None
-
-        if not sample.sources.filter(id=source.id).exists():
-            sample.sources.add(source)
-            sample.save()
-            return True
+        if sample and source:
+            if not sample.sources.filter(id=source.id).exists():
+                sample.sources.add(source)
+                sample.save()
+                return True
         return False
 
     @staticmethod
@@ -173,10 +200,11 @@ class SampleHelper(object):
             True - success
             False - failed
         """
-        if sample.sources.filter(id=source.id).exists():
-            sample.sources.remove(source)
-            sample.save()
-            return True
+        if sample and source:
+            if sample.sources.filter(id=source.id).exists():
+                sample.sources.remove(source)
+                sample.save()
+                return True
         return False
 
     @staticmethod
@@ -206,12 +234,17 @@ class SampleHelper(object):
     def save_sample(self, **kwargs):
         """
         Saving a sample into mongodb.
-        You can pass any keyword arguments to this function. This function will
-        try to save these arguments as attributes of the sample. Keyword argument
-        'md5' would be ignored, because mongodb also saves md5 in GridFS. In mazu,
-        we only save sha256 as an extra attribute.
 
-        >>> save_sample('HelloWorld!', user='spitfire', age='18 forever')
+        You can pass any keyword arguments to this function.
+        This function will try to save these keyword arguments as attributes
+        of the sample.
+
+        Keyword argument 'md5' would be ignored,
+        because mongodb also saves md5 in GridFS.
+
+        In mazu, we only save sha256 as an extra attribute.
+
+        >>> save_sample('HelloWorld!', sha256='73b49....')
         True
         """
         ignored_attrs = ['md5']
@@ -240,7 +273,7 @@ class SampleHelper(object):
 
     def get_size(self):
         """
-        Try to get sample size
+        Trying to get the file size of the sample.
         """
         # if fp is an instance of InMemoryUploadedFile or ContentFile
         if hasattr(self.fp, 'size'):
@@ -255,6 +288,9 @@ class SampleHelper(object):
         return None
 
     def get_content(self):
+        """
+        Trying to get the content of the sample
+        """
         if hasattr(self.fp, 'read') and hasattr(self.fp, 'tell') \
             and hasattr(self.fp, 'seek'):
             pos = self.fp.tell()
@@ -265,7 +301,7 @@ class SampleHelper(object):
 
     def get_sample_attrs(self):
         """
-        Try to get attributes of sample.
+        Trying to get attributes of the sample.
         """
         attrs = dict()
         attrs['md5'] = self.hashes.md5
