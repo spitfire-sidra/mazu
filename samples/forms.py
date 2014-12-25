@@ -106,11 +106,8 @@ class SourceAppendForm(SampleBaseForm, UserRequiredBaseForm):
         """
         source = self.cleaned_data['source']
         sample = self.get_sample()
-
-        if SampleHelper.append_source(sample, source):
-            return sample
-
-        return False
+        result = SampleHelper.append_source(sample, source)
+        return (sample, result)
 
 
 class SourceRemoveForm(SampleBaseForm, UserRequiredBaseForm):
@@ -149,12 +146,82 @@ class SourceRemoveForm(SampleBaseForm, UserRequiredBaseForm):
         sample = self.get_sample()
         # an instance of Source
         source = self.cleaned_data['source']
+        result = SampleHelper.remove_source(sample, source)
+        return (sample, result)
 
-        if sample and source:
-            SampleHelper.remove_source(sample, source)
-            return sample
 
-        return False
+class FilenameAppendForm(SampleBaseForm, UserRequiredBaseForm):
+
+    """
+    A form class for saving filenames
+    """
+
+    filename = forms.CharField()
+
+    def clean_filename(self):
+        """
+        Trying to get the filename instance.
+        If there is no corresponding filename,
+        then create one for the filename.
+        """
+        data = self.cleaned_data['filename']
+        try:
+            filename, _ = Filename.objects.get_or_create(
+                name=data,
+                user=self.user
+            )
+        except Exception:
+            raise ValidationError(_('Invalid value'))
+        else:
+            return filename
+
+    def append(self):
+        """
+        Append a filename instance to 'sample.filenames'
+        """
+        sample = self.get_sample()
+        filename = self.cleaned_data['filename']
+        result = SampleHelper.append_filename(sample, filename)
+        return (sample, result)
+
+
+class FilenameRemoveForm(SampleBaseForm, UserRequiredBaseForm):
+
+    """
+    A form class for removing filenames
+    """
+
+    filename = forms.CharField(widget=forms.HiddenInput)
+
+    def clean_filename(self):
+        """
+        Validating the filename field.
+        Only the owner of 'filename' can remove the filename.
+
+        Returns:
+            An instance of Filename - valid
+
+        Raises:
+            ValidationError - invalid
+        """
+        data = self.cleaned_data['filename']
+        try:
+            filename = Filename.objects.get(id=data)
+        except Filename.DoesNotExist:
+            raise ValidationError(_('Invalid value'))
+        else:
+            if filename.user != self.user:
+                raise ValidationError(_('Permission denied'))
+            return filename
+
+    def remove(self):
+        """
+        Removing the filename from 'sample.filenames'
+        """
+        sample = self.get_sample()
+        filename = self.cleaned_data['filename']
+        result = SampleHelper.remove_filename(sample, filename)
+        return (sample, result)
 
 
 class HyperlinkForm(forms.ModelForm):
@@ -169,54 +236,6 @@ class HyperlinkForm(forms.ModelForm):
         widgets = {
             'link': forms.URLInput()
         }
-
-
-class FilenameRemoveForm(forms.Form):
-
-    """
-    A form class for removing filenames
-    """
-
-    filename = forms.CharField(widget=forms.HiddenInput)
-    sample = forms.CharField(widget=forms.HiddenInput)
-
-    def remove_filename(self, user):
-        sha256 = self.cleaned_data['sample']
-        filename_id = self.cleaned_data['filename']
-        try:
-            sample = Sample.objects.get(sha256=sha256)
-            filename = Filename.objects.get(id=filename_id)
-        except Sample.DoesNotExist:
-            raise Http404
-        except Filename.DoesNotExist:
-            raise Http404
-        else:
-            SampleHelper.pop_filename(sample, filename, user)
-
-
-class FilenameAppendForm(forms.Form):
-
-    """
-    A form class for saving filenames
-    """
-
-    filename = forms.CharField()
-    sample = forms.CharField(widget=forms.HiddenInput)
-
-    def append_filename(self, user):
-        sha256 = self.cleaned_data['sample']
-        filename = self.cleaned_data['filename']
-        try:
-            sample = Sample.objects.get(sha256=sha256)
-            filename, _ = Filename.objects.get_or_create(
-                name=filename,
-                user=user
-            )
-        except Sample.DoesNotExist:
-            raise Http404
-        else:
-            SampleHelper.append_filename(sample, filename, user)
-            return sample
 
 
 class DescriptionForm(forms.ModelForm):

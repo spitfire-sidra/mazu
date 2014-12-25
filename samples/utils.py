@@ -86,28 +86,29 @@ class SampleHelper(object):
         return delete_file('sha256', sha256)
 
     @staticmethod
-    def append_filename(sample, filename, user):
-        if not filename:
-            return None
+    def append_filename(sample, filename):
+        """
+        Trying to append a filename to 'sample.filenames'.
 
-        obj, _ = Filename.objects.get_or_create(name=filename, user=user)
-        if not sample.filenames.filter(id=obj.id).exists():
-            sample.filenames.add(obj)
+        Args:
+            sample - an instance of Sample
+            filename - an instance of filename
+
+        Returns:
+            True - success
+            False - failed
+        """
+        if not sample.filenames.filter(id=filename.id).exists():
+            sample.filenames.add(filename)
             sample.save()
             return True
         return False
 
     @staticmethod
-    def pop_filename(sample, filename, user):
-        if not filename:
-            return None
-
-        try:
-            obj = Filename.objects.get(name=filename, user=user)
-        except Filename.DoesNotExist:
-            return False
-
-        if sample.filenames.remove(obj):
+    def remove_filename(sample, filename):
+        if not sample.filenames.filter(id=filename.id).exists():
+            sample.filenames.remove(filename)
+            sample.save()
             return True
         return False
 
