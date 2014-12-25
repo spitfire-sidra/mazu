@@ -113,28 +113,48 @@ class SourceAppendForm(SampleBaseForm, UserRequiredBaseForm):
         return False
 
 
-class SourceRemoveForm(forms.Form):
+class SourceRemoveForm(SampleBaseForm, UserRequiredBaseForm):
 
     """
     A form class for removing a source from 'Sample.sources'.
     """
 
     source = forms.CharField(widget=forms.HiddenInput)
-    sample = forms.CharField(widget=forms.HiddenInput)
 
-    def remove_source(self, user):
-        sha256 = self.cleaned_data['sample']
-        source_id = self.cleaned_data['source']
+    def clean_source(self):
+        """
+        Validating the source field.
+        Only the owner of 'source' can remove the source.
+
+        Returns:
+            An instance of Source - valid
+
+        Raises:
+            ValidationError - invalid
+        """
+        data = self.cleaned_data['source']
         try:
-            sample = Sample.objects.get(sha256=sha256)
-            source = Source.objects.get(id=source_id)
-        except Sample.DoesNotExist:
-            raise Http404
+            source = Source.objects.get(id=data)
         except Source.DoesNotExist:
-            raise Http404
+            raise ValidationError(_('Invalid value'))
         else:
-            SampleHelper.pop_source(sample, source)
+            if source.user != self.user:
+                raise ValidationError(_('Permission denied'))
+            return source
+
+    def remove(self):
+        """
+        Removing a source from 'Sample.sources'.
+        """
+        sample = self.get_sample()
+        # an instance of Source
+        source = self.cleaned_data['source']
+
+        if sample and source:
+            SampleHelper.remove_source(sample, source)
             return sample
+
+        return False
 
 
 class HyperlinkForm(forms.ModelForm):

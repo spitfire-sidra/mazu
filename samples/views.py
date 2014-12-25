@@ -16,6 +16,7 @@ from django.contrib import messages
 
 from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
+from core.mixins import UserRequiredFormMixin
 from core.mongodb import get_compressed_file
 from samples.utils import SampleHelper
 from samples.models import Sample
@@ -163,7 +164,7 @@ class SourceAppendView(FormView, OwnerRequiredMixin):
         return super(SourceAppendView, self).form_valid(form)
 
 
-class SourceRemoveView(FormView, OwnerRequiredMixin):
+class SourceRemoveView(FormView, OwnerRequiredMixin, UserRequiredFormMixin):
 
     """
     This class just breaks the relationship between a Source and a Sample.
@@ -173,6 +174,9 @@ class SourceRemoveView(FormView, OwnerRequiredMixin):
     form_class = SourceRemoveForm
 
     def get_initial(self):
+        """
+        Returning a dict that would be initial values for the form_class.
+        """
         initial = super(SourceRemoveView, self).get_initial()
         try:
             sample = Sample.objects.get(sha256=self.kwargs['sha256'])
@@ -193,7 +197,7 @@ class SourceRemoveView(FormView, OwnerRequiredMixin):
         )
 
     def form_valid(self, form):
-        self.sample = form.remove_source(self.request.user)
+        self.sample = form.remove()
         return super(SourceRemoveView, self).form_valid(form)
 
 

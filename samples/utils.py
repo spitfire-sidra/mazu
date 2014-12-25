@@ -134,10 +134,18 @@ class SampleHelper(object):
         return False
 
     @staticmethod
-    def pop_source(sample, source):
-        if not source:
-            return None
+    def remove_source(sample, source):
+        """
+        Remove 'source' from 'sample.sources'.
 
+        Args:
+            sample - an instance of sample
+            source - an instance of source
+
+        Returns:
+            True - success
+            False - failed
+        """
         if sample.sources.filter(id=source.id).exists():
             sample.sources.remove(source)
             sample.save()
