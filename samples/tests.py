@@ -7,11 +7,13 @@ from django.core.urlresolvers import reverse_lazy
 from core.mongodb import connect_gridfs
 from core.tests import CoreTestCase
 from core.tests import random_string
+from core.tests import random_integer
 from core.tests import random_http_link
 from core.utils import compute_hashes
 from samples.utils import SampleHelper
 from samples.models import Sample
 from samples.models import Source
+from samples.models import Filename
 
 
 def get_temp_folder():
@@ -181,7 +183,10 @@ class SampleTestCase(CoreTestCase):
     def test_detail_view(self):
         self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
-        target = reverse_lazy('sample.detail', kwargs={'sha256': sample.sha256})
+        target = reverse_lazy(
+            'sample.detail',
+            kwargs={'sha256': sample.sha256}
+        )
         self.set_target(target)
         self.assert_response_status_code(200)
         response = self.get_response()
@@ -195,3 +200,93 @@ class SampleTestCase(CoreTestCase):
         self.post_data = {'pk': sample.pk}
         self.send_post_request()
         self.assertFalse(self.helper.sample_exists(sample.sha256), False)
+
+
+class FilenameTestCase(CoreTestCase):
+
+    """
+    Test cases for Filename
+    """
+
+    def setUp(self):
+        super(FilenameTestCase, self).setUp()
+        self.post_data = dict()
+        self.make_sample()
+
+    def make_sample(self):
+        """
+        To make a sample for testing.
+        """
+        self.sample = Sample(
+            md5=random_string(32),
+            sha1=random_string(40),
+            sha256=random_string(64),
+            sha512=random_string(128),
+            crc32=random_integer(),
+            user=self.user
+        )
+        self.sample.save()
+
+    def make_filename(self):
+        """
+        To make a filename for testing.
+        """
+        self.filename = Filename(name=random_string(), user=self.user)
+        self.filename.save()
+
+    def append_filename_to_sample(self):
+        self.sample.filenames.add(self.filename)
+        self.sample.save()
+
+    def random_post_data(self):
+        self.filename = random_string()
+        self.post_data = {
+            'filename': self.filename,
+            'sample': self.sample.sha256
+        }
+
+    def test_can_append(self):
+        target = reverse_lazy(
+            'filename.append',
+            kwargs={'sha256': self.sample.sha256}
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.random_post_data()
+        self.send_post_request()
+        self.assert_response_status_code(200)
+        count = Filename.objects.filter(name=self.filename).count()
+        self.assertEqual(count, 1)
+
+    def test_can_remove(self):
+        self.make_filename()
+        self.append_filename_to_sample()
+        target = reverse_lazy(
+            'filename.remove',
+            kwargs={
+                'sha256': self.sample.sha256,
+                'filename_pk': self.filename.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['sample'] = self.sample.sha256
+        self.post_data['filename'] = self.filename.id
+        self.send_post_request()
+        result = self.sample.filenames.filter(id=self.filename.id).exists()
+        self.assertEqual(result, False)
+
+    def test_can_delete(self):
+        self.make_filename()
+        target = reverse_lazy(
+            'filename.delete',
+            kwargs={
+                'pk': self.filename.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['filename'] = self.filename.id
+        self.send_post_request()
+        count = Filename.objects.all().count()
+        self.assertEqual(count, 0)

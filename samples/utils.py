@@ -161,7 +161,7 @@ class SampleHelper(object):
             True - success
             False - failed
         """
-        if not sample.filenames.filter(id=filename.id).exists():
+        if sample.filenames.filter(id=filename.id).exists():
             sample.filenames.remove(filename)
             sample.save()
             return True

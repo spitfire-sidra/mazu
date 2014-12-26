@@ -14,6 +14,13 @@ from mongodb import get_compressed_file
 from mongodb import delete_file
 
 
+def random_integer():
+    """
+    >>> random_integer()
+    4245
+    """
+    return random.randint(1, 65535)
+
 def random_string(k=5):
     """
     Return a random string.
