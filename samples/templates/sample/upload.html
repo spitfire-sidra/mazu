@@ -1,12 +1,8 @@
 {% extends 'samples_app_base.html' %}
-
+{% load crispy_forms_tags %}
 {% block content %}
-<p></p>
-<div class="ui form segment">
-    <form action="" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input class="ui button" type="submit" value="Upload Malware">
-    </form>
-</div>
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% crispy form %}
+</form>
 {% endblock content %}

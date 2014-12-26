@@ -7,8 +7,14 @@ from django.core.urlresolvers import reverse_lazy
 from core.mongodb import connect_gridfs
 from core.tests import CoreTestCase
 from core.tests import random_string
+from core.tests import random_integer
+from core.tests import random_http_link
 from core.utils import compute_hashes
+from samples.utils import SampleHelper
 from samples.models import Sample
+from samples.models import Source
+from samples.models import Filename
+from samples.models import Description
 
 
 def get_temp_folder():
@@ -22,7 +28,7 @@ def get_temp_folder():
     return temp_test_folder
 
 
-def make_fake_sample_file():
+def make_sample_file():
     """
     Making a fake sample file for testing
     """
@@ -41,6 +47,129 @@ def remove_temp_folder():
     shutil.rmtree(temp_folder)
 
 
+def create_sample(user):
+    sample = Sample(
+        md5=random_string(32),
+        sha1=random_string(40),
+        sha256=random_string(64),
+        sha512=random_string(128),
+        crc32=random_integer(),
+        user=user
+    )
+    sample.save()
+    return sample
+
+
+class SourceTestCase(CoreTestCase):
+
+    """
+    Test cases for Source
+    """
+
+    def setUp(self):
+        super(SourceTestCase, self).setUp()
+        self.set_target_model(Source)
+
+    def create_source(self):
+        target = reverse_lazy('source.create')
+        self.set_target(target)
+        self.random_post_data()
+        self.send_post_request()
+
+    def random_post_data(self):
+        self.post_data = {
+            'name': random_string(),
+            'link': random_http_link(),
+            'descr': random_string(),
+        }
+
+    def test_can_list(self):
+        self.create_source()
+        target = reverse_lazy('source.list')
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        response = self.get_response()
+        self.assert_response_objects_count(response, 'object_list')
+
+    def test_can_create(self):
+        count = self.model.objects.all().count()
+        self.create_source()
+        excepted_count = self.model.objects.all().count()
+        self.assertEqual(count + 1, excepted_count)
+
+    def test_can_update(self):
+        self.create_source()
+        source = self.model.objects.latest('created')
+        target = reverse_lazy('source.update', kwargs={'pk': source.pk})
+        self.set_target(target)
+        self.random_post_data()
+        self.send_post_request()
+        source = self.model.objects.latest('created')
+        for k, v in self.post_data.items():
+            self.assertEqual(getattr(source, k), v)
+
+    def test_can_delete(self):
+        self.create_source()
+        source = self.model.objects.latest('created')
+        target = reverse_lazy('source.delete', kwargs={'pk': source.pk})
+        self.set_target(target)
+        self.post_data = {'pk': source.pk}
+        self.send_post_request()
+        try:
+            self.model.objects.get(pk=source.pk)
+        except self.model.DoesNotExist:
+            delete = True
+        else:
+            delete = False
+        self.assertEqual(delete, True)
+
+    def test_can_display_detail(self):
+        self.create_source()
+        source = self.model.objects.latest('created')
+        target = reverse_lazy('source.detail', kwargs={'pk': source.pk})
+        self.set_target(target)
+        self.assert_response_status_code(200)
+
+    def test_can_append(self):
+        self.create_source()
+        source = self.model.objects.latest('created')
+        sample = create_sample(self.user)
+        target = reverse_lazy(
+            'source.append',
+            kwargs={
+                'sha256': sample.sha256
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['sample'] = sample.sha256
+        self.post_data['source'] = source.id
+        self.send_post_request()
+        result = sample.sources.filter(id=source.id).exists()
+        self.assertEqual(result, True)
+
+    def test_can_remove(self):
+        self.create_source()
+        source = self.model.objects.latest('created')
+        sample = create_sample(self.user)
+        sample.sources.add(source)
+        sample.save()
+        target = reverse_lazy(
+            'source.remove',
+            kwargs={
+                'sha256': sample.sha256,
+                'source_pk': source.pk
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['sample'] = sample.sha256
+        self.post_data['source'] = source.id
+        self.send_post_request()
+        result = sample.sources.filter(id=source.id).exists()
+        self.assertEqual(result, False)
+
+
 class SampleTestCase(CoreTestCase):
 
     """
@@ -49,105 +178,220 @@ class SampleTestCase(CoreTestCase):
 
     def setUp(self):
         super(SampleTestCase, self).setUp()
+        self.helper = SampleHelper
 
     def tearDown(self):
         super(SampleTestCase, self).tearDown()
         remove_temp_folder()
 
-    def upload_fake_sample(self, filepath=None):
+    def random_post_data(self, fp):
+        self.post_data = {
+            'sample': fp,
+            'share': False,
+            'source': '',
+            'filename': random_string(),
+            'description': random_string(),
+        }
+
+    def upload_sample(self, filepath=None):
         if not filepath:
-            self.filepath = make_fake_sample_file()
+            self.filepath = make_sample_file()
             self.filename = random_string(8)
         else:
             self.filepath = filepath
-        fp = open(self.filepath, 'rb')
-        # compute hashes here
-        self.hashes = compute_hashes(fp.read())
-        # reset file pointer
-        fp.seek(0)
-        self.send_post_request(fp)
-        fp.close()
 
-    def send_post_request(self, fp):
-        self.response = self.client.post(
-            reverse_lazy('malware.upload'),
-            {
-                'sample': fp,
-                #'name': filename,
-                #'description': random_string(),
-            },
-            follow=True
-        )
+        fp = open(self.filepath, 'rb')
+        self.hashes = compute_hashes(fp.read())
+        fp.seek(0)
+        target = reverse_lazy('sample.upload')
+        self.set_target(target)
+        self.random_post_data(fp)
+        self.send_post_request()
+        fp.close()
 
     def test_can_upload(self):
         # test can save sample in GridFS
         gridfs = connect_gridfs()
-        self.upload_fake_sample()
+        self.upload_sample()
         count = gridfs.find({'md5': self.hashes.md5}).count()
         self.assertGreater(count, 0)
 
         # test can not upload duplicated sample
         # use the same file which just created
-        self.upload_fake_sample(self.filepath)
+        self.upload_sample(self.filepath)
         response = self.get_response()
         expected_errors = 'Duplicated sample.'
         form_all_errors = response.context['form'].errors['sample']
         self.assertIn(expected_errors, form_all_errors)
 
     def test_list_view(self):
-        target = reverse_lazy('malware.list')
+        self.upload_sample()
+        target = reverse_lazy('sample.list')
         self.set_target(target)
         self.set_target_model(Sample)
-
-        self.upload_fake_sample()
         self.assert_response_status_code(200)
         response = self.get_response()
         self.assert_response_objects_count(response, 'object_list')
 
-    def test_profile_view(self):
-        self.upload_fake_sample()
+    def test_detail_view(self):
+        self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
-        response = self.client.get(
-            reverse_lazy('malware.profile', args=[sample.sha256])
+        target = reverse_lazy(
+            'sample.detail',
+            kwargs={'sha256': sample.sha256}
         )
-        self.assertEqual(response.context['object'], sample)
-
-    def test_can_update(self):
-        self.upload_fake_sample()
-        target = reverse_lazy('malware.update', args=[self.hashes.sha256])
         self.set_target(target)
         self.assert_response_status_code(200)
-        random_filetype = random_string(8)
-        sample = Sample.objects.get(sha256=self.hashes.sha256)
-        response = self.client.post(
-            reverse_lazy('malware.update', args=[self.hashes.sha256]),
-            {
-                'filetype': random_filetype,
-                'size': sample.size,
-                'crc32': sample.crc32,
-                'md5': sample.md5,
-                'sha1': sample.sha1,
-                'sha256': sample.sha256,
-                'sha512': sample.sha512,
-                'ssdeep': sample.ssdeep,
-            }
-        )
-        sample = Sample.objects.get(sha256=self.hashes.sha256)
-        self.assertEqual(sample.filetype, random_filetype)
+        response = self.get_response()
+        self.assertEqual(response.context['object'], sample)
 
     def test_can_delete(self):
-        self.upload_fake_sample()
+        self.upload_sample()
         sample = Sample.objects.get(sha256=self.hashes.sha256)
-        self.client.post(
-            reverse_lazy('malware.delete', args=[sample.sha256]),
-            {
-                'pk': sample.id
+        target = reverse_lazy('sample.delete', kwargs={'sha256':sample.sha256})
+        self.set_target(target)
+        self.post_data = {'pk': sample.pk}
+        self.send_post_request()
+        self.assertFalse(self.helper.sample_exists(sample.sha256), False)
+
+
+class FilenameTestCase(CoreTestCase):
+
+    """
+    Test cases for Filename
+    """
+
+    def setUp(self):
+        super(FilenameTestCase, self).setUp()
+        self.make_sample()
+
+    def make_sample(self):
+        """
+        To make a sample for testing.
+        """
+        self.sample = create_sample(self.user)
+
+    def make_filename(self):
+        """
+        To make a filename for testing.
+        """
+        self.filename = Filename(name=random_string(), user=self.user)
+        self.filename.save()
+
+    def append_filename_to_sample(self):
+        self.sample.filenames.add(self.filename)
+        self.sample.save()
+
+    def random_post_data(self):
+        self.filename = random_string()
+        self.post_data = {
+            'filename': self.filename,
+            'sample': self.sample.sha256
+        }
+
+    def test_can_append(self):
+        target = reverse_lazy(
+            'filename.append',
+            kwargs={'sha256': self.sample.sha256}
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.random_post_data()
+        self.send_post_request()
+        self.assert_response_status_code(200)
+        count = Filename.objects.filter(name=self.filename).count()
+        self.assertEqual(count, 1)
+
+    def test_can_remove(self):
+        self.make_filename()
+        self.append_filename_to_sample()
+        target = reverse_lazy(
+            'filename.remove',
+            kwargs={
+                'sha256': self.sample.sha256,
+                'filename_pk': self.filename.id
             }
         )
-        try:
-            Sample.objects.get(sha256=self.hashes.sha256)
-        except Sample.DoesNotExist:
-            does_exist = False
-        else:
-            does_exist = True
-        self.assertFalse(does_exist)
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['sample'] = self.sample.sha256
+        self.post_data['filename'] = self.filename.id
+        self.send_post_request()
+        result = self.sample.filenames.filter(id=self.filename.id).exists()
+        self.assertEqual(result, False)
+
+    def test_can_delete(self):
+        self.make_filename()
+        target = reverse_lazy(
+            'filename.delete',
+            kwargs={
+                'pk': self.filename.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['filename'] = self.filename.id
+        self.send_post_request()
+        count = Filename.objects.all().count()
+        self.assertEqual(count, 0)
+
+
+class DescriptionTestCase(CoreTestCase):
+
+    """
+    Testing for Description.
+    """
+
+    def setUp(self):
+        super(DescriptionTestCase, self).setUp()
+        self.sample = create_sample(self.user)
+        self.descr = Description(
+            text=random_string(500),
+            sample=self.sample,
+            user=self.user
+        )
+        self.descr.save()
+
+    def test_can_create(self):
+        count = Description.objects.all().count()
+        target = reverse_lazy(
+            'descr.create',
+            kwargs={
+                'sha256': self.sample.sha256
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['text'] = random_string(500)
+        self.send_post_request()
+        current_count = Description.objects.all().count()
+        self.assertEqual(count + 1, current_count)
+
+    def test_can_delete(self):
+        target = reverse_lazy(
+            'descr.delete',
+            kwargs={
+                'pk': self.descr.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['pk'] = self.descr.id
+        self.send_post_request()
+        count = Description.objects.all().count()
+        self.assertEqual(count, 0)
+
+    def test_can_update(self):
+        new_text = random_string(500)
+        target = reverse_lazy(
+            'descr.update',
+            kwargs={
+                'pk': self.descr.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['text'] = new_text
+        self.send_post_request()
+        descr = Description.objects.get(id=self.descr.id)
+        self.assertEqual(new_text, descr.text)

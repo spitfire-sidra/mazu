@@ -5,36 +5,48 @@ from django.conf.urls import url
 from samples.views import download
 from samples.views import SampleList
 from samples.views import SampleUpload
-from samples.views import SampleUpdate
 from samples.views import SampleDelete
 from samples.views import SampleDetail
-from samples.views import SamplePublish
-from samples.views import SampleSourceList
-from samples.views import SampleSourceUpdate
-from samples.views import SampleSourceDelete
-from samples.views import SampleSourceCreate
-
+from samples.views import SampleUpdate
+from samples.views import FilenameDelete
+from samples.views import FilenameRemove
+from samples.views import FilenameAppend
+from samples.views import SourceAppend
+from samples.views import DescriptionCreate
+from samples.views import DescriptionDelete
+from samples.views import DescriptionUpdate
+from samples.views import SourceList
+from samples.views import SourceCreate
+from samples.views import SourceUpdate
+from samples.views import SourceDelete
+from samples.views import SourceDetail
+from samples.views import SourceRemove
 
 urlpatterns = patterns('',
     url(
         r'^source/list/$',
-        SampleSourceList,
+        SourceList,
         name='source.list'
     ),
     url(
         r'^source/create/$',
-        SampleSourceCreate,
+        SourceCreate,
         name='source.create'
     ),
     url(
-        r'^source/update/(?P<slug>[\w]+)/$',
-        SampleSourceUpdate,
+        r'^source/update/(?P<pk>\d+)/$',
+        SourceUpdate,
         name='source.update'
     ),
     url(
-        r'^source/delete/(?P<slug>[\w]+)/$',
-        SampleSourceDelete,
+        r'^source/delete/(?P<pk>\d+)/$',
+        SourceDelete,
         name='source.delete'
+    ),
+    url(
+        r'^source/detail/(?P<pk>\d+)/$',
+        SourceDetail,
+        name='source.detail'
     ),
 )
 
@@ -42,41 +54,71 @@ urlpatterns += patterns('',
     url(
         r'^list/$',
         SampleList,
-        name='malware.list'
+        name='sample.list'
     ),
     url(
         r'^upload/$',
         SampleUpload,
-        name='malware.upload'
+        name='sample.upload'
     ),
     url(
-        r'^download/(?P<slug>[\w]+)/$',
+        r'^download/(?P<sha256>[\w]+)$',
         download,
-        name='malware.download'
+        name='sample.download'
     ),
     url(
-        r'^list/(?P<slug>[\w]+)/$',
-        SampleList,
-        name='malware.source.filter'
-    ),
-    url(
-        r'^profile/(?P<slug>[\w]+)/$',
-        SampleDetail,
-        name='malware.profile'
-    ),
-    url(
-        r'^delete/(?P<slug>[\w]+)/$',
+        r'^delete/(?P<sha256>[\w]+)$',
         SampleDelete,
-        name='malware.delete'
+        name='sample.delete'
     ),
     url(
-        r'^update/(?P<slug>[\w]+)/$',
+        r'^profile/(?P<sha256>[\w]+)$',
+        SampleDetail,
+        name='sample.detail'
+    ),
+    url(
+        r'^update/(?P<sha256>[\w]+)$',
         SampleUpdate,
-        name='malware.update'
+        name='sample.update'
     ),
     url(
-        r'^publish/(?P<slug>[\w]*)/$',
-        SamplePublish,
-        name='malware.publish'
+        r'^filename/delete/(?P<pk>\d+)$',
+        FilenameDelete,
+        name='filename.delete'
+    ),
+    url(
+        r'^filename/remove/(?P<sha256>[\w]+)/(?P<filename_pk>\d+)$',
+        FilenameRemove,
+        name='filename.remove'
+    ),
+    url(
+        r'^filename/append/(?P<sha256>[\w]+)$',
+        FilenameAppend,
+        name='filename.append'
+    ),
+    url(
+        r'^source/append/(?P<sha256>[\w]+)$',
+        SourceAppend,
+        name='source.append'
+    ),
+    url(
+        r'^source/remove/(?P<sha256>[\w]+)/(?P<source_pk>\d+)$',
+        SourceRemove,
+        name='source.remove'
+    ),
+    url(
+        r'^descr/create/(?P<sha256>[\w]+)$',
+        DescriptionCreate,
+        name='descr.create'
+    ),
+    url(
+        r'^descr/delete/(?P<pk>\d+)$',
+        DescriptionDelete,
+        name='descr.delete'
+    ),
+    url(
+        r'^descr/update/(?P<pk>\d+)$',
+        DescriptionUpdate,
+        name='descr.update'
     ),
 )

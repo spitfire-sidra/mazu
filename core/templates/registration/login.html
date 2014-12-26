@@ -1,13 +1,12 @@
 {% extends 'empty.html' %}
 
 {% block content %}
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
+    {% if messages %}
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    {% endif %}
+<br />
 <form class="form-signin" method="post" action="{% url 'account.views.auth' %}">
     {% csrf_token %}
     <h2>Please Sign In</h2>

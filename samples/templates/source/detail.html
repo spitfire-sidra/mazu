@@ -1,0 +1,11 @@
+{% extends 'samples_app_base.html' %}
+
+{% block content %}
+
+
+{{ object.name }}<br />
+{{ object.link }}<br />
+{{ object.descr }}<br />
+<a href="{% url 'source.update' object.pk %}">update</a>
+
+{% endblock content %}

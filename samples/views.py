@@ -7,7 +7,6 @@ from django.http import Http404
 from django.http import HttpResponse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import FormMixin
 from django.views.generic.edit import FormView
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import UpdateView
@@ -16,139 +15,299 @@ from django.contrib import messages
 
 from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
+from core.mixins import UserRequiredFormMixin
 from core.mongodb import get_compressed_file
-from samples.utils import delete_sample
+
+from samples.utils import SampleHelper
+from samples.models import Source
 from samples.models import Sample
-from samples.models import SampleSource
-from samples.models import DownloadLog
+from samples.models import Filename
+from samples.models import Description
+from samples.models import AccessLog
 from samples.forms import SampleUploadForm
-from samples.forms import SamplePublishForm
-from samples.forms import SampleUpdateForm
 from samples.forms import SampleFilterForm
-from samples.forms import SampleSourceForm
+from samples.forms import SourceForm
+from samples.forms import SourceAppendForm
+from samples.forms import SourceRemoveForm
+from samples.forms import FilenameRemoveForm
+from samples.forms import FilenameAppendForm
+from samples.forms import DescriptionForm
+from samples.mixins import SampleInitialFormMixin
 
 
 logger = logging.getLogger(__name__)
 
 
-def download(request, slug):
+def download(request, sha256):
     """
     A function-based view for downloading sample
     """
     try:
-        sample = get_compressed_file('sha256', slug)
+        sample = get_compressed_file('sha256', sha256)
     except Exception as e:
         logger.debug(e)
         messages.error(request, 'Oops! We got an error!')
         return render(request, 'error.html')
     else:
         if sample:
-            response_body = 'attachment; filename={}.zip'.format(slug)
+            response_body = 'attachment; filename={}.zip'.format(sha256)
             response = HttpResponse(sample.read())
             response['Content-Type'] = 'application/x-zip'
             response['Content-Disposition'] = response_body
-            DownloadLog(user=request.user, malware=slug).save()
+            AccessLog(user=request.user, sample=sample).save()
             return response
         else:
             raise Http404
 
 
-class SamplePublishView(FormView, LoginRequiredMixin):
+class SourceListView(ListView, LoginRequiredMixin):
 
     """
-    A class-based view for publishing sample.
+    ListView for Source
     """
 
-    template_name = 'sample/publish.html'
-    form_class = SamplePublishForm
-    success_url = reverse_lazy('malware.list')
+    model = Source
+    template_name = 'source/list.html'
+
+    def get_queryset(self):
+        # users can see sample sources that owned by themself
+        return self.model.objects.filter(user=self.request.user)
+
+
+class SourceCreateView(CreateView, LoginRequiredMixin):
+
+    """
+    A class-based view for creating sample source.
+    """
+
+    model = Source
+    fields = ['name', 'link', 'descr']
+    form_class = SourceForm
+    template_name = 'source/create.html'
+    success_url = reverse_lazy('source.list')
+
+    def form_valid(self, form):
+        # Saving the user who creates the source
+        form.instance.user = self.request.user
+        messages.success(self.request, 'Source created.')
+        return super(SourceCreateView, self).form_valid(form)
+
+
+class SourceUpdateView(UpdateView, OwnerRequiredMixin):
+
+    """
+    UpdateView for Source.
+    Users can update a source which owned by himself.
+    """
+
+    model = Source
+    fields = ['name', 'link', 'descr']
+    form_class = SourceForm
+    template_name = 'source/update.html'
+
+    def get_success_url(self):
+        source = self.get_object()
+        return reverse_lazy('source.detail', kwargs={'pk': source.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Source details updated.')
+        return super(SourceUpdateView, self).form_valid(form)
+
+
+class SourceDeleteView(DeleteView, OwnerRequiredMixin):
+
+    """
+    DeleteView for Source.
+    """
+
+    model = Source
+    template_name = 'source/delete.html'
+    success_url = reverse_lazy('source.list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Source deleted.')
+        return super(SourceDeleteView, self).form_valid(form)
+
+
+class SourceDetailView(DetailView, LoginRequiredMixin):
+
+    """
+    DetailView for Source.
+    """
+
+    model = Source
+    template_name = 'source/detail.html'
+
+
+class SampleUpdateBaseView(FormView):
+
+    """
+    A base view class for updating sample.
+    """
+
+    def get_success_url(self):
+        """
+        If sample updated, then the view will be redirect to the following URL.
+        """
+        return reverse_lazy(
+            'sample.update',
+            kwargs={'sha256': self.sample.sha256}
+        )
+
+
+class SourceAppendView(SampleUpdateBaseView, UserRequiredFormMixin,\
+                        SampleInitialFormMixin, OwnerRequiredMixin):
+
+    """
+    Building a relationship between a Sample and a Source.
+    """
+
+    template_name = 'sample/append_source.html'
+    form_class = SourceAppendForm
+
+    def form_valid(self, form):
+        self.sample, result = form.append()
+        if not result:
+            messages.error(
+                self.request,
+                'Failed to append Source. Source already exists.'
+            )
+        else:
+            messages.success(self.request, 'Source appended.')
+        return super(SourceAppendView, self).form_valid(form)
+
+
+class SourceRemoveView(SampleUpdateBaseView, UserRequiredFormMixin,\
+                        SampleInitialFormMixin, OwnerRequiredMixin):
+
+    """
+    This class just breaks the relationship between a Source and a Sample.
+    """
+
+    template_name = 'sample/remove.html'
+    form_class = SourceRemoveForm
+
+    def get_object(self):
+        """
+        Trying to get the Source by self.kwargs['source_pk'].
+        """
+        try:
+            source = Source.objects.get(id=self.kwargs['source_pk'])
+        except Source.DoesNotExist:
+            raise Http404
+        else:
+            return source
 
     def get_initial(self):
         """
-        Initial value of self.form_class
+        Returning a dict that would be initial values for the form_class.
         """
-        try:
-            sha256 = self.kwargs['slug']
-        except KeyError:
-            raise Http404
-        else:
-            return {'sample': sha256}
-
-    def get_form(self, form_class):
-        kwargs = self.get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return form_class(**kwargs)
+        initial = super(SourceRemoveView, self).get_initial()
+        initial['source'] = self.get_object().pk
+        return initial
 
     def form_valid(self, form):
-        form.save()
-        return super(SamplePublishView, self).form_valid(form)
+        self.sample, result = form.remove()
+        if not result:
+            messages.error(self.request, 'Failed to remove the source.')
+        else:
+            messages.success(self.request, 'Source removed.')
+        return super(SourceRemoveView, self).form_valid(form)
 
 
-class SampleUploadView(FormView, LoginRequiredMixin):
+class FilenameAppendView(SampleUpdateBaseView, UserRequiredFormMixin,\
+                            SampleInitialFormMixin):
 
     """
-    Sample upload view.
+    Building a relationship between a Sample and a Filename.
     """
 
-    template_name = 'sample/upload.html'
-    form_class = SampleUploadForm
-    success_url = reverse_lazy('malware.upload')
-
-    def get_form(self, form_class):
-        """
-        Get current user instance, and initialize the form class.
-        """
-        kwargs = self.get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return form_class(**kwargs)
-
-    def form_invalid(self, form):
-        messages.info(
-            self.request,
-            "Your submission has not been saved. Try again."
-        )
-        return super(SampleUploadView, self).form_invalid(form)
+    template_name = 'sample/append_filename.html'
+    form_class = FilenameAppendForm
 
     def form_valid(self, form):
-        if form.save_sample():
-            messages.info(self.request, 'Success!')
+        self.sample, result = form.append()
+        if not result:
+            messages.error(self.request, 'Failed to append the filename.')
         else:
-            messages.warning(self.request, 'Can not save sample!')
-        return super(SampleUploadView, self).form_valid(form)
+            messages.success(self.request, 'Filename appended.')
+        return super(FilenameAppendView, self).form_valid(form)
 
 
-class SampleUpdateView(UpdateView, OwnerRequiredMixin):
-
+class FilenameRemoveView(SampleUpdateBaseView, UserRequiredFormMixin,\
+                            SampleInitialFormMixin, OwnerRequiredMixin):
     """
-    A class-based view for updating sample attributes.
-    Only the user of sample can update sample attributes
+    This class just breaks the relationship between a Filename and a Sample.
     """
 
-    model = Sample
-    form_class = SampleUpdateForm
-    template_name = 'sample/update.html'
-    success_url = reverse_lazy('malware.list')
+    template_name = 'sample/remove.html'
+    form_class = FilenameRemoveForm
 
     def get_object(self):
-        return self.model.objects.get(slug=self.kwargs['slug'])
+        """
+        Trying to get the Filename by self.kwargs['filename_pk'].
+        """
+        try:
+            filename = Filename.objects.get(id=self.kwargs['filename_pk'])
+        except Filename.DoesNotExist:
+            raise Http404
+        else:
+            return filename
+
+    def get_initial(self):
+        """
+        Returning a dict that would be initial values for the form_class.
+        """
+        initial = super(FilenameRemoveView, self).get_initial()
+        initial['filename'] = self.get_object().pk
+        return initial
+
+    def form_valid(self, form):
+        self.sample, result = form.remove()
+        if not result:
+            messages.error(self.request, 'Failed to remove the filename.')
+        else:
+            messages.success(self.request, 'Filename appended.')
+        return super(FilenameRemoveView, self).form_valid(form)
 
 
-class SampleListView(ListView, FormMixin, LoginRequiredMixin):
+class FilenameDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
-    A ListView that displays samples and a filter form. This class also
-    handles the POST request of filter form.
+    A class-based view for deleting a filename.
+    This CBV not only breaks the relationship between a Filename and
+    Samples but deletes the Filename from database.
+    Only the owner can delete the filename which owned by himself.
+    """
+
+    model = Filename
+    template_name = 'sample/delete.html'
+    success_url = reverse_lazy('sample.list')
+
+    def get_object(self, **kwargs):
+        return self.model.objects.get(id=self.kwargs['pk'])
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Filename deleted.')
+        return super(FilenameDeleteView, self).form_valid(form)
+
+
+class SampleListView(ListView, UserRequiredFormMixin, LoginRequiredMixin):
+
+    """
+    A ListView that displays samples and a filter form.
+    This class also handles the POST request from the filter form.
     """
 
     model = Sample
     template_name = 'sample/list.html'
     form_class = SampleFilterForm
-    success_url = reverse_lazy('malware.list')
+    success_url = reverse_lazy('sample.list')
     filtered_queryset = None
 
     def get_context_data(self, **kwargs):
         context = super(SampleListView, self).get_context_data(**kwargs)
-        context['filter'] = SampleFilterForm()
+        context['filter_form'] = SampleFilterForm()
         return context
 
     def get_queryset(self):
@@ -157,137 +316,181 @@ class SampleListView(ListView, FormMixin, LoginRequiredMixin):
         return super(SampleListView, self).get_queryset()
 
     def post(self, request, *args, **kwargs):
+        """
+        If we got a 'request.POST', the 'self.filtered_queryset' would be the
+        queryset that had been filtered.
+        Then we forward the rest jobs to 'self.get(request, *args, **kwargs)'
+        for displaying the web page.
+        """
         form = self.form_class(request.POST)
         if form.is_valid():
             self.filtered_queryset = form.get_queryset()
         return self.get(request, *args, **kwargs)
 
 
+class SampleUploadView(FormView, UserRequiredFormMixin, LoginRequiredMixin):
+
+    """
+    Class-based view for uploading sample.
+    """
+
+    template_name = 'sample/upload.html'
+    form_class = SampleUploadForm
+    success_url = reverse_lazy('sample.upload')
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            "Your submission has not been saved. Try again."
+        )
+        return super(SampleUploadView, self).form_invalid(form)
+
+    def form_valid(self, form):
+        if form.save():
+            messages.info(self.request, 'Success!')
+        else:
+            messages.warning(self.request, 'Can not save sample!')
+        return super(SampleUploadView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(SampleUploadView, self).get_context_data(**kwargs)
+        return context
+
+
 class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
-    A class-based view for deleting a sample.
-    Only the owner can delete the sample.
+    DeleteView for Sample.
+    Only the owner of the sample can delete it.
     """
 
     model = Sample
     template_name = 'sample/delete.html'
-    success_url = reverse_lazy('malware.list')
+    success_url = reverse_lazy('sample.list')
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(sha256=self.kwargs['sha256'])
 
     def delete(self, request, *args, **kwargs):
         # delete the sample which existing in GridFS
-        delete_sample(self.kwargs['slug'])
+        SampleHelper.delete_sample(self.kwargs['sha256'])
         return super(SampleDeleteView, self).delete(request, *args, **kwargs)
 
 
 class SampleDetailView(DetailView, LoginRequiredMixin):
 
     """
-    Detail view of Sample
+    DetailView for Sample.
     """
 
     model = Sample
     template_name = 'sample/detail.html'
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(slug=self.kwargs['slug'])
+        return self.model.objects.get(sha256=self.kwargs['sha256'])
 
 
-class SampleSourceCreateView(CreateView, LoginRequiredMixin):
+class SampleUpdateView(SampleDetailView):
 
     """
-    A class-based view for creating sample source.
+    UpdateView for Sample.
+    Actually, it's a DetailView but uses a different template.
     """
 
-    model = SampleSource
-    fields = ['name', 'link', 'descr']
-    form_class = SampleSourceForm
-    template_name = 'sample_source/create.html'
-    success_url = reverse_lazy('source.list')
+    template_name = 'sample/update.html'
+
+
+class DescriptionCreateView(CreateView, LoginRequiredMixin,\
+                            SampleUpdateBaseView):
+
+    """
+    A class-based view for creating Description.
+    """
+
+    model = Description
+    fields = ['text']
+    template_name = 'source/create.html'
+
+    def get_sample(self):
+        """
+        Trying to get the sample by sha256.
+        """
+        try:
+            sample = Sample.objects.get(sha256=self.kwargs['sha256'])
+        except Sample.DoesNotExist:
+            return False
+        else:
+            return sample
 
     def form_valid(self, form):
-        # Saving the user who create the sample source
+        # saving the user who creates the source
         form.instance.user = self.request.user
-        return super(SampleSourceCreateView, self).form_valid(form)
+
+        # get the sample
+        self.sample = self.get_sample()
+        if not self.sample:
+            raise Http404
+        # saveing the sample which maps to this description
+        form.instance.sample = self.sample
+        messages.success(self.request, 'Description created.')
+        return super(DescriptionCreateView, self).form_valid(form)
 
 
-class SampleSourceUpdateView(UpdateView, OwnerRequiredMixin):
-
-    """
-    UpdateView for SampleSource.
-    Users can a source which owned by them.
-    """
-
-    model = SampleSource
-    fields = ['name', 'link', 'descr']
-    form_class = SampleSourceForm
-    template_name = 'sample_source/update.html'
-    success_url = reverse_lazy('source.list')
-
-    def get_object(self):
-        return self.model.objects.get(
-            slug=self.kwargs['slug'],
-            user=self.request.user
-        )
-
-
-class SampleSourceListView(ListView, LoginRequiredMixin):
+class DescriptionDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
-    ListView for SampleSource
+    DeleteView for Description.
+    Only the owner of the description can delete the description.
     """
 
-    model = SampleSource
-    template_name = 'sample_source/list.html'
-
-    def get_queryset(self):
-        # users can see sample sources that owned by them
-        return self.model.objects.filter(user=self.request.user)
-
-
-class SampleSourceDeleteView(DeleteView, OwnerRequiredMixin):
-
-    """
-    DeleteView for SampleSource
-    """
-
-    model = SampleSource
-    template_name = 'sample_source/delete.html'
-    success_url = reverse_lazy('source.list')
+    model = Description
+    template_name = 'sample/delete.html'
+    success_url = reverse_lazy('sample.list')
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(
-            slug=self.kwargs['slug'],
-            user=self.request.user
-        )
+        return self.model.objects.get(id=self.kwargs['pk'])
 
 
-class SampleSourceDetailView(DetailView, OwnerRequiredMixin):
+class DescriptionUpdateView(UpdateView, OwnerRequiredMixin):
 
     """
-    DetailView for SampleSource
+    UpdateView for Description.
+    Only the owner of the description can update the description.
     """
 
-    model = SampleSource
-    template_name = 'sample_source/detail.html'
+    model = Description
+    fields = ['text']
+    form_class = DescriptionForm
+    template_name = 'sample/update_description.html'
+    success_url = reverse_lazy('sample.list')
 
     def get_object(self, **kwargs):
-        return self.model.objects.get(
-            slug=self.kwargs['slug'],
-            user=self.request.user
+        return self.model.objects.get(id=self.kwargs['pk'])
+
+    def get_success_url(self):
+        descr = self.get_object()
+        return reverse_lazy(
+            'sample.update',
+            kwargs={'sha256': descr.sample.sha256}
         )
 
 
-SampleSourceList = SampleSourceListView.as_view()
-SampleSourceCreate = SampleSourceCreateView.as_view()
-SampleSourceUpdate = SampleSourceUpdateView.as_view()
-SampleSourceDelete = SampleSourceDeleteView.as_view()
+# Alias
+SourceList = SourceListView.as_view()
+SourceCreate = SourceCreateView.as_view()
+SourceUpdate = SourceUpdateView.as_view()
+SourceDelete = SourceDeleteView.as_view()
+SourceDetail = SourceDetailView.as_view()
 SampleList = SampleListView.as_view()
 SampleUpload = SampleUploadView.as_view()
 SampleDetail = SampleDetailView.as_view()
 SampleDelete = SampleDeleteView.as_view()
 SampleUpdate = SampleUpdateView.as_view()
-SamplePublish = SamplePublishView.as_view()
+FilenameDelete = FilenameDeleteView.as_view()
+FilenameRemove = FilenameRemoveView.as_view()
+FilenameAppend = FilenameAppendView.as_view()
+SourceAppend = SourceAppendView.as_view()
+SourceRemove = SourceRemoveView.as_view()
+DescriptionCreate = DescriptionCreateView.as_view()
+DescriptionDelete = DescriptionDeleteView.as_view()
+DescriptionUpdate = DescriptionUpdateView.as_view()

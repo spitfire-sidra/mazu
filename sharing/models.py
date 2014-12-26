@@ -22,7 +22,7 @@ class HPFeedsChannel(TimeStampedModel):
     default = models.BooleanField(default=False)
     slug = models.SlugField()
     user = models.ForeignKey('auth.User')
-    source = models.ForeignKey('samples.SampleSource', null=True, blank=True)
+    source = models.ForeignKey('samples.Source', null=True, blank=True)
 
     def __unicode__(self):
         return "HPFeedsChannel-#{0}-{1}".fromat(self.id, self.name)

@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crispy_forms',
 	'south',
     'haystack',
     'djcelery',
@@ -72,6 +73,7 @@ LOGIN_URL = '/'
 
 WSGI_APPLICATION = 'mazu.wsgi.application'
 
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
