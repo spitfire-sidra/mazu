@@ -22,9 +22,9 @@ echo "==> Here we go..."
 
 # check if whoami = root
 if [ "$UID" == "$ROOT_UID" ]; then
-	echo "Must NOT be root ro run this script"
-	exit $E_ROOT
-fi  
+    echo "Must NOT be root ro run this script"
+    exit $E_ROOT
+fi
 
 
 # install PREREQUISITES
@@ -42,10 +42,10 @@ cp settings/production.example.py settings/production.py
 
 
 echo "  > Generating production key..."
-PRO_GEN=$(/usr/bin/python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789") for i in range(50)])')
+PRO_GEN=$(/usr/bin/python -c 'import random; print "".join([random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZbcdefghijklmnopqrstuvwxyz0123456789\\#/$%@!&^*()<>?[]{}") for i in range(50)])')
 
 # replace key in settings/production.py
-sed -i s/yoursecretkey/$PRO_GEN/g settings/production.py 
+sed -i "s|yoursecretkey|$PRO_GEN|g" settings/production.py
 
 echo "  > Creating superuser for django..."
 ./manage.py createsuperuser
