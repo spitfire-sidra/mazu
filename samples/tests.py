@@ -352,6 +352,21 @@ class DescriptionTestCase(CoreTestCase):
         )
         self.descr.save()
 
+    def test_can_create(self):
+        count = Description.objects.all().count()
+        target = reverse_lazy(
+            'descr.create',
+            kwargs={
+                'sha256': self.sample.sha256
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['text'] = random_string(500)
+        self.send_post_request()
+        current_count = Description.objects.all().count()
+        self.assertEqual(count + 1, current_count)
+
     def test_can_delete(self):
         target = reverse_lazy(
             'descr.delete',

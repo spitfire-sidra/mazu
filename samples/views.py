@@ -400,6 +400,42 @@ class SampleUpdateView(SampleDetailView):
     template_name = 'sample/update.html'
 
 
+class DescriptionCreateView(CreateView, LoginRequiredMixin,\
+                            SampleUpdateBaseView):
+
+    """
+    A class-based view for creating Description.
+    """
+
+    model = Description
+    fields = ['text']
+    template_name = 'source/create.html'
+
+    def get_sample(self):
+        """
+        Trying to get the sample by sha256.
+        """
+        try:
+            sample = Sample.objects.get(sha256=self.kwargs['sha256'])
+        except Sample.DoesNotExist:
+            return False
+        else:
+            return sample
+
+    def form_valid(self, form):
+        # saving the user who creates the source
+        form.instance.user = self.request.user
+
+        # get the sample
+        self.sample = self.get_sample()
+        if not self.sample:
+            raise Http404
+        # saveing the sample which maps to this description
+        form.instance.sample = self.sample
+        messages.success(self.request, 'Description created.')
+        return super(DescriptionCreateView, self).form_valid(form)
+
+
 class DescriptionDeleteView(DeleteView, OwnerRequiredMixin):
 
     """
@@ -455,5 +491,6 @@ FilenameRemove = FilenameRemoveView.as_view()
 FilenameAppend = FilenameAppendView.as_view()
 SourceAppend = SourceAppendView.as_view()
 SourceRemove = SourceRemoveView.as_view()
+DescriptionCreate = DescriptionCreateView.as_view()
 DescriptionDelete = DescriptionDeleteView.as_view()
 DescriptionUpdate = DescriptionUpdateView.as_view()

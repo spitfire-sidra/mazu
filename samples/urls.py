@@ -12,6 +12,7 @@ from samples.views import FilenameDelete
 from samples.views import FilenameRemove
 from samples.views import FilenameAppend
 from samples.views import SourceAppend
+from samples.views import DescriptionCreate
 from samples.views import DescriptionDelete
 from samples.views import DescriptionUpdate
 from samples.views import SourceList
@@ -104,6 +105,11 @@ urlpatterns += patterns('',
         r'^source/remove/(?P<sha256>[\w]+)/(?P<source_pk>\d+)$',
         SourceRemove,
         name='source.remove'
+    ),
+    url(
+        r'^descr/create/(?P<sha256>[\w]+)$',
+        DescriptionCreate,
+        name='descr.create'
     ),
     url(
         r'^descr/delete/(?P<pk>\d+)$',

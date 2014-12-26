@@ -40,6 +40,7 @@
         <a href="{% url 'descr.delete' descr.pk %}">delete</a><br />
     {% endif %}
 {% endfor %}
+<a href="{% url 'descr.create' object.sha256 %}">add</a><br />
 
 <a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
 
