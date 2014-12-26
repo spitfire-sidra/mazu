@@ -14,6 +14,7 @@ from samples.utils import SampleHelper
 from samples.models import Sample
 from samples.models import Source
 from samples.models import Filename
+from samples.models import Description
 
 
 def get_temp_folder():
@@ -67,7 +68,6 @@ class SourceTestCase(CoreTestCase):
 
     def setUp(self):
         super(SourceTestCase, self).setUp()
-        self.post_data = dict()
         self.set_target_model(Source)
 
     def create_source(self):
@@ -263,7 +263,6 @@ class FilenameTestCase(CoreTestCase):
 
     def setUp(self):
         super(FilenameTestCase, self).setUp()
-        self.post_data = dict()
         self.make_sample()
 
     def make_sample(self):
@@ -335,3 +334,49 @@ class FilenameTestCase(CoreTestCase):
         self.send_post_request()
         count = Filename.objects.all().count()
         self.assertEqual(count, 0)
+
+
+class DescriptionTestCase(CoreTestCase):
+
+    """
+    Testing for Description.
+    """
+
+    def setUp(self):
+        super(DescriptionTestCase, self).setUp()
+        self.sample = create_sample(self.user)
+        self.descr = Description(
+            text=random_string(500),
+            sample=self.sample,
+            user=self.user
+        )
+        self.descr.save()
+
+    def test_can_delete(self):
+        target = reverse_lazy(
+            'descr.delete',
+            kwargs={
+                'pk': self.descr.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['pk'] = self.descr.id
+        self.send_post_request()
+        count = Description.objects.all().count()
+        self.assertEqual(count, 0)
+
+    def test_can_update(self):
+        new_text = random_string(500)
+        target = reverse_lazy(
+            'descr.update',
+            kwargs={
+                'pk': self.descr.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['text'] = new_text
+        self.send_post_request()
+        descr = Description.objects.get(id=self.descr.id)
+        self.assertEqual(new_text, descr.text)

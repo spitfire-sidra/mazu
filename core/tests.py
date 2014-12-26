@@ -51,6 +51,7 @@ class CoreTestCase(TestCase):
     """
 
     def setUp(self):
+        self.post_data = dict()
         self.username = random_string()
         self.password = random_string()
         self.user = User.objects.create_user(
