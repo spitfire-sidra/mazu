@@ -46,6 +46,19 @@ def remove_temp_folder():
     shutil.rmtree(temp_folder)
 
 
+def create_sample(user):
+    sample = Sample(
+        md5=random_string(32),
+        sha1=random_string(40),
+        sha256=random_string(64),
+        sha512=random_string(128),
+        crc32=random_integer(),
+        user=user
+    )
+    sample.save()
+    return sample
+
+
 class SourceTestCase(CoreTestCase):
 
     """
@@ -54,9 +67,10 @@ class SourceTestCase(CoreTestCase):
 
     def setUp(self):
         super(SourceTestCase, self).setUp()
+        self.post_data = dict()
         self.set_target_model(Source)
 
-    def create_sample_source(self):
+    def create_source(self):
         target = reverse_lazy('source.create')
         self.set_target(target)
         self.random_post_data()
@@ -70,7 +84,7 @@ class SourceTestCase(CoreTestCase):
         }
 
     def test_can_list(self):
-        self.create_sample_source()
+        self.create_source()
         target = reverse_lazy('source.list')
         self.set_target(target)
         self.assert_response_status_code(200)
@@ -79,12 +93,12 @@ class SourceTestCase(CoreTestCase):
 
     def test_can_create(self):
         count = self.model.objects.all().count()
-        self.create_sample_source()
+        self.create_source()
         excepted_count = self.model.objects.all().count()
         self.assertEqual(count + 1, excepted_count)
 
     def test_can_update(self):
-        self.create_sample_source()
+        self.create_source()
         source = self.model.objects.latest('created')
         target = reverse_lazy('source.update', kwargs={'pk': source.pk})
         self.set_target(target)
@@ -95,7 +109,7 @@ class SourceTestCase(CoreTestCase):
             self.assertEqual(getattr(source, k), v)
 
     def test_can_delete(self):
-        self.create_sample_source()
+        self.create_source()
         source = self.model.objects.latest('created')
         target = reverse_lazy('source.delete', kwargs={'pk': source.pk})
         self.set_target(target)
@@ -110,11 +124,50 @@ class SourceTestCase(CoreTestCase):
         self.assertEqual(delete, True)
 
     def test_can_display_detail(self):
-        self.create_sample_source()
+        self.create_source()
         source = self.model.objects.latest('created')
         target = reverse_lazy('source.detail', kwargs={'pk': source.pk})
         self.set_target(target)
         self.assert_response_status_code(200)
+
+    def test_can_append(self):
+        self.create_source()
+        source = self.model.objects.latest('created')
+        sample = create_sample(self.user)
+        target = reverse_lazy(
+            'source.append',
+            kwargs={
+                'sha256': sample.sha256
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['sample'] = sample.sha256
+        self.post_data['source'] = source.id
+        self.send_post_request()
+        result = sample.sources.filter(id=source.id).exists()
+        self.assertEqual(result, True)
+
+    def test_can_remove(self):
+        self.create_source()
+        source = self.model.objects.latest('created')
+        sample = create_sample(self.user)
+        sample.sources.add(source)
+        sample.save()
+        target = reverse_lazy(
+            'source.remove',
+            kwargs={
+                'sha256': sample.sha256,
+                'source_pk': source.pk
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['sample'] = sample.sha256
+        self.post_data['source'] = source.id
+        self.send_post_request()
+        result = sample.sources.filter(id=source.id).exists()
+        self.assertEqual(result, False)
 
 
 class SampleTestCase(CoreTestCase):
@@ -217,15 +270,7 @@ class FilenameTestCase(CoreTestCase):
         """
         To make a sample for testing.
         """
-        self.sample = Sample(
-            md5=random_string(32),
-            sha1=random_string(40),
-            sha256=random_string(64),
-            sha512=random_string(128),
-            crc32=random_integer(),
-            user=self.user
-        )
-        self.sample.save()
+        self.sample = create_sample(self.user)
 
     def make_filename(self):
         """
