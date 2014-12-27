@@ -7,9 +7,9 @@ from django.core.urlresolvers import reverse_lazy
 
 from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
-from sharing.forms import HPFeedsChannelForm
-from sharing.models import HPFeedsChannel
-from sharing.models import HPFeedsPubQueue
+from extensions.hpfeeds.forms import HPFeedsChannelForm
+from extensions.hpfeeds.models import HPFeedsChannel
+from extensions.hpfeeds.models import HPFeedsPubQueue
 
 
 class HPFeedsChannelCreateView(CreateView, LoginRequiredMixin):

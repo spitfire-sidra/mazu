@@ -21,6 +21,11 @@ urlpatterns = patterns('',
         name='channel.create'
     ),
     url(
+        r'^publish/(?P<sha256>[\w]+)$',
+        HPFeedsChannelCreateView.as_view(),
+        name='sharing-via-hpfeeds'
+    ),
+    url(
         r'^delete/(?P<pk>[\d]+)/$',
         HPFeedsChannelDeleteView.as_view(),
         name='channel.delete'

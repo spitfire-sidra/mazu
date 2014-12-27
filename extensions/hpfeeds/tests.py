@@ -3,7 +3,7 @@ import random
 
 from django.core.urlresolvers import reverse_lazy
 
-from sharing.models import HPFeedsChannel
+from extensions.hpfeeds.models import HPFeedsChannel
 from core.tests import CoreTestCase
 from core.tests import random_string
 

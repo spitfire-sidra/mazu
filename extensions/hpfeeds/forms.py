@@ -2,7 +2,7 @@
 from django import forms
 
 from samples.models import Source
-from sharing.models import HPFeedsChannel
+from extensions.hpfeeds.models import HPFeedsChannel
 
 
 class HPFeedsChannelForm(forms.ModelForm):

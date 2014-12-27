@@ -18,7 +18,7 @@ mazu_tasks = {
         'schedule': crontab(hour=21, minute=30),
     },
     'check_hpfeeds_pubqueue': {
-        'task': 'sharing.tasks.check_hpfeeds_pubqueue',
+        'task': 'extensions.hpfeeds.tasks.check_hpfeeds_pubqueue',
         'schedule': crontab(minute='*/3'),
     },
 }
