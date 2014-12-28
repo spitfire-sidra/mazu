@@ -7,23 +7,23 @@ from django.contrib import messages
 
 from core.mixins import LoginRequiredMixin
 
-from sharing.forms import SharingForm
+from sharing.forms import SelectExtensionForm
 
 
-class SharingFormView(FormView, LoginRequiredMixin):
+class SelectExtensionView(FormView, LoginRequiredMixin):
 
     """
     FormView for sharing samples.
     """
 
-    form_class = SharingForm
+    form_class = SelectExtensionForm
     template_name = 'form.html'
 
     def get_initial(self):
         """
         Giving the initial value (sha256) to self.form_class.
         """
-        initial = super(SharingFormView, self).get_initial()
+        initial = super(SelectExtensionView, self).get_initial()
         initial['sample'] = self.kwargs['sha256']
         return initial
 
@@ -34,7 +34,7 @@ class SharingFormView(FormView, LoginRequiredMixin):
         That's say this method is actually "get_failed_url()".
         """
         return reverse_lazy(
-            'sharing.form',
+            'sharing.select.extension',
             kwargs={'sha256': self.kwargs['sha256']}
         )
 
@@ -51,8 +51,8 @@ class SharingFormView(FormView, LoginRequiredMixin):
                 message_fmt.format(form.cleaned_data['choice'])
             )
             # if can't redirect
-            return super(SharingFormView, self).form_valid(form)
+            return super(SelectExtensionView, self).form_valid(form)
 
 
 # Alias
-SharingForm = SharingFormView.as_view()
+SelectExtension = SelectExtensionView.as_view()

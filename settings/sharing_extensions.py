@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-CHOICES = (
+EXT_CHOICES = (
     ('hpfeeds', 'Honeynet Project generic authenticated data feed protocol'),
 )

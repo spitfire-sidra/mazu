@@ -3,12 +3,12 @@ from django import forms
 from django.core.urlresolvers import reverse_lazy
 
 
-from settings.sharing_extensions import CHOICES
+from settings.sharing_extensions import EXT_CHOICES
 
 
-class SharingForm(forms.Form):
+class SelectExtensionForm(forms.Form):
 
-    choice = forms.ChoiceField(choices=CHOICES)
+    choice = forms.ChoiceField(choices=EXT_CHOICES)
     sample = forms.CharField(widget=forms.HiddenInput)
 
     def get_redirect_url(self):
