@@ -4,8 +4,8 @@ import logging
 from celery import shared_task
 
 from core.mongodb import connect_gridfs
-from sharing.modules import hpfeeds
-from sharing.models import HPFeedsPubQueue
+from extensions.hpfeeds.modules import hpfeeds
+from extensions.hpfeeds.models import HPFeedsPubQueue
 
 
 logger = logging.getLogger(__name__)

@@ -1,90 +1,58 @@
 # -*- coding: utf-8 -*-
-from django.views.generic.edit import CreateView
-from django.views.generic.edit import UpdateView
-from django.views.generic.edit import DeleteView
-from django.views.generic.list import ListView
+from django.shortcuts import redirect
 from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import NoReverseMatch
+from django.views.generic.edit import FormView
+from django.contrib import messages
 
-from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
-from sharing.forms import HPFeedsChannelForm
-from sharing.models import HPFeedsChannel
-from sharing.models import HPFeedsPubQueue
+
+from sharing.forms import SelectExtensionForm
 
 
-class HPFeedsChannelCreateView(CreateView, LoginRequiredMixin):
+class SelectExtensionView(FormView, LoginRequiredMixin):
 
     """
-    A view class for creating HPFeeds channels.
+    FormView for sharing samples.
     """
 
-    model = HPFeedsChannel
-    form_class = HPFeedsChannelForm
-    template_name = 'hpfeeds_channel/create.html'
-    success_url = reverse_lazy('channel.list')
+    form_class = SelectExtensionForm
+    template_name = 'form.html'
 
-    def get_form(self, form_class):
-        kwargs = self.get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return form_class(**kwargs)
+    def get_initial(self):
+        """
+        Giving the initial value (sha256) to self.form_class.
+        """
+        initial = super(SelectExtensionView, self).get_initial()
+        initial['sample'] = self.kwargs['sha256']
+        return initial
+
+    def get_success_url(self):
+        """
+        **NOTICE**
+        If the redirect() is out of function, this method will be called.
+        That's say this method is actually "get_failed_url()".
+        """
+        return reverse_lazy(
+            'sharing.select.extension',
+            kwargs={'sha256': self.kwargs['sha256']}
+        )
 
     def form_valid(self, form):
-        # save the user of channel
-        form.instance.user = self.request.user
-        return super(HPFeedsChannelCreateView, self).form_valid(form)
+        """
+        If the form is valid, redirect to the following URL.
+        """
+        try:
+            return redirect(form.get_redirect_url())
+        except NoReverseMatch:
+            message_fmt = "The module '{0}' is not working."
+            messages.error(
+                self.request,
+                message_fmt.format(form.cleaned_data['choice'])
+            )
+            # if can't redirect
+            return super(SelectExtensionView, self).form_valid(form)
 
 
-class HPFeedsChannelListView(ListView, LoginRequiredMixin):
-
-    """
-    Listing all channels that own by an user.
-    """
-
-    model = HPFeedsChannel
-    template_name = 'hpfeeds_channel/list.html'
-
-    def get_queryset(self):
-        return self.model.objects.filter(user=self.request.user)
-
-
-class HPFeedsChannelUpdateView(UpdateView, OwnerRequiredMixin):
-
-    """
-    UpdateView for HPFeedsChannel.
-    """
-
-    model = HPFeedsChannel
-    form_class = HPFeedsChannelForm
-    template_name = 'hpfeeds_channel/update.html'
-    success_url = reverse_lazy('channel.list')
-
-    def get_form(self, form_class):
-        kwargs = self.get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return form_class(**kwargs)
-
-
-class HPFeedsChannelDeleteView(DeleteView, OwnerRequiredMixin):
-
-    """
-    DeleteView for HPFeedsChannel
-    """
-
-    model = HPFeedsChannel
-    template_name = 'hpfeeds_channel/delete.html'
-    success_url = reverse_lazy('channel.list')
-
-
-class HPFeedsPubQueueListView(ListView, LoginRequiredMixin):
-
-    """
-    Listing publishing queue of an user.
-    Users are allowed to review queue own by them.
-    """
-
-    model = HPFeedsPubQueue
-    template_name = 'hpfeeds_pubqueue/list.html'
-
-    def get_queryset(self):
-        return self.model.objects.filter(sample__user=self.request.user)
-
+# Alias
+SelectExtension = SelectExtensionView.as_view()

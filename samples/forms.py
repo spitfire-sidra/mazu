@@ -14,6 +14,8 @@ from crispy_forms.layout import ButtonHolder
 
 from core.utils import compute_hashes
 
+from sharing.models import SharingList
+
 from samples.models import Hyperlink
 from samples.models import Filename
 from samples.models import Description
@@ -337,6 +339,7 @@ class SampleUploadForm(UserRequiredBaseForm):
         # an instance of Filename
         filename = self.cleaned_data['filename']
         text = self.cleaned_data['description']
+        share = self.cleaned_data['share']
 
         helper = SampleHelper(sample_fp)
         sample = helper.save(user=self.user)
@@ -345,6 +348,9 @@ class SampleUploadForm(UserRequiredBaseForm):
 
         helper.append_filename(sample, filename)
         helper.save_description(sample, text, self.user)
+        # add to share list
+        if share:
+            SharingList(sample=sample, user=self.user).save()
         return True
 
 

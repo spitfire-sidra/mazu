@@ -18,4 +18,5 @@ urlpatterns = patterns('',
     url(r'^samples/', include('samples.urls')),
     url(r'^sharing/', include('sharing.urls')),
     url(r'^notification/', include('notification.urls')),
+    url(r'^ext/hpfeeds/', include('extensions.hpfeeds.urls')),
 )

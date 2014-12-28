@@ -10,6 +10,7 @@ from core.tests import random_string
 from core.tests import random_integer
 from core.tests import random_http_link
 from core.utils import compute_hashes
+from sharing.models import SharingList
 from samples.utils import SampleHelper
 from samples.models import Sample
 from samples.models import Source
@@ -187,7 +188,7 @@ class SampleTestCase(CoreTestCase):
     def random_post_data(self, fp):
         self.post_data = {
             'sample': fp,
-            'share': False,
+            'share': True,
             'source': '',
             'filename': random_string(),
             'description': random_string(),
@@ -223,6 +224,12 @@ class SampleTestCase(CoreTestCase):
         expected_errors = 'Duplicated sample.'
         form_all_errors = response.context['form'].errors['sample']
         self.assertIn(expected_errors, form_all_errors)
+
+    def test_can_add_to_sharing_list(self):
+        count = SharingList.objects.all().count()
+        self.upload_sample()
+        current_count = SharingList.objects.all().count()
+        self.assertEqual(count + 1, current_count)
 
     def test_list_view(self):
         self.upload_sample()

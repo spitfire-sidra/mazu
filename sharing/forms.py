@@ -1,34 +1,21 @@
 # -*- coding: utf-8 -*-
 from django import forms
-
-from samples.models import Source
-from sharing.models import HPFeedsChannel
+from django.core.urlresolvers import reverse_lazy
 
 
-class HPFeedsChannelForm(forms.ModelForm):
+from settings.sharing_extensions import EXT_CHOICES
 
-    """
-    Form class used for creating, updating a channel.
-    """
 
-    class Meta:
-        model = HPFeedsChannel
-        fields = [
-            'default', 'name', 'host', 'port', 'identity',
-            'secret', 'pubchans', 'subchans', 'source'
-        ]
+class SelectExtensionForm(forms.Form):
 
-    def __init__(self, *args, **kwargs):
-        # get current user
-        self.user = kwargs.pop('user')
-        super(HPFeedsChannelForm, self).__init__(*args, **kwargs)
-        # add a filed
-        # only offers sources owned by the user
-        self.fields['source'] = self.source_field()
+    choice = forms.ChoiceField(choices=EXT_CHOICES)
+    sample = forms.CharField(widget=forms.HiddenInput)
 
-    def source_field(self):
-        return forms.ModelChoiceField(
-            required=False,
-            label='Sample Source',
-            queryset=Source.objects.filter(user=self.user)
+    def get_redirect_url(self):
+        url_name = 'sharing.via.{0}'.format(self.cleaned_data['choice'])
+        return reverse_lazy(
+            url_name,
+            kwargs={
+                'sha256': self.cleaned_data['sample']
+            }
         )

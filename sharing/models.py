@@ -1,67 +1,31 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.template.defaultfilters import slugify
-from django.core.urlresolvers import reverse_lazy
 
+from settings.sharing_extensions import EXT_CHOICES
 from core.models import TimeStampedModel
 
 
-class HPFeedsChannel(TimeStampedModel):
+class SharingList(TimeStampedModel):
 
     """
-    This model stores channels that used for HPFeeds.
+    To store samples that users want to share.
     """
 
-    name = models.CharField(max_length=255)
-    host = models.CharField(max_length=255)
-    port = models.IntegerField()
-    pubchans = models.TextField()
-    subchans = models.TextField()
-    identity = models.TextField()
-    secret = models.TextField()
-    default = models.BooleanField(default=False)
-    slug = models.SlugField()
-    user = models.ForeignKey('auth.User')
-    source = models.ForeignKey('samples.Source', null=True, blank=True)
-
-    def __unicode__(self):
-        return "HPFeedsChannel-#{0}-{1}".fromat(self.id, self.name)
-
-    def split_chans(self, text):
-        """
-        Split channels by comma. Remove empty items and strip spaces.
-
-        For example:
-        >>> [x.strip(' ') for x in 'a, b,    c,d,,,'.split(',') if x]
-        ['a', 'b', 'c', 'd']
-        """
-        return [x.strip(' ') for x in text.split(',') if x]
-
-    def get_pubchans(self):
-        return self.split_chans(self.pubchans)
-
-    def get_subchans(self):
-        return self.split_chans(self.subchans)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.slug = slugify(self.name)
-        super(HPFeedsChannel, self).save(*args, **kwargs)
-
-    class Meta:
-        ordering = ['host', 'port']
-        unique_together = ('user', 'name')
-
-
-class HPFeedsPubQueue(TimeStampedModel):
-
-    """
-    This model stores all samples that are waiting for publishing.
-    """
+    STATUS_CHOICES = (
+        (0, 'Queued'),
+        (1, 'Processing'),
+        (2, 'Failed'),
+        (3, 'Success'),
+        (4, 'Stop')
+    )
 
     sample = models.ForeignKey('samples.Sample')
-    channel = models.ForeignKey(HPFeedsChannel)
-    published = models.BooleanField(default=False)
+    extension = models.IntegerField(choices=EXT_CHOICES, null=True, blank=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    user = models.ForeignKey('auth.User')
 
     def __unicode__(self):
-        return 'HPFeedsPubQueue-#{0}'.format(self.id)
+        return '{0} -> {1}'.format(self.sample.sha256, self.status)
+
+    class Meta:
+        ordering = ['-updated', '-created']
