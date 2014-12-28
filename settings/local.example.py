@@ -45,6 +45,7 @@ INSTALLED_APPS = (
 	'samples',
     'sharing',
     'notification',
+    'extensions.hpfeeds',
 )
 
 MIDDLEWARE_CLASSES = (
