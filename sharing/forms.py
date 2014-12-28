@@ -12,7 +12,7 @@ class SelectExtensionForm(forms.Form):
     sample = forms.CharField(widget=forms.HiddenInput)
 
     def get_redirect_url(self):
-        url_name = 'sharing-via-{0}'.format(self.cleaned_data['choice'])
+        url_name = 'sharing.via.{0}'.format(self.cleaned_data['choice'])
         return reverse_lazy(
             url_name,
             kwargs={
