@@ -283,6 +283,45 @@ class HyperlinkAppendForm(SampleBaseForm, UserRequiredBaseForm):
         return (sample, result)
 
 
+class HyperlinkRemoveForm(SampleBaseForm, UserRequiredBaseForm):
+
+    """
+    A form class for removing Hyperlinks
+    """
+
+    hyperlink = forms.CharField(widget=forms.HiddenInput)
+
+    def clean_hyperlink(self):
+        """
+        Validating the hyperlink field.
+        Only the owner of 'hyperlink' can remove the hyperlink.
+
+        Returns:
+            An instance of Hyperlink - valid
+
+        Raises:
+            ValidationError - invalid
+        """
+        data = self.cleaned_data['hyperlink']
+        try:
+            hyperlink = Hyperlink.objects.get(id=data)
+        except Hyperlink.DoesNotExist:
+            raise ValidationError(_('Invalid value'))
+        else:
+            if hyperlink.user != self.user:
+                raise ValidationError(_('Permission denied'))
+            return hyperlink
+
+    def remove(self):
+        """
+        Removing the filename from 'sample.hyperlinks'
+        """
+        sample = self.get_sample()
+        hyperlink = self.cleaned_data['hyperlink']
+        result = SampleHelper.remove_hyperlink(sample, hyperlink)
+        return (sample, result)
+
+
 class SampleUploadForm(UserRequiredBaseForm):
 
     """

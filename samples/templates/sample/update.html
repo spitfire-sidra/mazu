@@ -45,6 +45,7 @@
 {% for hyperlink in object.hyperlinks.all %}
     {{ hyperlink.headline }} {{ hyperlink.link }}<br />
     {% if hyperlink.user == request.user %}
+        <a href="{% url 'hyperlink.remove' object.sha256 hyperlink.pk %}">remove</a><br />
     {% endif %}
 {% endfor %}
 <a href="{% url 'hyperlink.append' object.sha256 %}">add</a><br />

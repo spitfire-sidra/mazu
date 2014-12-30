@@ -187,6 +187,25 @@ class SampleHelper(object):
         return False
 
     @staticmethod
+    def remove_hyperlink(sample, hyperlink):
+        """
+        Removing the hyperlink instance form 'sample.hyperlinks'.
+
+        Args:
+            sample - an instance of Sample
+            hyperlink - an instance of Hyperlink
+
+        Returns:
+            True - success
+            False - failed
+        """
+        if sample.hyperlinks.filter(id=hyperlink.id).exists():
+            sample.hyperlinks.remove(hyperlink)
+            sample.save()
+            return True
+        return False
+
+    @staticmethod
     def append_source(sample, source):
         """
         Appending a Source to 'Sample.sources'.
