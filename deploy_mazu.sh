@@ -32,7 +32,7 @@ echo "  > Installing PREREQUISITES..."
 echo "  > Updating package soruce..."
 sudo apt-get update &> /dev/null
 echo "  > Installing python-dev libxml2-dev libxslt-dev..."
-sudo apt-get -y install python-dev libxml2-dev libxslt-dev mongodb&> /dev/null
+sudo apt-get -y install python-dev libxml2-dev libxslt-dev mongodb ipython ipython-notebook python-pandas&> /dev/null
 echo "  > Installing packages in requirements..."
 sudo pip install -r requirements.txt &> /dev/null
 
