@@ -15,6 +15,7 @@ from samples.utils import SampleHelper
 from samples.models import Sample
 from samples.models import Source
 from samples.models import Filename
+from samples.models import Hyperlink
 from samples.models import Description
 
 
@@ -341,6 +342,60 @@ class FilenameTestCase(CoreTestCase):
         self.send_post_request()
         count = Filename.objects.all().count()
         self.assertEqual(count, 0)
+
+
+class HyperlinkTestCase(CoreTestCase):
+
+    """
+    Test cases for Hyperlink
+    """
+
+    def setUp(self):
+        super(HyperlinkTestCase, self).setUp()
+        self.make_sample()
+
+    def make_sample(self):
+        """
+        To make a sample for testing.
+        """
+        self.sample = create_sample(self.user)
+
+    def make_hyperlink(self):
+        """
+        To make a hyperlink for testing.
+        """
+        self.hyperlink = Hyperlink(
+            headline=random_string(),
+            link=random_http_link(),
+            user=self.user
+        )
+        self.hyperlink.save()
+
+    def append_hyperlink_to_sample(self):
+        self.sample.hyperlinks.add(self.hyperlink)
+        self.sample.save()
+
+    def random_post_data(self):
+        self.link = random_http_link()
+        self.post_data = {
+            'headline': random_string(),
+            'link': self.link,
+            'kind': 0,
+            'sample': self.sample.sha256
+        }
+
+    def test_can_append(self):
+        target = reverse_lazy(
+            'hyperlink.append',
+            kwargs={'sha256': self.sample.sha256}
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.random_post_data()
+        self.send_post_request()
+        self.assert_response_status_code(200)
+        count = Hyperlink.objects.filter(link=self.link).count()
+        self.assertEqual(count, 1)
 
 
 class DescriptionTestCase(CoreTestCase):

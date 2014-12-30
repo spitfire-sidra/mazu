@@ -11,6 +11,7 @@ from samples.views import SampleUpdate
 from samples.views import FilenameDelete
 from samples.views import FilenameRemove
 from samples.views import FilenameAppend
+from samples.views import HyperlinkAppend
 from samples.views import SourceAppend
 from samples.views import DescriptionCreate
 from samples.views import DescriptionDelete
@@ -95,6 +96,11 @@ urlpatterns += patterns('',
         r'^filename/append/(?P<sha256>[\w]+)$',
         FilenameAppend,
         name='filename.append'
+    ),
+    url(
+        r'^hyperlink/append/(?P<sha256>[\w]+)$',
+        HyperlinkAppend,
+        name='hyperlink.append'
     ),
     url(
         r'^source/append/(?P<sha256>[\w]+)$',
