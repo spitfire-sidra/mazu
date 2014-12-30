@@ -47,8 +47,9 @@ PRO_GEN=$(/usr/bin/python -c 'import random; print "".join([random.choice("ABCDE
 # replace key in settings/production.py
 sed -i "s|yoursecretkey|$PRO_GEN|g" settings/production.py
 
-echo "  > Creating superuser for django..."
-./manage.py createsuperuser
+echo "  > syncdb..."
+./manage.py syncdb
+#./manage.py createsuperuser
 
 echo -e "  > Your key is ${YEL}$PRO_GEN${NC}. And is now using in settings/production.py"
 echo -e "${GRN}-= Great, now you're all set to go! =-${NC}"
