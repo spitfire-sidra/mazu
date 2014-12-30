@@ -16,7 +16,8 @@
 ```
 $ git clone https://github.com/PwnDoRa/mazu
 $ cd mazu
-$ sh deploy_mazu.sh
+$ chmod +x deploy_mazu.sh
+$ ./deploy_mazu.sh
 ```
 
 ## USAGE
@@ -25,7 +26,8 @@ $ sh deploy_mazu.sh
 
 ```
 $ cd mazu
-$ sh start_mazu.sh
+$ chmod +x start_mazu.sh
+$ ./start_mazu.sh 
 ```
 
 ### Type in ip and port
