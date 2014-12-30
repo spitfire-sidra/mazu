@@ -13,6 +13,7 @@ from samples.views import FilenameRemove
 from samples.views import FilenameAppend
 from samples.views import HyperlinkAppend
 from samples.views import HyperlinkRemove
+from samples.views import HyperlinkDelete
 from samples.views import SourceAppend
 from samples.views import DescriptionCreate
 from samples.views import DescriptionDelete
@@ -108,6 +109,11 @@ urlpatterns += patterns('',
         r'^hyperlink/remove/(?P<sha256>[\w]+)/(?P<hyperlink_pk>\d+)$',
         HyperlinkRemove,
         name='hyperlink.remove'
+    ),
+    url(
+        r'^hyperlink/delete/(?P<pk>\d+)$',
+        HyperlinkDelete,
+        name='hyperlink.delete'
     ),
     url(
         r'^source/append/(?P<sha256>[\w]+)$',

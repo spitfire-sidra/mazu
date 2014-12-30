@@ -415,6 +415,22 @@ class HyperlinkTestCase(CoreTestCase):
         result = self.sample.hyperlinks.filter(id=self.hyperlink.id).exists()
         self.assertEqual(result, False)
 
+    def test_can_delete(self):
+        self.make_hyperlink()
+        target = reverse_lazy(
+            'hyperlink.delete',
+            kwargs={
+                'pk': self.hyperlink.id
+            }
+        )
+        self.set_target(target)
+        self.assert_response_status_code(200)
+        self.post_data['hyperlink'] = self.hyperlink.id
+        self.send_post_request()
+        count = Hyperlink.objects.all().count()
+        self.assertEqual(count, 0)
+
+
 
 class DescriptionTestCase(CoreTestCase):
 

@@ -351,6 +351,27 @@ class HyperlinkRemoveView(SampleUpdateBaseView, UserRequiredFormMixin,\
         return super(HyperlinkRemoveView, self).form_valid(form)
 
 
+class HyperlinkDeleteView(DeleteView, OwnerRequiredMixin):
+
+    """
+    A class-based view for deleting a hyperlink.
+    This CBV not only breaks the relationship between a Hyperlink and
+    Samples but deletes the Hyperlink from database.
+    Only the owner can delete the filename which owned by himself.
+    """
+
+    model = Hyperlink
+    template_name = 'sample/delete.html'
+    success_url = reverse_lazy('sample.list')
+
+    def get_object(self, **kwargs):
+        return self.model.objects.get(id=self.kwargs['pk'])
+
+    def form_valid(self, form):
+        messages.success(self.request, 'hyperlink deleted.')
+        return super(HyperlinkDeleteView, self).form_valid(form)
+
+
 class SampleListView(ListView, UserRequiredFormMixin, LoginRequiredMixin):
 
     """
@@ -550,6 +571,7 @@ FilenameRemove = FilenameRemoveView.as_view()
 FilenameAppend = FilenameAppendView.as_view()
 HyperlinkAppend = HyperlinkAppendView.as_view()
 HyperlinkRemove = HyperlinkRemoveView.as_view()
+HyperlinkDelete = HyperlinkDeleteView.as_view()
 SourceAppend = SourceAppendView.as_view()
 SourceRemove = SourceRemoveView.as_view()
 DescriptionCreate = DescriptionCreateView.as_view()
