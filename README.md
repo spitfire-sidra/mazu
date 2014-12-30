@@ -1,4 +1,4 @@
-# mazu - with ipython inside
+# MAZU - with ipython inside
 ## Malware Repository with social sharing feature
 ##  
 
@@ -46,4 +46,4 @@ $ ./start_mazu.sh
 
 ```
 
-## Now Mazu service is running on 127.0.0.1:8000 !
+### Now you can use ipython notebook to interact with mazu on 127.0.0.1:8888 !
