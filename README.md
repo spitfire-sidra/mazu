@@ -1,4 +1,6 @@
-# MAZU - MALWARE REPOSITORY WITH SOCIAL SHARING FEATURE
+# mazu - with ipython inside
+## Malware Repository with social sharing feature
+##  
 
 [![Build Status](https://travis-ci.org/PwnDoRa/mazu.svg?branch=master)](https://travis-ci.org/PwnDoRa/mazu)
 
@@ -27,7 +29,7 @@ $ ./deploy_mazu.sh
 ```
 $ cd mazu
 $ chmod +x start_mazu.sh
-$ ./start_mazu.sh 
+$ ./start_mazu.sh
 ```
 
 ### Type in ip and port
@@ -38,8 +40,10 @@ $ ./start_mazu.sh
   > Initializing database...
   > Starting web service...
   > Type in IP address that binds mazu to : 127.0.0.1
-  > Type in port number that runs mazu :8000
-  > Starting celery worker...
+[NotebookApp] Using existing profile dir: u'/home/kippo/.ipython/profile_nbserver'
+[NotebookApp] The IPython Notebook is running at: http://127.0.0.1:8888
+[NotebookApp] Use Control-C to stop this server and shut down all kernels.
+
 ```
 
 ## Now Mazu service is running on 127.0.0.1:8000 !

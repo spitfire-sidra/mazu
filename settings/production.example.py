@@ -46,7 +46,15 @@ INSTALLED_APPS = (
     'sharing',
     'notification',
     'extensions.hpfeeds',
+    'django_extensions', 
 )
+
+IPYTHON_ARGUMENTS = [
+    '--ext', 'django_extensions.management.notebook_extension',
+    '--profile=nbserver',
+    '--ip=iptochange',
+    '--no-browser',
+]
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

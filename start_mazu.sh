@@ -24,10 +24,10 @@ echo "  > Initializing database..."
 # start web server
 echo "  > Starting web service..."
 read -p "  > Type in IP address that binds mazu to : " ip
-read -p "  > Type in port number that runs mazu : " port
 sed -i s/iptochange/$ip/g settings/production.py
 
-./manage.py runserver $ip:$port &
+./manage.py shell_plus --notebook
+#./manage.py runserver $ip:$port &
 sleep 5
 
 # start celery worker
