@@ -105,6 +105,7 @@ class Sample(TimeStampedModel):
     filetypes = models.ManyToManyField(Filetype, null=True, blank=True)
     filenames = models.ManyToManyField(Filename, null=True, blank=True)
     sources = models.ManyToManyField(Source, null=True, blank=True)
+    hyperlinks = models.ManyToManyField(Hyperlink, null=True, blank=True)
     user = models.ForeignKey('auth.User')
 
     def __unicode__(self):

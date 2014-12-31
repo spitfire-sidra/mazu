@@ -27,6 +27,10 @@
     {{ descr.text }}<br />
 {% endfor %}
 
+{% for hyperlink in object.hyperlinks.all %}
+    {{ hyperlink.headline }} {{ hyperlink.link }}<br />
+{% endfor %}
+
 <a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
 <a href='{% url 'sample.update' object.sha256 %}'>update<br />
 {% endblock content %}

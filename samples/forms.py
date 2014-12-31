@@ -241,19 +241,85 @@ class DescriptionForm(forms.ModelForm):
         }
 
 
-# This form class is not used yet.
-class HyperlinkForm(forms.ModelForm):
+class HyperlinkAppendForm(SampleBaseForm, UserRequiredBaseForm):
 
     """
     A form class for saving links.
     """
 
-    class Meta:
-        model = Hyperlink
-        fields = ['headline', 'link', 'kind']
-        widgets = {
-            'link': forms.URLInput()
-        }
+    headline  = forms.CharField(required=False)
+    link = forms.CharField(widget=forms.URLInput())
+    kind = forms.ChoiceField(choices=Hyperlink.KIND_CHOICES)
+
+    def get_hyperlink(self):
+        """
+        Trying to get the Sample by the sha256 value.
+
+        Returns:
+            None - not found
+            An instance of Sample - success
+        """
+        headline = self.cleaned_data['headline']
+        link = self.cleaned_data['link']
+        try:
+            hyperlink, created = Hyperlink.objects.get_or_create(
+                headline=headline,
+                link=link,
+                user=self.user
+            )
+        except Hyperlink.DoesNotExist:
+            return None
+        else:
+            return hyperlink
+        return None
+
+    def append(self):
+        """
+        Append a Hyperlink instance to 'sample.hyperlinks'
+        """
+        sample = self.get_sample()
+        hyperlink = self.get_hyperlink()
+        result = SampleHelper.append_hyperlink(sample, hyperlink)
+        return (sample, result)
+
+
+class HyperlinkRemoveForm(SampleBaseForm, UserRequiredBaseForm):
+
+    """
+    A form class for removing Hyperlinks
+    """
+
+    hyperlink = forms.CharField(widget=forms.HiddenInput)
+
+    def clean_hyperlink(self):
+        """
+        Validating the hyperlink field.
+        Only the owner of 'hyperlink' can remove the hyperlink.
+
+        Returns:
+            An instance of Hyperlink - valid
+
+        Raises:
+            ValidationError - invalid
+        """
+        data = self.cleaned_data['hyperlink']
+        try:
+            hyperlink = Hyperlink.objects.get(id=data)
+        except Hyperlink.DoesNotExist:
+            raise ValidationError(_('Invalid value'))
+        else:
+            if hyperlink.user != self.user:
+                raise ValidationError(_('Permission denied'))
+            return hyperlink
+
+    def remove(self):
+        """
+        Removing the filename from 'sample.hyperlinks'
+        """
+        sample = self.get_sample()
+        hyperlink = self.cleaned_data['hyperlink']
+        result = SampleHelper.remove_hyperlink(sample, hyperlink)
+        return (sample, result)
 
 
 class SampleUploadForm(UserRequiredBaseForm):

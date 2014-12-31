@@ -22,6 +22,7 @@ from samples.utils import SampleHelper
 from samples.models import Source
 from samples.models import Sample
 from samples.models import Filename
+from samples.models import Hyperlink
 from samples.models import Description
 from samples.models import AccessLog
 from samples.forms import SampleUploadForm
@@ -29,8 +30,10 @@ from samples.forms import SampleFilterForm
 from samples.forms import SourceForm
 from samples.forms import SourceAppendForm
 from samples.forms import SourceRemoveForm
-from samples.forms import FilenameRemoveForm
 from samples.forms import FilenameAppendForm
+from samples.forms import FilenameRemoveForm
+from samples.forms import HyperlinkAppendForm
+from samples.forms import HyperlinkRemoveForm
 from samples.forms import DescriptionForm
 from samples.mixins import SampleInitialFormMixin
 
@@ -292,6 +295,83 @@ class FilenameDeleteView(DeleteView, OwnerRequiredMixin):
         return super(FilenameDeleteView, self).form_valid(form)
 
 
+class HyperlinkAppendView(SampleUpdateBaseView, UserRequiredFormMixin,\
+                            SampleInitialFormMixin):
+
+    """
+    Building a relationship between a Sample and a Hyperlink.
+    """
+
+    template_name = 'sample/append_hyperlink.html'
+    form_class = HyperlinkAppendForm
+
+    def form_valid(self, form):
+        self.sample, result = form.append()
+        if not result:
+            messages.error(self.request, 'Failed to append the Hyperlink.')
+        else:
+            messages.success(self.request, 'Hyperlink appended.')
+        return super(HyperlinkAppendView, self).form_valid(form)
+
+
+class HyperlinkRemoveView(SampleUpdateBaseView, UserRequiredFormMixin,\
+                            SampleInitialFormMixin, OwnerRequiredMixin):
+    """
+    This class just breaks the relationship between a Filename and a Sample.
+    """
+
+    template_name = 'sample/remove.html'
+    form_class = HyperlinkRemoveForm
+
+    def get_object(self):
+        """
+        Trying to get the Hyperlink by self.kwargs['hyperlink_pk'].
+        """
+        try:
+            hyperlink = Hyperlink.objects.get(id=self.kwargs['hyperlink_pk'])
+        except Hyperlink.DoesNotExist:
+            raise Http404
+        else:
+            return hyperlink
+
+    def get_initial(self):
+        """
+        Returning a dict that would be initial values for the form_class.
+        """
+        initial = super(HyperlinkRemoveView, self).get_initial()
+        initial['hyperlink'] = self.get_object().pk
+        return initial
+
+    def form_valid(self, form):
+        self.sample, result = form.remove()
+        if not result:
+            messages.error(self.request, 'Failed to remove the hyperlink.')
+        else:
+            messages.success(self.request, 'Hyperlink appended.')
+        return super(HyperlinkRemoveView, self).form_valid(form)
+
+
+class HyperlinkDeleteView(DeleteView, OwnerRequiredMixin):
+
+    """
+    A class-based view for deleting a hyperlink.
+    This CBV not only breaks the relationship between a Hyperlink and
+    Samples but deletes the Hyperlink from database.
+    Only the owner can delete the filename which owned by himself.
+    """
+
+    model = Hyperlink
+    template_name = 'sample/delete.html'
+    success_url = reverse_lazy('sample.list')
+
+    def get_object(self, **kwargs):
+        return self.model.objects.get(id=self.kwargs['pk'])
+
+    def form_valid(self, form):
+        messages.success(self.request, 'hyperlink deleted.')
+        return super(HyperlinkDeleteView, self).form_valid(form)
+
+
 class SampleListView(ListView, UserRequiredFormMixin, LoginRequiredMixin):
 
     """
@@ -489,6 +569,9 @@ SampleUpdate = SampleUpdateView.as_view()
 FilenameDelete = FilenameDeleteView.as_view()
 FilenameRemove = FilenameRemoveView.as_view()
 FilenameAppend = FilenameAppendView.as_view()
+HyperlinkAppend = HyperlinkAppendView.as_view()
+HyperlinkRemove = HyperlinkRemoveView.as_view()
+HyperlinkDelete = HyperlinkDeleteView.as_view()
 SourceAppend = SourceAppendView.as_view()
 SourceRemove = SourceRemoveView.as_view()
 DescriptionCreate = DescriptionCreateView.as_view()

@@ -42,6 +42,16 @@
 {% endfor %}
 <a href="{% url 'descr.create' object.sha256 %}">add</a><br />
 
+{% for hyperlink in object.hyperlinks.all %}
+    {{ hyperlink.headline }} {{ hyperlink.link }}&nbsp;
+    {% if hyperlink.user == request.user %}
+        <a href="{% url 'hyperlink.remove' object.sha256 hyperlink.pk %}">remove</a>&nbsp;
+        <a href="{% url 'hyperlink.delete' hyperlink.pk %}">delete</a><br />
+    {% endif %}
+{% endfor %}
+<a href="{% url 'hyperlink.append' object.sha256 %}">add</a><br />
+
+
 <a href="{{ object.sha256 | virustotal_link}}">VirusTotal</a><br />
 
 {% endblock content %}
