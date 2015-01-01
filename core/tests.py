@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 
 from mongodb import connect_gridfs
 from mongodb import get_compressed_file
-from mongodb import delete_file
+from mongodb import gridfs_delete_file
 
 
 def random_integer():
@@ -161,8 +161,8 @@ class MongodbTestCase(TestCase):
         output = get_compressed_file('_id', id)
         self.assertIsInstance(output, StringIO)
 
-    def test_delete_file(self):
+    def test_gridfs_delete_file(self):
         data = random_string()
         id = self.fs.put(data)
-        result = delete_file('_id', id)
+        result = gridfs_delete_file('_id', id)
         self.assertTrue(result)

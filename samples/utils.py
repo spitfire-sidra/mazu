@@ -8,7 +8,7 @@ import binascii
 from django.core.files.base import ContentFile
 
 from core.mongodb import connect_gridfs
-from core.mongodb import delete_file
+from core.mongodb import gridfs_delete_file
 from core.utils import dynamic_import
 from samples.models import Sample
 from samples.models import Filetype
@@ -148,7 +148,7 @@ class SampleHelper(object):
         >>> SampleHelper.sample_exists('73b49....')
         True
         """
-        return delete_file('sha256', sha256)
+        return gridfs_delete_file('sha256', sha256)
 
     @staticmethod
     def append_filename(sample, filename):

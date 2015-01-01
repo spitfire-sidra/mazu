@@ -85,7 +85,7 @@ def get_compressed_file(attr, value):
             return None
 
 
-def delete_file(attr, value):
+def gridfs_delete_file(attr, value):
     """
     Delete files in GridFS
 
@@ -100,7 +100,7 @@ def delete_file(attr, value):
     Raises:
         Exception
 
-    >>> delete_file('name', 'test')
+    >>> gridfs_delete_file('name', 'test')
     """
     try:
         gridfs = connect_gridfs()
