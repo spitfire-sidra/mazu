@@ -290,7 +290,7 @@ class SampleHelper(object):
                 return True
         return False
 
-    def save_sample(self, **kwargs):
+    def gridfs_save_sample(self, **kwargs):
         """
         Saving a sample into mongodb.
 
@@ -303,7 +303,8 @@ class SampleHelper(object):
 
         In mazu, we only save sha256 as an extra attribute.
 
-        >>> save_sample('HelloWorld!', sha256='73b49....')
+        >>> helper = SampleHelper(open('thesample'))
+        >>> helper.gridfs_save_sample(sha256='73b49....')
         True
         """
         ignored_attrs = ['md5']
@@ -378,7 +379,7 @@ class SampleHelper(object):
         """
         attrs = self.get_sample_attrs()
         attrs['user'] = user
-        if self.save_sample():
+        if self.gridfs_save_sample():
             try:
                 sample = Sample(**attrs)
                 sample.save()

@@ -18,12 +18,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.production")
 from django.contrib.auth.models import User
 
 from samples.models import Sample
-from samples.utils import get_file_attrs
-from samples.utils import save_sample
-from samples.utils import SampleHepler
-from sharing.utils import DictDiffer
-from sharing.models import HPFeedsChannel
-from sharing.modules import hpfeeds
+from samples.utils import SampleHelper
+from extensions.hpfeeds.utils import DictDiffer
+from extensions.hpfeeds.models import HPFeedsChannel
+from extensions.hpfeeds.modules import hpfeeds
 
 
 # used for storing hfpeeds client mapping
@@ -91,17 +89,10 @@ def save_hpfeeds_payload(payload, user_id, source_id):
     Save the payload received from hpfeeds
     """
     user = User.objects.get(id=user_id)
-    attrs = get_file_attrs(payload)
-    attrs['user'] = user
-    if save_sample(payload):
-        try:
-            Sample(**attrs).save()
-        except Exception:
-            # if didn't save attributes into database,
-            # delete the sample that saved in GridFS.
-            SampleHelper.gridfs_delete_sample(attrs['sha256'])
-        else:
-            return True
+    content_file = SampleHelper.payload_to_content_file(payload)
+    sample_helper = SampleHelper(content_file)
+    if sample_helper.save(user=user):
+        return True
     return False
 
 
