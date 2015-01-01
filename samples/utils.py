@@ -138,7 +138,7 @@ class SampleHelper(object):
             return True
 
     @staticmethod
-    def delete_sample(sha256):
+    def gridfs_delete_sample(sha256):
         """
         Deleting a sample from GridFS which sha256 equals variable 'sha256'
 
@@ -383,7 +383,7 @@ class SampleHelper(object):
                 sample = Sample(**attrs)
                 sample.save()
             except Exception:
-                SampleHelper.delete_sample(attrs['sha256'])
+                SampleHelper.gridfs_delete_sample(attrs['sha256'])
             else:
                 sample.filetypes = self.filetype_helper.get_object_list()
                 sample.save()

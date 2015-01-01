@@ -453,7 +453,7 @@ class SampleDeleteView(DeleteView, OwnerRequiredMixin):
 
     def delete(self, request, *args, **kwargs):
         # delete the sample which existing in GridFS
-        SampleHelper.delete_sample(self.kwargs['sha256'])
+        SampleHelper.gridfs_delete_sample(self.kwargs['sha256'])
         return super(SampleDeleteView, self).delete(request, *args, **kwargs)
 
 

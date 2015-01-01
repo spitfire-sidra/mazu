@@ -20,7 +20,7 @@ from django.contrib.auth.models import User
 from samples.models import Sample
 from samples.utils import get_file_attrs
 from samples.utils import save_sample
-from samples.utils import delete_sample
+from samples.utils import SampleHepler
 from sharing.utils import DictDiffer
 from sharing.models import HPFeedsChannel
 from sharing.modules import hpfeeds
@@ -99,7 +99,7 @@ def save_hpfeeds_payload(payload, user_id, source_id):
         except Exception:
             # if didn't save attributes into database,
             # delete the sample that saved in GridFS.
-            delete_sample(attrs['sha256'])
+            SampleHelper.gridfs_delete_sample(attrs['sha256'])
         else:
             return True
     return False
