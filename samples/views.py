@@ -16,7 +16,6 @@ from django.contrib import messages
 from core.mixins import OwnerRequiredMixin
 from core.mixins import LoginRequiredMixin
 from core.mixins import UserRequiredFormMixin
-from core.mongodb import gridfs_get_zipfile
 
 from samples.utils import SampleHelper
 from samples.models import Source
@@ -46,7 +45,7 @@ def download(request, sha256):
     A function-based view for downloading sample
     """
     try:
-        sample = gridfs_get_zipfile('sha256', sha256)
+        sample = SampleHelper.gridfs_get_sample(sha256)
     except Exception as e:
         logger.debug(e)
         messages.error(request, 'Oops! We got an error!')

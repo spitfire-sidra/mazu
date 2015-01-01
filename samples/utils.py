@@ -138,6 +138,20 @@ class SampleHelper(object):
             return True
 
     @staticmethod
+    def gridfs_get_sample(sha256):
+        """
+        Returning a cursor of zipfile that contains a sample.
+
+        Args:
+            sha256 - a sha256 hash (string)
+
+        Returns:
+            None - file not found
+            ZipFile object - file found
+        """
+        return gridfs_get_zipfile('sha256', sha256)
+
+    @staticmethod
     def gridfs_delete_sample(sha256):
         """
         Deleting a sample from GridFS which sha256 equals variable 'sha256'
