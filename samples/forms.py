@@ -12,8 +12,6 @@ from crispy_forms.layout import Field
 from crispy_forms.layout import Submit
 from crispy_forms.layout import ButtonHolder
 
-from core.utils import compute_hashes
-
 from sharing.models import SharingList
 
 from samples.models import Hyperlink
@@ -368,7 +366,7 @@ class SampleUploadForm(UserRequiredBaseForm):
         """
         temp_file = self.cleaned_data['sample']
         pos = temp_file.tell()
-        hashes = compute_hashes(temp_file.read())
+        hashes = SampleHelper.compute_hashes(temp_file.read())
         if SampleHelper.sample_exists(sha256=hashes.sha256):
             raise ValidationError(_('Duplicated sample.'))
         else:

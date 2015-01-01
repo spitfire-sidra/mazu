@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 import os
 import logging
+import hashlib
+import ssdeep
 import binascii
 
 from django.core.files.base import ContentFile
 
 from core.mongodb import connect_gridfs
 from core.mongodb import delete_file
-from core.utils import compute_hashes
 from core.utils import dynamic_import
 from samples.models import Sample
 from samples.models import Filetype
 from samples.models import Description
+from samples.objects import Hashes
 from samples.filetypes.filetype import FileTypeDetector
 
 
@@ -76,9 +78,28 @@ class SampleHelper(object):
         self.size = self.get_size()
         self.content = self.get_content()
         self.crc32 = binascii.crc32(self.content)
-        self.hashes = compute_hashes(self.content)
+        self.hashes = SampleHelper.compute_hashes(self.content)
         self.filetype_helper = FiletypeHelper()
         self.filetype_helper.identify(self.content)
+
+    @staticmethod
+    def compute_hashes(content):
+        """
+        To compute hashes of content.
+        Available attributes as following:
+        md5, sha1, sha256, sha512, ssdeep
+
+        >>> hashes = make_hashes('123')
+        >>> hashes.sha1
+        '40bd001563085fc35165329ea1ff5c5ecbdbbeef'
+        """
+        argos = ('md5', 'sha1', 'sha256', 'sha512')
+        hashes = list()
+        for argo in argos:
+            cls = getattr(hashlib, argo)
+            hashes.append(cls(content).hexdigest())
+        hashes.append(ssdeep.hash(content))
+        return Hashes(*hashes)
 
     @staticmethod
     def payload_to_content_file(payload):

@@ -9,7 +9,6 @@ from core.tests import CoreTestCase
 from core.tests import random_string
 from core.tests import random_integer
 from core.tests import random_http_link
-from core.utils import compute_hashes
 from sharing.models import SharingList
 from samples.utils import SampleHelper
 from samples.models import Sample
@@ -203,7 +202,7 @@ class SampleTestCase(CoreTestCase):
             self.filepath = filepath
 
         fp = open(self.filepath, 'rb')
-        self.hashes = compute_hashes(fp.read())
+        self.hashes = SampleHelper.compute_hashes(fp.read())
         fp.seek(0)
         target = reverse_lazy('sample.upload')
         self.set_target(target)
