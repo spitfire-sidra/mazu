@@ -46,9 +46,9 @@ def connect_gridfs():
         return gridfs.GridFS(mongodb)
 
 
-def get_compressed_file(attr, value):
+def gridfs_get_zipfile(attr, value):
     """
-    Get a compressed file cursor that attribute equals specific value from GridFS
+    Get a zip file cursor that attribute equals specific value from GridFS
 
     Args:
         attr (str): The attribute to retrieve.
@@ -61,7 +61,7 @@ def get_compressed_file(attr, value):
     Raises:
         Exception
 
-    >>> get_compressed_file('name', 'test')
+    >>> gridfs_get_zipfile('name', 'test')
     """
     try:
         gridfs = connect_gridfs()

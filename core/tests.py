@@ -10,7 +10,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 
 from mongodb import connect_gridfs
-from mongodb import get_compressed_file
+from mongodb import gridfs_get_zipfile
 from mongodb import gridfs_delete_file
 
 
@@ -158,7 +158,7 @@ class MongodbTestCase(TestCase):
     def test_download_zip(self):
         data = random_string()
         id = self.fs.put(data)
-        output = get_compressed_file('_id', id)
+        output = gridfs_get_zipfile('_id', id)
         self.assertIsInstance(output, StringIO)
 
     def test_gridfs_delete_file(self):
