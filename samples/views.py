@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render
 from django.http import Http404
 from django.http import HttpResponse
+from django.views.generic import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormView
@@ -38,28 +39,6 @@ from samples.mixins import SampleInitialFormMixin
 
 
 logger = logging.getLogger(__name__)
-
-
-def download(request, sha256):
-    """
-    A function-based view for downloading a sample
-    """
-    try:
-        sample = SampleHelper.gridfs_get_sample(sha256)
-    except Exception as e:
-        logger.debug(e)
-        messages.error(request, 'Oops! We got an error!')
-        return render(request, 'error.html')
-    else:
-        if sample:
-            response_body = 'attachment; filename={}.zip'.format(sha256)
-            response = HttpResponse(sample.read())
-            response['Content-Type'] = 'application/x-zip'
-            response['Content-Disposition'] = response_body
-            # feature 'AccessLog' will be added in the future
-            #AccessLog(user=request.user, sample=sample).save()
-            return response
-        raise Http404
 
 
 class SourceListView(ListView, LoginRequiredMixin):
@@ -479,6 +458,39 @@ class SampleUpdateView(SampleDetailView):
     template_name = 'sample/update.html'
 
 
+class SampleDownloadView(View, LoginRequiredMixin):
+
+    """
+    A CBV for downloading sample
+    """
+
+    def gridfs_get_sample(self, sha256):
+        try:
+            sample = SampleHelper.gridfs_get_sample(sha256)
+        except Exception as e:
+            return None
+        else:
+            return sample
+        return None
+
+    def get(self, request, sha256):
+        if not sha256:
+            raise Http404
+
+        sample = self.gridfs_get_sample(sha256)
+        if not sample:
+            messages.error(request, 'Oops! We got an error!')
+            return render(request, 'error.html')
+
+        response_body = 'attachment; filename={}.zip'.format(sha256)
+        response = HttpResponse(sample.read())
+        response['Content-Type'] = 'application/x-zip'
+        response['Content-Disposition'] = response_body
+        # feature 'AccessLog' will be added in the future
+        #AccessLog(user=request.user, sample=sample).save()
+        return response
+
+
 class DescriptionCreateView(CreateView, LoginRequiredMixin,\
                             SampleUpdateBaseView):
 
@@ -565,6 +577,7 @@ SampleUpload = SampleUploadView.as_view()
 SampleDetail = SampleDetailView.as_view()
 SampleDelete = SampleDeleteView.as_view()
 SampleUpdate = SampleUpdateView.as_view()
+SampleDownload = SampleDownloadView.as_view()
 FilenameDelete = FilenameDeleteView.as_view()
 FilenameRemove = FilenameRemoveView.as_view()
 FilenameAppend = FilenameAppendView.as_view()

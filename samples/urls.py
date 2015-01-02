@@ -2,12 +2,12 @@
 from django.conf.urls import patterns
 from django.conf.urls import url
 
-from samples.views import download
 from samples.views import SampleList
 from samples.views import SampleUpload
 from samples.views import SampleDelete
 from samples.views import SampleDetail
 from samples.views import SampleUpdate
+from samples.views import SampleDownload
 from samples.views import FilenameDelete
 from samples.views import FilenameRemove
 from samples.views import FilenameAppend
@@ -67,7 +67,7 @@ urlpatterns += patterns('',
     ),
     url(
         r'^download/(?P<sha256>[\w]+)$',
-        download,
+        SampleDownload,
         name='sample.download'
     ),
     url(
