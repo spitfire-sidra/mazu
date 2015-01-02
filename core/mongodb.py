@@ -70,19 +70,17 @@ def gridfs_get_zipfile(attr, value):
         raise
     else:
         files = gridfs.find({attr: value})
+        # if multiple files returned.
         if files.count() > 0:
             zipdata = StringIO()
             zipfp = zipfile.ZipFile(zipdata, mode='w')
-            if files[0].filename:
-                filename = files[0].filename
-            else:
-                filename = getattr(files[0], 'sha256', files[0].md5)
+            # trying to set a filename for the file
+            filename = getattr(files[0], 'sha256', files[0].md5)
             zipfp.writestr(filename, files[0].read())
             zipfp.close()
             zipdata.seek(0)
             return zipdata
-        else:
-            return None
+        return None
 
 
 def gridfs_delete_file(attr, value):

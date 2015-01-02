@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 def download(request, sha256):
     """
-    A function-based view for downloading sample
+    A function-based view for downloading a sample
     """
     try:
         sample = SampleHelper.gridfs_get_sample(sha256)
@@ -56,10 +56,10 @@ def download(request, sha256):
             response = HttpResponse(sample.read())
             response['Content-Type'] = 'application/x-zip'
             response['Content-Disposition'] = response_body
-            AccessLog(user=request.user, sample=sample).save()
+            # feature 'AccessLog' will be added in the future
+            #AccessLog(user=request.user, sample=sample).save()
             return response
-        else:
-            raise Http404
+        raise Http404
 
 
 class SourceListView(ListView, LoginRequiredMixin):

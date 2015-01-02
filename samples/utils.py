@@ -9,6 +9,7 @@ from django.core.files.base import ContentFile
 
 from core.mongodb import connect_gridfs
 from core.mongodb import gridfs_delete_file
+from core.mongodb import gridfs_get_zipfile
 from core.utils import dynamic_import
 from samples.models import Sample
 from samples.models import Filetype
@@ -393,7 +394,8 @@ class SampleHelper(object):
         """
         attrs = self.get_sample_attrs()
         attrs['user'] = user
-        if self.gridfs_save_sample():
+        # setting a sha256 attribute for the sample
+        if self.gridfs_save_sample(sha256=attrs['sha256']):
             try:
                 sample = Sample(**attrs)
                 sample.save()
