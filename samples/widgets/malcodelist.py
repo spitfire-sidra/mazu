@@ -15,7 +15,7 @@ class MalcodeList (Widget):
             logger.error('Please install feedparser python module')
             sys.exit()
 
-        d = feedparser.parse('rss')
+        d = feedparser.parse('http://malc0de.com/rss/')
 
         records = list()
         for item in d.entries:
