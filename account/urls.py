@@ -3,6 +3,7 @@ from django.conf.urls import patterns
 from django.conf.urls import url
 from django.contrib.auth.views import logout_then_login
 
+
 urlpatterns = patterns('',
     url(
         r'^$',
@@ -13,7 +14,7 @@ urlpatterns = patterns('',
         'account.views.auth'
     ),
     url(
-        r'^logout', 
+        r'^logout',
         logout_then_login,
         name='user.logout'
     ),

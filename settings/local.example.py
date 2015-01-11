@@ -37,14 +37,16 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
-	'south',
+    'rest_framework',
+    'south',
     'haystack',
     'djcelery',
     'core',
     'account',
-	'samples',
+    'samples',
     'sharing',
     'notification',
+    'api',
     'extensions.hpfeeds',
 )
 
