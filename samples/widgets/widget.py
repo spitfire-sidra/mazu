@@ -9,4 +9,8 @@ class Widget(object):
     """
 
     def run(self):
-        pass
+        """
+        Any module that extends class Widget should implemented this method,
+        or this method will raise 'NotImplementedError'.
+        """
+        raise NotImplementedError
