@@ -245,7 +245,7 @@ class HyperlinkAppendForm(SampleBaseForm, UserRequiredBaseForm):
     A form class for saving links.
     """
 
-    headline  = forms.CharField(required=False)
+    headline = forms.CharField(required=False)
     link = forms.CharField(widget=forms.URLInput())
     kind = forms.ChoiceField(choices=Hyperlink.KIND_CHOICES)
 
